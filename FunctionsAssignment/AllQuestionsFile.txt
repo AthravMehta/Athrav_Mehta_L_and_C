@@ -1,0 +1,259 @@
+Assignment 1: The below program is to guess the correct number between 1 to 100
+ProgramName: GuessTheNumberGame.py
+
+def isValidInput(guessedNumber):
+    if guessedNumber.isdigit() and 1<= int(guessedNumber) <=100:
+        return True
+    else:
+        return False
+
+def play_guess_the_number():
+    secret_number = random.randint(1, 100)
+    num_guesses = 0
+
+    while True:
+        user_input = input("Guess a number between 1 and 100: ")
+        if not isValidInput(user_input):
+            print("I wont count this one Please enter a number between 1 to 100.")
+            continue
+
+        guess = int(user_input)
+        num_guesses += 1
+
+        if guess < secret_number:
+            print("Too low. Guess again.")
+        elif guess > secret_number:
+            print("Too High. Guess again.")
+        else:
+            print(f"You guessed it in {num_guesses} guesses!")
+            break
+
+play_guess_the_number()
+
+----------------------------------------------------------------------------------------
+
+You are given an array of n numbers and q queries. For each query you have to print the floor of the expected value(mean) of the subarray from L to R.
+Inputs
+First line contains two integers N and Q denoting number of array elements and number of queries.
+Next line contains N space seperated integers denoting array elements.
+Next Q lines contain two integers L and R(indices of the array).
+Output
+print a single integer denoting the answer.
+*/
+
+using System;
+using System.Numerics;
+class ArrayQueryProcessor {
+    static void Main(string[] args) {
+       var arrayAndQueryNumberInput = Array.ConvertAll(Console.ReadLine().Split(' '), int.Parse);
+       var numbers = Array.ConvertAll(Console.ReadLine().Split(' '), long.Parse);
+       long[] prefixSum = new long[arrayAndQueryNumberInput[0] + 1];
+       prefixSum[0] = 0;
+       for (int index = 1; index <= arrayAndQueryNumberInput[0]; index++)
+        {
+            prefixSum[i] = prefixSum[i - 1] + numbers[i - 1];
+        }
+        for (var x = 0; x < arrayAndQueryNumberInput[1]; x++)
+        {
+            var query = Array.ConvertAll(Console.ReadLine().Split(' '))
+            var leftIndex = query[0];
+            var rightIndex = query[1];
+            Console.WriteLine((long)((long)(prefixSum[rightIndex] - prefixSum[leftIndex - 1]) / (rightIndex - leftIndex + 1)));
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------
+
+public class CustomerSearch
+{
+    public List<Customer> SearchByCountry(string country)
+    {
+        var query = from c in db.customers
+                    where c.Country.Contains(country)
+                    orderby c.CustomerID ascending
+                    select c;
+
+        return query.ToList();
+    }
+
+    public List<Customer> SearchByCompanyName(string company)
+    {
+        var query = from c in db.customers
+                    where c.Country.Contains(company)
+                    orderby c.CustomerID ascending
+                    select c;
+
+        return query.ToList();
+    }
+
+    public List<Customer> SearchByContact(string contact)
+    {
+        var query = from c in db.customers
+                    where c.Country.Contains(contact)
+                    orderby c.CustomerID ascending
+                    select c;
+
+        return query.ToList();
+    }
+
+    public string ExportToCSV(List<Customer> data)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        foreach (var item in data)
+        {
+            sb.AppendFormat("{0},{1}, {2}, {3}", item.CustomerID, item.CompanyName, item.ContactName, item.Country);
+            sb.AppendLine();
+        }
+
+        return sb.ToString();
+    }
+}
+
+SRP is not followed here as CustomerSearch name defines that their can be searching functions but not other than that.
+here ExportToCSV should not be inside CustomerSearch rather it can be in another Class named CustomerDataExporter
+
+OCP is also kind of voilated as to add new search parameter than Class will get modified by writing extra methods, to solve this we can write generic function which can take multiple parameter altogether.
+
+----------------------------------------------------------------------------------------
+
+class Book {
+
+    function getTitle() {
+        return "A Great Book";
+    }
+
+    function getAuthor() {
+        return "John Doe";
+    }
+
+    function turnPage() {
+        // pointer to next page
+    }
+
+    function getCurrentPage() {
+        return "current page content";
+    }
+
+    function getLocation() {
+        // returns the position in the library
+        // ie. shelf number & room number
+    }
+
+    function save() {
+        $filename = '/documents/' . $this->getTitle() . ' - ' . $this->getAuthor();
+        file_put_contents($filename, serialize($this));
+    }
+}
+
+interface Printer {
+
+    function printPage($page);
+}
+
+class PlainTextPrinter implements Printer {
+
+    function printPage($page) {
+        echo $page;
+    }
+
+}
+
+class HtmlPrinter implements Printer {
+
+    function printPage($page) {
+        echo '<div style="single-page">' . $page . '</div>';
+    }
+}
+
+Book Class don't follow SRP as it has multiple responsiblies like getting title, getting author, turning page, getting current page, and getting location which don't rely on each other. OCP is also voilated as to modify anything related to book we directly have to modify the base Book class.
+To improve SRP this we can create seperate classes like
+Book -> to handle only book data (title, author)
+BookLocation -> to get location 
+BookState -> which says about current book condition and it's operation
+
+Printer interface follows SOLID principle.
+
+Improved Version of Book Class can be
+
+class Book {
+
+    function getTitle() {
+        return "A Great Book";
+    }
+
+    function getAuthor() {
+        return "John Doe";
+    }
+}
+
+class BookStateService {
+    
+    function save() {
+        $filename = '/documents/' . $this->getTitle() . ' - ' . $this->getAuthor();
+        file_put_contents($filename, serialize($this));
+    }
+
+    function turnPage() {
+        // pointer to next page
+    }
+
+    function getCurrentPage() {
+        return "current page content";
+    }
+}
+
+class BookLocationService {
+    function getLocation() {
+        // returns the position in the library
+        // ie. shelf number & room number
+    }
+}
+
+----------------------------------------------------------------------------------------
+class Employee
+{
+    int id;
+    string name;
+    string department;
+    bool isWorking;
+
+public:
+    void saveEmployeeTODatabase();
+    void printEmployeeDetailReportXML();
+    void printEmployeeDetailReportCSV();
+    void terminateEmployee();
+    bool isWorking();
+};
+
+Here SRP is voilated as Employee class has multiple responsiblies like database operations, Employee state and exporting Employee data.
+To Improve we can create multiple classes differentiating on based of responsiblies. 
+modified Version of the Above Code can be
+
+class Employee
+{
+public:
+    int id;
+    string name;
+    string department;
+    bool isWorking;
+};
+
+class EmployeeRepository // Repository Layer deals with operations where db is interacted to they should be seperate as well.
+{
+    public void Save(Employee employee)
+    public Employee GetById(int id) 
+}
+
+class EmployeeService // employee state related things can come here in service section
+{
+    public void TerminateEmployee(Employee employee) 
+    public bool IsEmployeeWorking(Employee employee) 
+}
+
+class EmployeeReportGenerator // exporting related things can come here
+{
+    public string GenerateXmlReport(Employee employee) 
+    public string GenerateCsvReport(Employee employee) 
+}
