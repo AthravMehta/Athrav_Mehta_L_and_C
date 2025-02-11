@@ -1,5 +1,6 @@
 export const AppConstants = {
   PhotoUrl: "photo-url-1280",
+  ApiUrl: ".tumblr.com/api/read/json?type=photo&num=",
   ResponseHeader: "var tumblr_api_read =",
 };
 

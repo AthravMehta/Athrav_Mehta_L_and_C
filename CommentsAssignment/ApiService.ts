@@ -2,7 +2,7 @@ import { AppConstants, ErrorConstants } from "./Constants";
 
 export class ApiService {
   getUrl(blogName: string, startPost: number, endPost: number): string {
-    return `https://${blogName}.tumblr.com/api/read/json?type=photo&num=${
+    return `https://${blogName}${AppConstants.ApiUrl}${
       endPost - startPost + 1
     }&start=${startPost - 1}`;
   }
