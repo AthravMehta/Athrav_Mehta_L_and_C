@@ -17,7 +17,7 @@ export class ApiService {
 
   getUsefulDatafromResponse(response: string): any {
     if (response.startsWith(AppConstants.ResponseHeader)) {
-      response = response.replace(/^var tumblr_api_read = /, "").slice(0, -2);
+      response = response.replace(/^var tumblr_api_read = /, "").slice(0, -2); // necesarry for parsing response, Api returns this way
     } else {
       throw new Error(ErrorConstants.ResponseFormatError);
     }
