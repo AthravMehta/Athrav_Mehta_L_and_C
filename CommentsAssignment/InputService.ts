@@ -1,21 +1,21 @@
-import { ErrorConstants, InputConstants } from "./Constants";
+import { Constants } from "./Constants";
 import promptSync from "prompt-sync";
 
 const prompt = promptSync();
 export class InputService {
   getBlogName(): string {
-    const blogName = prompt(InputConstants.BlogNameInput);
+    const blogName = prompt(Constants.INPUT.BLOG_NAME_INPUT);
     if (!blogName) {
-      throw new Error(ErrorConstants.InvalidBlogName);
+      throw new Error(Constants.ERRORS.INVALID_BLOG_NAME);
     }
     return blogName.trim();
   }
 
   getPostsRange(): { startPost: number; endPost: number } {
-    const range = prompt(InputConstants.RangeInput);
+    const range = prompt(Constants.INPUT.RANGE_INPUT);
 
     if (!range) {
-      throw new Error(ErrorConstants.InvalidPostRange);
+      throw new Error(Constants.ERRORS.INVALID_POST_RANGE);
     }
 
     const rangeParts = range.split("-").map((num) => parseInt(num.trim(), 10));
@@ -25,7 +25,7 @@ export class InputService {
       isNaN(rangeParts[0]) ||
       isNaN(rangeParts[1])
     ) {
-      throw new Error(ErrorConstants.InvalidRangeFormat);
+      throw new Error(Constants.ERRORS.INVALID_RANGE_FORMAT);
     }
 
     return { startPost: rangeParts[0], endPost: rangeParts[1] };

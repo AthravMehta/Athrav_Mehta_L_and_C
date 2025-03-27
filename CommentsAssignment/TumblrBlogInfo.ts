@@ -1,7 +1,7 @@
 import { ApiService } from "./ApiService";
-import { AppConstants, BasicInfoConstant, ErrorConstants } from "./Constants";
+import { Constants } from "./Constants";
 import { InputService } from "./InputService";
-import { BlogInfo, PostRange } from "./Interface";
+import { BlogInfo, Post, PostRange, TumblrApiResponse } from "./Interface";
 
 class TumblrBlogInfo {
   static async getInfo() {
@@ -14,18 +14,19 @@ class TumblrBlogInfo {
     const apiUrl = apiService.getUrl(blogName, startPost, endPost);
     try {
       const response = await apiService.fetchResponse(apiUrl);
-      const usefulData = apiService.getUsefulDatafromResponse(response);
+      const usefulData: TumblrApiResponse =
+        apiService.getUsefulDatafromResponse(response);
       this.displayInformation(usefulData);
     } catch (error) {
       console.error(
-        `${ErrorConstants.ErrorOccured}: ${
+        `${Constants.ERRORS.ERROR_OCCURRED}: ${
           error instanceof Error ? error.message : error
         }`
       );
     }
   }
 
-  static displayInformation(data: any) {
+  static displayInformation(data: TumblrApiResponse) {
     TumblrBlogInfo.displayBasicInfo(data);
     TumblrBlogInfo.displayPosts(data.posts);
   }
@@ -35,33 +36,31 @@ class TumblrBlogInfo {
     "posts-total": totalPosts,
   }: BlogInfo): void => {
     console.log(
-      `\n${BasicInfoConstant.Title}: ${
-        title ? title : ErrorConstants.TitleNoAvailable
+      `\n${Constants.BASIC_INFO.TITLE}: ${
+        title ? title : Constants.ERRORS.TITLE_NO_AVAILABLE
       }`
     );
     console.log(
-      `${BasicInfoConstant.Name}: ${
-        name ? name : ErrorConstants.NameNoAvailable
+      `${Constants.BASIC_INFO.NAME}: ${
+        name ? name : Constants.ERRORS.NAME_NO_AVAILABLE
       }`
     );
     console.log(
-      `${BasicInfoConstant.Description}: ${
-        description ? description : ErrorConstants.DescriptionNoAvailable
+      `${Constants.BASIC_INFO.DESCRIPTION}: ${
+        description ? description : Constants.ERRORS.DESCRIPTION_NO_AVAILABLE
       }`
     );
-    console.log(`${BasicInfoConstant.NumberOfPost}: ${totalPosts}\n`);
+    console.log(`${Constants.BASIC_INFO.NUMBER_OF_POST}: ${totalPosts}\n`);
   };
 
-  static displayPosts = (posts: any[]): void => {
-    let postNumbering = 1;
-    for (const post of posts) {
+  static displayPosts = (posts: Post[]): void => {
+    posts.forEach((post, index) => {
       console.log(
-        `${postNumbering}. ${
-          post[AppConstants.PhotoUrl] || ErrorConstants.NoPhotosErrorMessage
+        `${index + 1}. ${
+          post["photo-url-1280"] || Constants.ERRORS.NO_PHOTOS_ERROR_MESSAGE
         }`
       );
-      postNumbering++;
-    }
+    });
   };
 }
 

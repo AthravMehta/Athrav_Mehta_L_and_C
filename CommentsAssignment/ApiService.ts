@@ -1,8 +1,9 @@
-import { AppConstants, ErrorConstants } from "./Constants";
+import { Constants } from "./Constants";
+import { TumblrApiResponse } from "./Interface";
 
 export class ApiService {
   getUrl(blogName: string, startPost: number, endPost: number): string {
-    return `https://${blogName}${AppConstants.ApiUrl}${
+    return `https://${blogName}${Constants.API.API_URL}${
       endPost - startPost + 1
     }&start=${startPost - 1}`;
   }
@@ -10,17 +11,24 @@ export class ApiService {
   async fetchResponse(apiUrl: string): Promise<string> {
     const response = await fetch(apiUrl);
     if (!response.ok) {
-      throw new Error(`${ErrorConstants.FailedToFetch}: ${response.status}`);
+      throw new Error(
+        `${Constants.ERRORS.FAILED_TO_FETCH}: ${response.status}`
+      );
     }
     return await response.text();
   }
 
-  getUsefulDatafromResponse(response: string): any {
-    if (response.startsWith(AppConstants.ResponseHeader)) {
-      response = response.replace(/^var tumblr_api_read = /, "").slice(0, -2); // necesarry for parsing response, Api returns this way
+  getUsefulDatafromResponse(response: string): TumblrApiResponse {
+    if (response.startsWith(Constants.API.RESPONSE_HEADER)) {
+      response = this.extractTumblrApiResponse(response);
     } else {
-      throw new Error(ErrorConstants.ResponseFormatError);
+      throw new Error(Constants.ERRORS.RESPONSE_FORMAT_ERROR);
     }
     return JSON.parse(response);
+  }
+
+  extractTumblrApiResponse(apiResponse: string): string {
+    // Eliminating Tumblr API's wrapper to parse raw JSON.
+    return apiResponse.replace(/^var tumblr_api_read = /, "").slice(0, -2);
   }
 }
