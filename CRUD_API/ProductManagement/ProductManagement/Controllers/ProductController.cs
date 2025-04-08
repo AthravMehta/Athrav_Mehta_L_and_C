@@ -61,7 +61,7 @@ namespace ProductManagement.Controllers
                     return Conflict(ErrorConstants.ProductWithSimilarNameExists);
                 }
                 await _productService.AddProduct(product);
-                return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+                return Created();
             }
             catch (Exception ex)
             {
