@@ -36,3 +36,26 @@ yarn-error.log*
 
 *.crt
 *.key
+
+# Ignore .NET build output
+**/bin/**
+**/obj/**
+**/.vs/**
+
+# Ignore NuGet packages
+**/packages/**
+
+# Ignore user-specific settings
+*.userprefs
+*.suo
+*.sln.docstates
+
+# Ignore Visual Studio temporary files
+_ReSharper.*
+vssver.scc
+*.vspscc
+*.vssscc
+vs/
+
+# Ignore Rider-specific files (if you use Rider)
+.idea/
