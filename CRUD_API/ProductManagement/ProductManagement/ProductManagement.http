@@ -1,0 +1,6 @@
+@ProductManagement_HostAddress = http://localhost:5045
+
+GET {{ProductManagement_HostAddress}}/
+Accept: application/json
+
+###
