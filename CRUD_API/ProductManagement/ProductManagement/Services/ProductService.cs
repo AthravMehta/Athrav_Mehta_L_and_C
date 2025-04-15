@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProductManagement.Constants;
+﻿using ProductManagement.Constants;
 using ProductManagement.Entities;
+using ProductManagement.Exceptions;
 using ProductManagement.Repository.Contracts;
 using ProductManagement.Services.Contracts;
-using System.Net;
 
 namespace ProductManagement.Services
 {
@@ -26,7 +25,7 @@ namespace ProductManagement.Services
             Product product = await _productRepository.GetProduct(id);
             if (product == null)
             {
-                throw new Exception($"{ErrorConstants.ProductNotFound}");
+                throw new ApiException(ErrorConstants.ProductNotFound);
             }
             return product;
         }
@@ -35,7 +34,7 @@ namespace ProductManagement.Services
             List<Product> products = await _productRepository.GetAllProducts();
             if (!products.Any())
             {
-                throw new Exception($"{ErrorConstants.ProductsNotFound}");
+                throw new ApiException(ErrorConstants.ProductsNotFound);
             }
             return products;
         }
@@ -44,7 +43,7 @@ namespace ProductManagement.Services
         {
             if (product == null)
             {
-                throw new ArgumentNullException(nameof(product));
+                throw new ApiException(ErrorConstants.ProductNotFound);
             }
             await _productRepository.AddProduct(product);
         }
@@ -53,13 +52,14 @@ namespace ProductManagement.Services
         {
             if (product == null)
             {
-                throw new ArgumentNullException(nameof(product));
+                throw new ApiException(ErrorConstants.ProductNotFound);
             }
             Product oldProduct = await GetProduct(product.Id);
-            oldProduct.Name = product.Name;
-            oldProduct.Price = product.Price;
-            oldProduct.Quantity = product.Quantity;
-            oldProduct.ProductType = product.ProductType;
+            oldProduct.Name = product.Name ?? oldProduct.Name;
+            oldProduct.Description = product.Description ?? oldProduct.Description;
+            oldProduct.Price = product.Price ?? oldProduct.Price;
+            oldProduct.Quantity = product.Quantity ?? oldProduct.Quantity;
+            oldProduct.ProductType = product.ProductType ?? oldProduct.ProductType;
             await _productRepository.UpdateProduct(oldProduct);
         }
 
@@ -67,7 +67,7 @@ namespace ProductManagement.Services
         {
             if (id == 0)
             {
-                throw new Exception(ErrorConstants.IdCannotBeZero);
+                throw new ApiException(ErrorConstants.IdCannotBeZero);
             }
             Product productToDelete = await GetProduct(id);
             await _productRepository.DeleteProduct(productToDelete);

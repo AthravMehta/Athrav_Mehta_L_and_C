@@ -2,6 +2,8 @@
 using ProductManagement.Constants;
 using ProductManagement.DbContexts;
 using ProductManagement.Entities;
+using ProductManagement.Exceptions;
+using ProductManagement.Enums;
 using ProductManagement.Repository.Contracts;
 
 namespace ProductManagement.Repository
@@ -22,7 +24,7 @@ namespace ProductManagement.Repository
             {
                 return product;
             }
-            throw new Exception(ErrorConstants.ProductNotFound);
+            throw new ApiException(ErrorCode.NotFound ,ErrorConstants.ProductNotFound);
         }
 
         public async Task<List<Product>> GetAllProducts()
@@ -32,13 +34,13 @@ namespace ProductManagement.Repository
             {
                 return products;
             }
-            throw new Exception(ErrorConstants.ProductsNotFound);
+            throw new ApiException(ErrorCode.NotFound, ErrorConstants.ProductsNotFound);
         }
         public async Task AddProduct(Product product)
         {
             if (product == null)
             {
-                throw new ArgumentNullException(ErrorConstants.ProductIsNull);
+                throw new ApiException(ErrorConstants.ProductIsNull);
             }
             await _productContext.Products.AddAsync(product);
             await _productContext.SaveChangesAsync();
@@ -47,7 +49,7 @@ namespace ProductManagement.Repository
         {
             if (product == null)
             {
-                throw new ArgumentNullException(ErrorConstants.ProductIsNull);
+                throw new ApiException(ErrorConstants.ProductIsNull);
             }
             _productContext.Products.Remove(product);
             await _productContext.SaveChangesAsync();
@@ -57,7 +59,7 @@ namespace ProductManagement.Repository
         {
             if (updatedProduct == null)
             {
-                throw new Exception(ErrorConstants.UpdatedProductIsNull);
+                throw new ApiException(ErrorConstants.UpdatedProductIsNull);
             }
             _productContext.Products.Update(updatedProduct);
             await _productContext.SaveChangesAsync();
@@ -65,7 +67,7 @@ namespace ProductManagement.Repository
 
         public bool ProductExists(string name)
         {
-            return _productContext.Products.Any(e => e.Name == name);
+            return _productContext.Products.Any(product => product.Name == name);
         }
     }
 }

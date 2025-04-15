@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductManagement.Constants;
 using ProductManagement.Entities;
+using ProductManagement.Exceptions;
 using ProductManagement.Services.Contracts;
 
 namespace ProductManagement.Controllers
@@ -23,6 +24,10 @@ namespace ProductManagement.Controllers
             {
                 return await _productService.GetAllProducts();
             }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.errorCode, ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
@@ -40,6 +45,10 @@ namespace ProductManagement.Controllers
                     return NotFound();
                 }
                 return product;
+            }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.errorCode, ex.Message);
             }
             catch (Exception ex)
             {
@@ -63,6 +72,10 @@ namespace ProductManagement.Controllers
                 await _productService.AddProduct(product);
                 return Created();
             }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.errorCode, ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
@@ -80,6 +93,10 @@ namespace ProductManagement.Controllers
             {
                 await _productService.UpdateProduct(product);
                 return NoContent();
+            }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.errorCode, ex.Message);
             }
             catch (Exception ex)
             {
@@ -99,6 +116,10 @@ namespace ProductManagement.Controllers
             {
                 await _productService.DeleteProduct(id);
                 return NoContent();
+            }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.errorCode, ex.Message);
             }
             catch (Exception ex)
             {
