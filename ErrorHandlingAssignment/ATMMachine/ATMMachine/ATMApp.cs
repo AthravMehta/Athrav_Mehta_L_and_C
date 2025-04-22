@@ -27,9 +27,9 @@ namespace ATMMachine
             {
                 while (true)
                 {
-                    ShowMainMenu();
+                    Menu.ShowMainMenu();
                     var choice = InputHelper.ReadNonEmptyString("Choose an option: ");
-                    if (!checkConnectionToServer())
+                    if (choice != "3" && !checkConnectionToServer())
                     {
                         throw new UnableToConnectToServerException();
                     }
@@ -57,27 +57,13 @@ namespace ATMMachine
             }
         }
 
-        private void ShowMainMenu()
-        {
-            Console.WriteLine("\nATM Machine:");
-            Console.WriteLine("1. Create Account");
-            Console.WriteLine("2. Login");
-            Console.WriteLine("3. Exit\n");
-        }
-        private void ShowAtmMenu()
-        {
-            Console.WriteLine("\nATM Operations:");
-            Console.WriteLine("1. Withdraw");
-            Console.WriteLine("2. Deposit");
-            Console.WriteLine("3. Check Balance");
-            Console.WriteLine("4. Logout");
-        }
+        
 
         private void RunATMOperations()
         {
             while (_currentAccount != null && _currentCard != null)
             {
-                ShowAtmMenu();
+                Menu.ShowAtmMenu();
                 string op = InputHelper.ReadNonEmptyString("Choose an operation: ");
 
                 if (!checkConnectionToServer())
