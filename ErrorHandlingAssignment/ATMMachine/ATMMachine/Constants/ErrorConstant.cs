@@ -2,6 +2,7 @@
 {
     public class ErrorConstant
     {
+        public const string UnableToConnectToServer = "Connection to Server Failed. Come back later";
         public const string InsufficientFunds = "Insufficient funds in the account.";
         public const string UnableToConnectServer = "Unable to connect to the server.";
         public const string CardBlocked = "Your Card is Blocked. Reach Bank to Unblock";

@@ -23,27 +23,37 @@ namespace ATMMachine
 
         public void Run()
         {
-            while (true)
+            try
             {
-                ShowMainMenu();
-                var choice = InputHelper.ReadNonEmptyString("Choose an option: ");
-
-                switch (choice)
+                while (true)
                 {
-                    case "1":
-                        if (!HandleAccountCreation()) continue;
-                        break;
-                    case "2":
-                        if (!HandleLogin()) continue;
-                        break;
-                    case "3":
-                        return;
-                    default:
-                        Console.WriteLine("Invalid option.\n");
-                        continue;
-                }
+                    ShowMainMenu();
+                    var choice = InputHelper.ReadNonEmptyString("Choose an option: ");
+                    if (!checkConnectionToServer())
+                    {
+                        throw new UnableToConnectToServerException();
+                    }
+                    switch (choice)
+                    {
+                        case "1":
+                            if (!HandleAccountCreation()) continue;
+                            break;
+                        case "2":
+                            if (!HandleLogin()) continue;
+                            break;
+                        case "3":
+                            return;
+                        default:
+                            Console.WriteLine("Invalid option.\n");
+                            continue;
+                    }
 
-                RunATMOperations();
+                    RunATMOperations();
+                }
+            }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine(ex.Message);    
             }
         }
 
@@ -68,8 +78,12 @@ namespace ATMMachine
             while (_currentAccount != null && _currentCard != null)
             {
                 ShowAtmMenu();
-
                 string op = InputHelper.ReadNonEmptyString("Choose an operation: ");
+
+                if (!checkConnectionToServer())
+                {
+                    throw new UnableToConnectToServerException();
+                }
 
                 try
                 {
@@ -180,6 +194,11 @@ namespace ATMMachine
         {
             Console.WriteLine("Logged out.");
             ClearSession();
+        }
+
+        private bool checkConnectionToServer()
+        {
+            return _atmService.ConnectToServer();
         }
 
         private void ValidateSession()

@@ -13,6 +13,11 @@ namespace ATMMachine.Services
             _atm = atm;
         }
 
+        public bool ConnectToServer()
+        {
+            return new Random().Next(0, 2) == 1;
+        }
+
         public void Withdraw(AccountModel account, decimal amount, CardModel card) 
         {
             if(card.IsBlocked)
