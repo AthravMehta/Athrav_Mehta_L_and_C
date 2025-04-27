@@ -43,7 +43,7 @@
         {
             if (myWallet.GetTotalMoney() >= debit)
             {
-                myWallet.SubtractMoney(debit);
+                myWallet.DebitMoney(debit);
                 return true;
             }
             return false;

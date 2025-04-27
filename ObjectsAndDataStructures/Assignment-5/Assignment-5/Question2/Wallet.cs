@@ -19,7 +19,7 @@
             value += deposit;
         }
 
-        public void SubtractMoney(float debit)
+        public void DebitMoney(float debit)
         {
             value -= debit;
         }
