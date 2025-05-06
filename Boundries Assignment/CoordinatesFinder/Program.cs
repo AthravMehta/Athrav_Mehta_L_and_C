@@ -23,10 +23,6 @@ namespace CoordinatesFinder
                 Coordinates coordinates = await coordinatesFinder.GetCoordinatesFromLocationAsync(location);
                 Console.WriteLine($"Latitude: {coordinates.Latitude}, Longitude: {coordinates.Longitude}");
             }
-            catch (GeocodingException ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
