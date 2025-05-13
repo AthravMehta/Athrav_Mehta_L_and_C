@@ -43,6 +43,7 @@ yarn-error.log*
 
 # Ignore NuGet packages
 **/packages/**
+**/.vs/**
 
 # Ignore user-specific settings
 *.userprefs
