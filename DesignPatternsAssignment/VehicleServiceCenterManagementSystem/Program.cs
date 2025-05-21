@@ -1,19 +1,4 @@
-﻿// Class - VehicleService, Interface - IVehicleService
-
-// CarService implements IVehicleService
-// BikeService implements IVehicleService
-// TruckService implements IVehicleService
-
-// Class CarService
-// OilChange, BrakeInspection, TireRotation
-
-// Class BikeService
-// ChainLubrication, BrakeTightening
-
-// Class TruckService
-// HeavyDutyEngineDiagnostics, CargoInspection
-
-using VehicleServiceCenterManagementSystem;
+﻿using VehicleServiceCenterManagementSystem;
 using VehicleServiceCenterManagementSystem.Enums;
 using VehicleServiceCenterManagementSystem.VehicleService.Contracts;
 
