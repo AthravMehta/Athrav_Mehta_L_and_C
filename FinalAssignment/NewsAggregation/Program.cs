@@ -1,7 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Logger Configuration
+var logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+Directory.CreateDirectory(logDirectory); // Ensure Directory Exists
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 string databaseConnectionString = builder.Configuration.GetConnectionString(name: "DatabaseConnection")!;
 
