@@ -1,4 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using NewsAggregation.Configurations.DatabaseConfigurations;
+
 var builder = WebApplication.CreateBuilder(args);
+
+string databaseConnectionString = builder.Configuration.GetConnectionString(name: "DatabaseConnection")!;
+
+// Database Configuration
+builder.Services.AddDbContext<NewsAggregationDbContext>(optionsAction => optionsAction.UseSqlServer(databaseConnectionString));
 
 // Add services to the container.
 
