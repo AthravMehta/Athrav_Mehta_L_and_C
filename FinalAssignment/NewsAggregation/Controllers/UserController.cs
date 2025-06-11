@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Controllers;
 using NewsAggregation.Entities;
 using NewsAggregation.Exceptions;
@@ -11,11 +12,13 @@ public class UserController : CrudBaseController<User, Guid>
 {
     private readonly ICrudBaseService<User, Guid> _service;
     private readonly ILogger<UserController> _logger;
+    private readonly IMapper _mapper;
 
-    public UserController(ICrudBaseService<User, Guid> service, ILogger<UserController> logger) : base(service)
+    public UserController(ICrudBaseService<User, Guid> service, ILogger<UserController> logger, IMapper mapper) : base(service)
     {
         _service = service;
         _logger = logger;
+        _mapper = mapper;
     }
 
     [HttpPost]
@@ -39,7 +42,7 @@ public class UserController : CrudBaseController<User, Guid>
 
             await _service.AddAsync(user);
 
-            var resultDto = MapToReadDto(user);
+            var resultDto = _mapper.Map<UserReadDto>(user);
 
             return CreatedAtAction(nameof(CreateUser), new { id = user.Id }, resultDto);
         }
@@ -107,7 +110,7 @@ public class UserController : CrudBaseController<User, Guid>
             if (user == null)
                 return NotFound();
 
-            var dto = MapToReadDto(user);
+            var dto = _mapper.Map<UserReadDto>(user);
             return Ok(dto);
         }
         catch (Exception ex)
@@ -126,7 +129,7 @@ public class UserController : CrudBaseController<User, Guid>
             var dtos = new List<UserReadDto>();
             foreach (var user in users)
             {
-                dtos.Add(MapToReadDto(user));
+                dtos.Add(_mapper.Map<UserReadDto>(user));
             }
             return Ok(dtos);
         }
@@ -136,21 +139,6 @@ public class UserController : CrudBaseController<User, Guid>
             return StatusCode(500, "An unexpected error occurred.");
         }
     }
-
-    private UserReadDto MapToReadDto(User user)
-    {
-        return new UserReadDto
-        {
-            Id = user.Id,
-            Username = user.Username,
-            Email = user.Email,
-            RoleId = user.RoleId,
-            LastLoginDateTime = user.LastLoginDateTime,
-            CreatedDateTime = user.CreatedDateTime,
-            LastUpdatedDateTime = user.LastUpdatedDateTime
-        };
-    }
-
     private string HashPassword(string password)
     {
         return password;

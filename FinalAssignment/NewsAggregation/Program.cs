@@ -24,6 +24,9 @@ string databaseConnectionString = builder.Configuration.GetConnectionString(name
 builder.Services.AddDbContext<NewsAggregationDbContext>(optionsAction => optionsAction.UseSqlServer(databaseConnectionString));
 builder.Services.AddScoped<DbContext, NewsAggregationDbContext>();
 
+// AutoMapper Configuration
+builder.Services.AddAutoMapper(typeof(Program));
+
 // Add services to the container.
 
 builder.Services.AddControllers();
