@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
+using NewsAggregation.Repository;
+using NewsAggregation.Repository.Contracts;
+using NewsAggregation.Services;
+using NewsAggregation.Services.Contracts;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,10 +22,15 @@ string databaseConnectionString = builder.Configuration.GetConnectionString(name
 
 // Database Configuration
 builder.Services.AddDbContext<NewsAggregationDbContext>(optionsAction => optionsAction.UseSqlServer(databaseConnectionString));
+builder.Services.AddScoped<DbContext, NewsAggregationDbContext>();
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped(typeof(ICrudBaseRepository<,>), typeof(CrudBaseRepository<,>));
+builder.Services.AddScoped(typeof(ICrudBaseService<,>), typeof(CrudBaseService<,>));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

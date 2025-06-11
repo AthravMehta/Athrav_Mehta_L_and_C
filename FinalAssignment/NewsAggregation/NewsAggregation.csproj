@@ -23,11 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-    <Folder Include="Models\" />
     <Folder Include="Constants\" />
-    <Folder Include="Repository\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
+using NewsAggregation.Configurations;
+using NewsAggregation.Enums;
 
 namespace NewsAggregation.Entities
 {
-    public class User
+    public class User : BaseKeyEntity<Guid>
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid UserId { get; set; }
-
         [Required]
         [MaxLength(50)]
         public string Username { get; set; }
@@ -25,7 +21,7 @@ namespace NewsAggregation.Entities
         public DateTime? LastLoginDateTime { get; set; }
 
         [Required]
-        public int RoleId { get; set; } = 1;
+        public RoleEnum RoleId { get; set; } = RoleEnum.User;
 
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
 
