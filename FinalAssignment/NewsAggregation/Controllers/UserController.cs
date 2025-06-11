@@ -1,50 +1,30 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using NewsAggregation.Controllers;
-using NewsAggregation.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
-using NewsAggregation.Services.Contracts;
 
 [ApiController]
-[Route("api/users")]
-public class UserController : CrudBaseController<User, Guid>
+[Route("api/[controller]")]
+public class UserController : ControllerBase
 {
-    private readonly ICrudBaseService<User, Guid> _service;
+    private readonly IUserService _userService;
     private readonly ILogger<UserController> _logger;
-    private readonly IMapper _mapper;
 
-    public UserController(ICrudBaseService<User, Guid> service, ILogger<UserController> logger, IMapper mapper) : base(service)
+    public UserController(IUserService userService, ILogger<UserController> logger)
     {
-        _service = service;
+        _userService = userService;
         _logger = logger;
-        _mapper = mapper;
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] UserCreateDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = dto.Username,
-                PasswordHash = HashPassword(dto.Password),
-                Email = dto.Email,
-                RoleId = dto.RoleId,
-                CreatedDateTime = DateTime.UtcNow,
-                LastUpdatedDateTime = DateTime.UtcNow
-            };
-
-            await _service.AddAsync(user);
-
-            var resultDto = _mapper.Map<UserReadDto>(user);
-
-            return CreatedAtAction(nameof(CreateUser), new { id = user.Id }, resultDto);
+            var createdUser = await _userService.CreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
         catch (ApiException apiEx)
         {
@@ -61,31 +41,14 @@ public class UserController : CrudBaseController<User, Guid>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         try
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existingUser = await _service.GetByIdAsync(id);
-            if (existingUser == null)
+            var updatedUser = await _userService.UpdateUserAsync(id, dto);
+            if (updatedUser == null)
                 return NotFound();
-
-            // Update fields if provided
-            if (!string.IsNullOrWhiteSpace(dto.Username))
-                existingUser.Username = dto.Username;
-
-            if (!string.IsNullOrWhiteSpace(dto.Password))
-                existingUser.PasswordHash = HashPassword(dto.Password);
-
-            if (!string.IsNullOrWhiteSpace(dto.Email))
-                existingUser.Email = dto.Email;
-
-            if (dto.RoleId.HasValue)
-                existingUser.RoleId = dto.RoleId.Value;
-
-            existingUser.LastUpdatedDateTime = DateTime.UtcNow;
-
-            await _service.UpdateAsync(existingUser);
 
             return NoContent();
         }
@@ -106,12 +69,11 @@ public class UserController : CrudBaseController<User, Guid>
     {
         try
         {
-            var user = await _service.GetByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound();
 
-            var dto = _mapper.Map<UserReadDto>(user);
-            return Ok(dto);
+            return Ok(user);
         }
         catch (Exception ex)
         {
@@ -125,22 +87,13 @@ public class UserController : CrudBaseController<User, Guid>
     {
         try
         {
-            var users = await _service.GetAllAsync();
-            var dtos = new List<UserReadDto>();
-            foreach (var user in users)
-            {
-                dtos.Add(_mapper.Map<UserReadDto>(user));
-            }
-            return Ok(dtos);
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error during fetching all users");
             return StatusCode(500, "An unexpected error occurred.");
         }
-    }
-    private string HashPassword(string password)
-    {
-        return password;
     }
 }
