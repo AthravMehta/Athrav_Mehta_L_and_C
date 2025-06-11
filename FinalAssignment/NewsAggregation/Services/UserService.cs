@@ -11,10 +11,12 @@ public class UserService : CrudBaseService<User, Guid>, IUserService
 {
     private readonly IMapper _mapper;
     private readonly PasswordHasher<User> _passwordHasher;
+    private readonly IUserRepository _userRepository;
 
-    public UserService(ICrudBaseRepository<User, Guid> repository, IMapper mapper) : base(repository)
+    public UserService(ICrudBaseRepository<User, Guid> repository, IMapper mapper, IUserRepository userRepository) : base(repository)
     {
         _mapper = mapper;
+        _userRepository = userRepository;
         _passwordHasher = new PasswordHasher<User>();
     }
 
@@ -73,6 +75,18 @@ public class UserService : CrudBaseService<User, Guid>, IUserService
     {
         var users = await GetAllAsync();
         return _mapper.Map<IEnumerable<UserReadDto>>(users);
+    }
+
+    public async Task<User> GetUserByName(string username)
+    {
+        var user = await _userRepository.GetUserByName(username);
+        return user;
+    }
+
+    public bool VerifyPassword(User user, string providedPassword)
+    {
+        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, providedPassword);
+        return result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded;
     }
 
     private string HashPassword(User user, string password)
