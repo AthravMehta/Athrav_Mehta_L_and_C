@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Configurations;
+using NewsAggregation.Enums;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[AuthorizeRoles(nameof(RoleEnum.User), nameof(RoleEnum.Admin))]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;

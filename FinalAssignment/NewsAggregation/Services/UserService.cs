@@ -94,6 +94,7 @@ public class UserService : CrudBaseService<User, Guid>, IUserService
         return _passwordHasher.HashPassword(user, password);
     }
 
+    // TODO: Validation Methods can be refactored and Proper Exception code can be returned.
     private void ValidateUserCreateDto(UserCreateDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Username) || dto.Username.Length < 8)

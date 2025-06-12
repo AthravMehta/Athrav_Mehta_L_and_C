@@ -4,7 +4,7 @@ using NewsAggregation.Repository.Contracts;
 
 namespace NewsAggregation.Repository
 {
-    public class CrudBaseRepository<TEntity, TKey> : ICrudBaseRepository<TEntity, TKey> where TEntity : BaseKeyEntity<TKey>
+    public class CrudBaseRepository<TEntity, TKey> : ICrudBaseRepository<TEntity, TKey> where TEntity : class, BaseKeyEntity<TKey>
     {
         protected readonly DbContext _context;
         protected readonly DbSet<TEntity> _entitySet;

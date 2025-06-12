@@ -10,6 +10,26 @@ namespace NewsAggregation.Configurations.FluentApiConfigurations
         {
             builder.HasIndex(user => user.Username).IsUnique();
             builder.HasIndex(user => user.Email).IsUnique();
+
+            builder.HasMany<UserArticleAction>()
+                .WithOne(ua => ua.User)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany<UserNotification>()
+                .WithOne()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany<UserNotificationConfiguration>()
+                .WithOne()
+                .HasForeignKey(nc => nc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany<UserKeyword>()
+                .WithOne()
+                .HasForeignKey(uk => uk.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
