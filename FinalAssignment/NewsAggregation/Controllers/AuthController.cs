@@ -29,8 +29,8 @@ namespace NewsAggregation.Controllers
 
             try
             {
-                var user = await _authService.RegisterAsync(userDto);
-                return Ok(user);
+                var token = await _authService.RegisterAsync(userDto);
+                return Ok(new { token });
             }
             catch (ApiException ex)
             {

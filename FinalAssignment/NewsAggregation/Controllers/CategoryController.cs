@@ -1,0 +1,74 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Configurations;
+using NewsAggregation.Enums;
+using NewsAggregation.Models;
+using NewsAggregation.Services.Contracts;
+
+namespace NewsAggregation.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CategoryController : ControllerBase
+    {
+        private readonly ILogger<CategoryController> _logger;
+        private readonly ICategoryService _categoryService;
+
+        public CategoryController(ILogger<CategoryController> logger, ICategoryService categoryService)
+        {
+            _logger = logger;
+            _categoryService = categoryService;
+        }
+
+        [HttpPost]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> Add([FromBody] CategoryDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _categoryService.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        [HttpPut("{id}")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> Update(Guid id, [FromBody] CategoryDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _categoryService.UpdateAsync(id, dto);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _categoryService.DeleteAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet("{id}")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _categoryService.GetByIdAsync(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _categoryService.GetAllAsync();
+            return Ok(result);
+        }
+    }
+}
