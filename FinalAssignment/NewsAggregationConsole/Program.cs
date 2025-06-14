@@ -1,6 +1,7 @@
 ﻿using NewsAggregationConsole.Helpers;
 using NewsAggregationConsole.Models;
 using NewsAggregationConsole.Services;
+using NewsAggregationConsole.Enums;
 
 namespace NewsAggregationConsole
 {
@@ -65,9 +66,9 @@ namespace NewsAggregationConsole
                     return;
                 }
 
-                //if (_currentUser.IsAdmin)
-                //    await AdminFlow();
-                //else
+                if (_currentUser.RoleId == RoleEnum.Admin)
+                    await AdminFlow();
+                else
                     await UserFlow();
             }
             catch (Exception ex)

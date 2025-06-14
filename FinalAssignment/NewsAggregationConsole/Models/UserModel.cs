@@ -1,4 +1,4 @@
-﻿using NewsAggregation.Enums;
+﻿using NewsAggregationConsole.Enums;
 
 namespace NewsAggregationConsole.Models
 {

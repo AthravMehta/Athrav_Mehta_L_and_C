@@ -1,4 +1,4 @@
-﻿namespace NewsAggregation.Enums
+﻿namespace NewsAggregationConsole.Enums
 {
     public enum RoleEnum
     {
