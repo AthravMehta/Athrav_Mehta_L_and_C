@@ -126,7 +126,6 @@ public class UserService : CrudBaseService<User, Guid>, IUserService
         return regex.IsMatch(password);
     }
 
-    // Email regex validation
     private bool IsValidEmail(string email)
     {
         // Simple email regex pattern (@)(.)

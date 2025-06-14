@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Entities;
+﻿using AutoMapper;
+using NewsAggregation.Entities;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
@@ -9,15 +10,17 @@ namespace NewsAggregation.Services
     {
         private readonly IUserService _userService;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IMapper _mapper;
 
 
-        public AuthService(IUserService userService, IJwtTokenService jwtTokenService)
+        public AuthService(IUserService userService, IJwtTokenService jwtTokenService, IMapper mapper)
         {
             _userService = userService;
             _jwtTokenService = jwtTokenService;
+            _mapper = mapper;
         }
 
-        public async Task<string> RegisterAsync(UserCreateDto userDto)
+        public async Task<UserDataWithTokenDto> RegisterAsync(UserCreateDto userDto)
         {
             var existingUser = await _userService.GetUserByName(userDto.Username);
             if (existingUser != null)
@@ -26,10 +29,15 @@ namespace NewsAggregation.Services
             }
             var newUser = await _userService.CreateUserAsync(userDto);
             var roles = new List<string> { newUser.RoleId.ToString() };
-            return _jwtTokenService.GenerateToken(newUser.Id.ToString(), newUser.Username, roles);
+            var userDataWithToken = new UserDataWithTokenDto
+            {
+                User = newUser,
+                token = _jwtTokenService.GenerateToken(newUser.Id.ToString(), newUser.Username, roles)
+            };
+            return userDataWithToken;
         }
 
-        public async Task<string> LoginAsync(LoginDto userDto)
+        public async Task<UserDataWithTokenDto> LoginAsync(LoginDto userDto)
         {
             User user = await _userService.GetUserByName(userDto.Username);
             if (user == null)
@@ -39,7 +47,12 @@ namespace NewsAggregation.Services
                 throw new ApiException("Invalid username or password.");
 
             var roles = new List<string> { user.RoleId.ToString() };
-            return _jwtTokenService.GenerateToken(user.Id.ToString(), user.Username, roles);
+            var userDataWithToken = new UserDataWithTokenDto
+            {
+                User = _mapper.Map<UserReadDto>(user),
+                token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Username, roles)
+            };
+            return userDataWithToken;
         }
     }
 }

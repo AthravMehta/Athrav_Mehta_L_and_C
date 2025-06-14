@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
@@ -29,8 +28,8 @@ namespace NewsAggregation.Controllers
 
             try
             {
-                var token = await _authService.RegisterAsync(userDto);
-                return Ok(new { token });
+                UserDataWithTokenDto userDataWithToken= await _authService.RegisterAsync(userDto);
+                return Ok(userDataWithToken);
             }
             catch (ApiException ex)
             {
@@ -47,8 +46,8 @@ namespace NewsAggregation.Controllers
 
             try
             {
-                var token = await _authService.LoginAsync(userDto);
-                return Ok(new { token });
+                UserDataWithTokenDto userDataWithToken = await _authService.LoginAsync(userDto);
+                return Ok(userDataWithToken);
             }
             catch (ApiException ex)
             {

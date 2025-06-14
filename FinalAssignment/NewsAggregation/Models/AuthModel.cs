@@ -13,4 +13,9 @@
         public string Password { get; set; }
     }
 
+    public class UserDataWithTokenDto
+    {
+        public UserReadDto User { get; set; }
+        public string token { get; set; }
+    }
 }
