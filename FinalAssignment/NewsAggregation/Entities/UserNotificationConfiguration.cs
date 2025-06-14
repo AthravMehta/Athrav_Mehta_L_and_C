@@ -14,6 +14,7 @@ namespace NewsAggregation.Entities
         public Guid UserId { get; set; }
         public User? User { get; set; }
         public Guid CategoryId { get; set; }
+        // TODO: When Creating next Migration, Correct IsEnabled Casing here
         public bool isEnabled { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 
@@ -11,9 +12,11 @@ using NewsAggregation.Configurations.DatabaseConfigurations;
 namespace NewsAggregation.Migrations
 {
     [DbContext(typeof(NewsAggregationDbContext))]
-    partial class NewsAggregationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613125542_added-categoryid-in-userkeyword-table")]
+    partial class addedcategoryidinuserkeywordtable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

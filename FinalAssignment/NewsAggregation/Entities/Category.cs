@@ -14,5 +14,6 @@ namespace NewsAggregation.Entities
         [MaxLength(255)]
         public string Name { get; set; }
         public ICollection<Article> Articles { get; set; }
+        public ICollection<UserKeyword> UserKeywords { get; set; }
     }
 }

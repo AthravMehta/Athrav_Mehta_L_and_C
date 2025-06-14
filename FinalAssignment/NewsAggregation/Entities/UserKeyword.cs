@@ -13,6 +13,9 @@ namespace NewsAggregation.Entities
         [ForeignKey(nameof(User))]
         public Guid UserId { get; set; }
         public User? User { get; set; }
+
+        [ForeignKey(nameof(Category))]
+        public Guid CategoryId { get; set; }
         public string Keyword { get; set; }
         public bool isEnabled { get; set; }
     }

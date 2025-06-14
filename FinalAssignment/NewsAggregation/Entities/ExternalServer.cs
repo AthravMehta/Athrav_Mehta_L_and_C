@@ -18,6 +18,7 @@ namespace NewsAggregation.Entities
         [MaxLength(255)]
         public string BaseUrl { get; set; }
 
+        // TODO: Make casing correct in next migration
         [Required]
         public bool isActive { get; set; }
 

@@ -65,6 +65,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers();
 
+//TODO: Apply Filter/Sorting in GET ALL API's
+//TODO: Check Authorize Roles above controller
+//TODO: Fix UserId1 Column in DB
 builder.Services.AddScoped(typeof(ICrudBaseRepository<,>), typeof(CrudBaseRepository<,>));
 builder.Services.AddScoped(typeof(ICrudBaseService<,>), typeof(CrudBaseService<,>));
 builder.Services.AddScoped<IUserService, UserService>();
@@ -72,36 +75,36 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ICrudBaseRepository<Category, Guid>, CrudBaseRepository<Category, Guid>>();
+builder.Services.AddScoped<IUserKeywordService, UserKeywordService>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        Description = "JWT Authorization header using the Bearer scheme."
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
-});
+//builder.Services.AddSwaggerGen(c =>
+//{
+//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+//    {
+//        Type = SecuritySchemeType.Http,
+//        Scheme = "bearer",
+//        BearerFormat = "JWT",
+//        Description = "JWT Authorization header using the Bearer scheme."
+//    });
+//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+//    {
+//        {
+//            new OpenApiSecurityScheme
+//            {
+//                Reference = new OpenApiReference
+//                {
+//                    Type = ReferenceType.SecurityScheme,
+//                    Id = "Bearer"
+//                }
+//            },
+//            new string[] { }
+//        }
+//    });
+//});
 
 var app = builder.Build();
 

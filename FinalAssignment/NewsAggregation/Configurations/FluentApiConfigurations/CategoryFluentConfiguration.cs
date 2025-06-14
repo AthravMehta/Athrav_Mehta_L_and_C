@@ -14,6 +14,11 @@ namespace NewsAggregation.Configurations
                 .WithOne() 
                 .HasForeignKey(a => a.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.UserKeywords)
+                .WithOne()
+                .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
