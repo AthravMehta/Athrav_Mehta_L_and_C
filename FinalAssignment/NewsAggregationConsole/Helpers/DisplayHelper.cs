@@ -79,7 +79,7 @@ namespace NewsAggregationConsole.Helpers
             }
             foreach (var n in notifications)
             {
-                Console.WriteLine($"[{n.Id}] {n.Message} (Article: {n.ArticleId}, Date: {n.DateSent:yyyy-MM-dd HH:mm})");
+                Console.WriteLine($"[{n.Id}] {n.IsRead} (Article: {n.ArticleId}, Date: {n.SentDateTime:yyyy-MM-dd HH:mm})");
             }
             Console.WriteLine();
         }

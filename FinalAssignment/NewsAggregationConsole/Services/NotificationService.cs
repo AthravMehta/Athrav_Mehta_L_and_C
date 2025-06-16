@@ -13,7 +13,7 @@ namespace NewsAggregationConsole.Services
 
         public async Task<List<NotificationDto>> GetUnviewedNotificationsAsync(Guid userId)
         {
-            return await _apiService.GetAsync<List<NotificationDto>>($"/api/usernotification/{userId}");
+            return await _apiService.GetAsync<List<NotificationDto>>($"/api/usernotification?userId={userId}");
         }
 
         //public async Task MarkNotificationsAsViewedAsync(List<Guid> notificationIds)

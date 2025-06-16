@@ -2,10 +2,10 @@
 {
     public class NotificationDto
     {
-        public Guid Id { get; set; }
-        public string Message { get; set; }
-        public Guid ArticleId { get; set; }
-        public DateTime DateSent { get; set; }
+        public int Id { get; set; }
+        public Guid UserId { get; set; }
+        public int ArticleId { get; set; }
+        public DateTime SentDateTime { get; set; }
         public bool IsRead { get; set; }
     }
 }

@@ -45,7 +45,7 @@ namespace NewsAggregationConsole.Services
         private static async Task<T> HandleResponse<T>(HttpResponseMessage response)
         {
             if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"API request failed: {response.StatusCode} : {response.RequestMessage}");
+                throw new HttpRequestException($"API request failed: {response.StatusCode} : {response}");
 
             return await response.Content.ReadFromJsonAsync<T>();
         }
