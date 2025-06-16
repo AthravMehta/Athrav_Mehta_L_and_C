@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NewsAggregation.Configurations.DatabaseConfigurations;
-using NewsAggregation.Entities;
+using Polly;
+using NewsAggregation.ExternalServers.Factory.Contracts;
+using NewsAggregation.ExternalServers.Factory;
+using NewsAggregation.ExternalServers.Services.Contracts;
 using NewsAggregation.Repository;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services;
@@ -61,10 +64,11 @@ builder.Services.AddScoped<DbContext, NewsAggregationDbContext>();
 // AutoMapper Configuration
 builder.Services.AddAutoMapper(typeof(Program));
 
-// Add services to the container.
 
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 
+//TODO: Add services to the container.
 //TODO: Apply Filter/Sorting in GET ALL API's
 //TODO: Check Authorize Roles above controller
 //TODO: Fix UserId1 Column in DB
@@ -80,36 +84,49 @@ builder.Services.AddScoped<IExternalServerService, ExternalServerService>();
 builder.Services.AddScoped<IUserNotificationConfigurationService, UserNotificationConfigurationService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+builder.Services.AddScoped<INewsApiFactory, NewsApiFactory>();
+builder.Services.AddScoped<INewsFetcher, NewsFetcherService>();
+builder.Services.AddHostedService<NewsFetchingService>();
 
-
+builder.Services.AddHttpClient("NewsAPI")
+    .AddTransientHttpErrorPolicy(policyBuilder =>
+    policyBuilder.WaitAndRetryAsync(
+        3,
+        retryAttempt => TimeSpan.FromSeconds(2),
+        onRetry: (outcome, timespan, retryAttempt, context) =>
+        {
+            Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds} seconds due to {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+        }
+    )
+);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-//builder.Services.AddSwaggerGen(c =>
-//{
-//    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//    {
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "bearer",
-//        BearerFormat = "JWT",
-//        Description = "JWT Authorization header using the Bearer scheme."
-//    });
-//    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-//                Reference = new OpenApiReference
-//                {
-//                    Type = ReferenceType.SecurityScheme,
-//                    Id = "Bearer"
-//                }
-//            },
-//            new string[] { }
-//        }
-//    });
-//});
+//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
 
 var app = builder.Build();
 
