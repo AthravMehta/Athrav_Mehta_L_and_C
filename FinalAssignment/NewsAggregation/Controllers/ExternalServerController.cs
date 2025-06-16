@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Configurations;
+using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
 
@@ -6,6 +8,7 @@ namespace NewsAggregation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AuthorizeRoles(nameof(RoleEnum.Admin))]
     public class ExternalServerController : ControllerBase
     {
         private readonly ILogger<ExternalServerController> _logger;

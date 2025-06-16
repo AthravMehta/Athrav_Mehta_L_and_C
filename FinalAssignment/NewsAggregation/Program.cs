@@ -76,6 +76,11 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserKeywordService, UserKeywordService>();
+builder.Services.AddScoped<IExternalServerService, ExternalServerService>();
+builder.Services.AddScoped<IUserNotificationConfigurationService, UserNotificationConfigurationService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

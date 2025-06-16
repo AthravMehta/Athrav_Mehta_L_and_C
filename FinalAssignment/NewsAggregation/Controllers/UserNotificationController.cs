@@ -8,7 +8,7 @@ namespace NewsAggregation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
+    [AuthorizeRoles(nameof(RoleEnum.User))]
     public class UserNotificationController : ControllerBase
     {
         private readonly ILogger<UserNotificationController> _logger;
