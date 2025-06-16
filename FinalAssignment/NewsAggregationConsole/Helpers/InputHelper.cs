@@ -18,7 +18,7 @@
             {
                 Console.Write(prompt);
                 var input = Console.ReadLine();
-                if ((allowEmpty || !string.IsNullOrWhiteSpace(input)) || ValidationHelper.validatePassword(input)) return input;
+                if ((allowEmpty || !string.IsNullOrWhiteSpace(input)) && ValidationHelper.validatePassword(input)) return input;
                 ShowError("Password cannot be empty");
             }
         }
@@ -28,7 +28,7 @@
             {
                 Console.Write(prompt);
                 var input = Console.ReadLine();
-                if ((allowEmpty || !string.IsNullOrWhiteSpace(input)) || ValidationHelper.validateEmail(input)) return input;
+                if ((allowEmpty || !string.IsNullOrWhiteSpace(input)) && ValidationHelper.validateEmail(input)) return input;
                 ShowError("Email cannot be empty");
             }
         }
