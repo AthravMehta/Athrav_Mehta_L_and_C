@@ -86,6 +86,11 @@ builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 builder.Services.AddScoped<INewsApiFactory, NewsApiFactory>();
 builder.Services.AddScoped<INewsFetcher, NewsFetcherService>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<IUserArticleActionService, UserArticleActionService>();
+builder.Services.AddScoped<IUserArticleActionRepository, UserArticleActionRepository>();
+
+builder.Services.AddScoped<RequestContext>();
 builder.Services.AddHostedService<NewsFetchingService>();
 
 builder.Services.AddHttpClient("NewsAPI")
@@ -142,6 +147,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<RequestContextMiddleware>();
 
 app.MapControllers();
 

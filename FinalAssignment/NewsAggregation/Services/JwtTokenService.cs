@@ -14,7 +14,7 @@ namespace NewsAggregation.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string userId, string username, IList<string> roles)
+        public string GenerateToken(string userId, string username, string email, IList<string> roles)
         {
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!));
@@ -24,6 +24,7 @@ namespace NewsAggregation.Services
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.UniqueName, username),
+            new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

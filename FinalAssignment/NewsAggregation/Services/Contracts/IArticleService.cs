@@ -8,6 +8,6 @@ namespace NewsAggregation.Services.Contracts
         Task<ArticleDto> UpdateAsync(int id, ArticleDto dto);
         Task DeleteAsync(int id);
         Task<ArticleDto> GetByIdAsync(int id);
-        Task<IEnumerable<ArticleDto>> GetAllAsync();
+        Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate);
     }
 }

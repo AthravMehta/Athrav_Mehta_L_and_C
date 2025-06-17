@@ -32,7 +32,7 @@ namespace NewsAggregation.Services
             var userDataWithToken = new UserDataWithTokenDto
             {
                 User = newUser,
-                token = _jwtTokenService.GenerateToken(newUser.Id.ToString(), newUser.Username, roles)
+                token = _jwtTokenService.GenerateToken(newUser.Id.ToString(), newUser.Username, newUser.Email, roles)
             };
             return userDataWithToken;
         }
@@ -50,7 +50,7 @@ namespace NewsAggregation.Services
             var userDataWithToken = new UserDataWithTokenDto
             {
                 User = _mapper.Map<UserReadDto>(user),
-                token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Username, roles)
+                token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Username, user.Email, roles)
             };
             return userDataWithToken;
         }

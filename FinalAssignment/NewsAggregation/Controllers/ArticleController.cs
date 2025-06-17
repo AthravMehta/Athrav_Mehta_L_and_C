@@ -6,6 +6,7 @@ using NewsAggregation.Enums;
 
 namespace NewsAggregation.Controllers
 {
+    // TODO: 
     [Route("api/[controller]")]
     [ApiController]
     [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
@@ -13,11 +14,13 @@ namespace NewsAggregation.Controllers
     {
         private readonly ILogger<ArticleController> _logger;
         private readonly IArticleService _service;
+        private readonly IUserArticleActionService _userArticleActionService;
 
-        public ArticleController(ILogger<ArticleController> logger, IArticleService service)
+        public ArticleController(ILogger<ArticleController> logger, IArticleService service, IUserArticleActionService userArticleActionService)
         {
             _logger = logger;
             _service = service;
+            _userArticleActionService = userArticleActionService;
         }
 
         [HttpPost]
@@ -61,9 +64,16 @@ namespace NewsAggregation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(DateTime startDate, DateTime endDate)
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllAsync(startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpPost("toggle-save")]
+        public async Task<IActionResult> ToggleSave([FromBody] ToggleSaveRequestDto request)
+        {
+            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
             return Ok(result);
         }
     }
