@@ -44,6 +44,16 @@
             }
         }
 
+        public static DateTime GetDate(string prompt)
+        {
+            DateTime date;
+            do
+            {
+                Console.Write(prompt);
+            } while (!DateTime.TryParse(Console.ReadLine(), out date));
+            return date;
+        }
+
         public static void ShowError(string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;

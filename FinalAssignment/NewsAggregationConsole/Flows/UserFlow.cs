@@ -23,7 +23,7 @@ namespace NewsAggregationConsole.Flows
                 switch (choice)
                 {
                     case 1:
-                        // await HeadlinesMenu();
+                        await HeadlinesFlow.Run(currentUser, apiService);
                         break;
                     case 2:
                         // await SavedArticlesMenu();

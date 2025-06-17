@@ -7,6 +7,7 @@ using NewsAggregationConsole.Flows;
 namespace NewsAggregationConsole
 {
     // TODO: Create .env or appsettings to put configuration
+    // TODO: Use Constants for API URLs
     class Program
     {
         private static ApiService _apiService;
