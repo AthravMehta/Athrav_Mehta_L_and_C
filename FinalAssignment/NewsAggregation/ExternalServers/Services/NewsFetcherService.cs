@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 using NewsAggregation.ExternalServers.Services.Contracts;
+using System.Text;
 
 public class NewsFetcherService : INewsFetcher
 {
@@ -10,17 +12,20 @@ public class NewsFetcherService : INewsFetcher
     private readonly INewsApiFactory _apiFactory;
     private readonly NewsAggregationDbContext _context;
     private readonly ILogger<NewsFetcherService> _logger;
+    private readonly NotificationSenderFactory _notificationSenderFactory;
 
     public NewsFetcherService(
         IHttpClientFactory clientFactory,
         INewsApiFactory apiFactory,
         NewsAggregationDbContext context,
-        ILogger<NewsFetcherService> logger)
+        ILogger<NewsFetcherService> logger,
+        NotificationSenderFactory notificationSenderFactory)
     {
         _clientFactory = clientFactory;
         _apiFactory = apiFactory;
         _context = context;
         _logger = logger;
+        _notificationSenderFactory = notificationSenderFactory;
     }
 
     public async Task FetchAndStoreNewsAsync()
@@ -49,6 +54,7 @@ public class NewsFetcherService : INewsFetcher
                 var articles = await adapter.ConvertToArticles(content, server.Id, GetCategoryId(server));
 
                 await SaveArticles(articles);
+                await SendNotification(articles);
                 break;
             }
             catch (Exception ex)
@@ -98,4 +104,61 @@ public class NewsFetcherService : INewsFetcher
             throw;
         }
     }
+
+    private async Task SendNotification(IEnumerable<Article> articles)
+    {
+        var users = await _context.Users
+            .Include(u => u.NotificationConfigurations)
+            .ToListAsync();
+
+        foreach (var user in users)
+        {
+            var config = user.NotificationConfigurations;
+            if (config == null)
+                continue;
+
+            var userArticles = articles
+                .Where(a => ShouldSendArticleToUser(a, user, config))
+                .ToList();
+
+            if (!userArticles.Any())
+                continue;
+
+            var subject = "Your Personalized News Digest";
+            var body = BuildEmailBody(user, userArticles);
+
+            var sender = _notificationSenderFactory.GetSender("Email");
+            BackgroundJob.Enqueue(() => sender.SendAsync(user.Email, subject, body));
+        }
+    }
+
+    private bool ShouldSendArticleToUser(Article article, User user, ICollection<UserNotificationConfiguration> userConfiguration)
+    {
+        // TODO: Write Logic to find which articles to send.
+        return  userConfiguration.FirstOrDefault(a => a.CategoryId == article.CategoryId && a.isEnabled) != null;
+        //foreach (var config in userConfiguration)
+        //{
+        //    if (config.CategoryId != null && config.isEnabled)
+        //    {
+        //        return article.CategoryId == config.CategoryId;
+        //    }
+        //}
+        //return false;
+    }
+
+    private string BuildEmailBody(User user, List<Article> articles)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"<h2>Hello {user.Username},</h2>");
+        sb.AppendLine("<p>Here are your latest news articles:</p>");
+        sb.AppendLine("<ul>");
+        foreach (var article in articles)
+        {
+            sb.AppendLine($"<li><a href='{article.Url}'>{article.Title}</a></li>");
+        }
+        sb.AppendLine("</ul>");
+        sb.AppendLine("<p>Thank you for using News Aggregation App!</p>");
+        return sb.ToString();
+    }
+
 }

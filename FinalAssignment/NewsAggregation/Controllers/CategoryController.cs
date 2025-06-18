@@ -23,6 +23,8 @@ namespace NewsAggregation.Controllers
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
         public async Task<IActionResult> Add([FromBody] CategoryDto dto)
         {
+            // TODO: Whenever a Category gets created, in user notification configuration
+            // for all User that configuration should get added with some default value
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

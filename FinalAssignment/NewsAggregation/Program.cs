@@ -13,6 +13,11 @@ using NewsAggregation.Services;
 using NewsAggregation.Services.Contracts;
 using Serilog;
 using System.Text;
+using NewsAggregation.Models;
+using NewsAggregation.Notifications.Contracts;
+using NewsAggregation.Notifications;
+using Hangfire;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,7 +94,12 @@ builder.Services.AddScoped<INewsFetcher, NewsFetcherService>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IUserArticleActionService, UserArticleActionService>();
 builder.Services.AddScoped<IUserArticleActionRepository, UserArticleActionRepository>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<EmailNotificationSender>();
+builder.Services.AddSingleton<NotificationSenderFactory>();
 
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<RequestContext>();
 builder.Services.AddHostedService<NewsFetchingService>();
 
@@ -104,6 +114,11 @@ builder.Services.AddHttpClient("NewsAPI")
         }
     )
 );
+
+// Hangfire Config
+builder.Services.AddHangfire(x => x.UseInMemoryStorage());
+builder.Services.AddHangfireServer();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -143,6 +158,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseHangfireDashboard();
 
 app.UseRouting();
 app.UseAuthentication();
