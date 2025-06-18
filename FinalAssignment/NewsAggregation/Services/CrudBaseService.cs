@@ -1,44 +1,100 @@
-﻿using NewsAggregation.Configurations;
+﻿using NewsAggregation.Exceptions;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
-namespace NewsAggregation.Services
+public class CrudBaseService<TEntity> : ICrudBaseService<TEntity> where TEntity : class
 {
-    public class CrudBaseService<TEntity, TKey> : ICrudBaseService<TEntity, TKey> where TEntity : BaseKeyEntity<TKey>
+    private readonly ICrudBaseRepository<TEntity> _repository;
+    private readonly ILogger<CrudBaseService<TEntity>> _logger;
+
+    public CrudBaseService(
+        ICrudBaseRepository<TEntity> repository,
+        ILogger<CrudBaseService<TEntity>> logger)
     {
-        private readonly ICrudBaseRepository<TEntity, TKey> _repository;
+        _repository = repository;
+        _logger = logger;
+    }
 
-        public CrudBaseService(ICrudBaseRepository<TEntity, TKey> repository)
+    protected virtual string EntityName => typeof(TEntity).Name;
+
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
+    {
+        try
         {
-            _repository = repository;
+            return await _repository.GetAllAsync();
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving all {EntityName} entities");
+            throw new ApiException($"Failed to get all {EntityName} entities.", ex, _logger);
+        }
+    }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync() =>
-            await _repository.GetAllAsync();
+    public virtual async Task<TEntity> GetByIdAsync(int id)
+    {
+        try
+        {
+            return await _repository.GetByIdAsync(id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving {EntityName} with ID {id}");
+            throw new ApiException($"Failed to get {EntityName} with ID {id}.", ex, _logger);
+        }
+    }
 
-        public async Task<TEntity> GetByIdAsync(TKey id) =>
-            await _repository.GetByIdAsync(id);
-
-        public async Task AddAsync(TEntity entity)
+    public virtual async Task AddAsync(TEntity entity)
+    {
+        try
         {
             await _repository.AddAsync(entity);
+            await SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error adding new {EntityName}");
+            throw new ApiException($"Failed to add new {EntityName}.", ex, _logger);
+        }
+    }
+
+    public virtual async Task UpdateAsync(TEntity entity)
+    {
+        try
+        {
+            await _repository.UpdateAsync(entity);
+            await SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error updating {EntityName}");
+            throw new ApiException($"Failed to update {EntityName}.", ex, _logger);
+        }
+    }
+
+    public virtual async Task DeleteAsync(int id)
+    {
+        try
+        {
+            await _repository.DeleteAsync(id);
+            await SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error deleting {EntityName} with ID {id}");
+            throw new ApiException($"Failed to delete {EntityName} with ID {id}.", ex, _logger);
+        }
+    }
+
+    private async Task SaveChangesAsync()
+    {
+        try
+        {
             await _repository.SaveChangesAsync();
         }
-
-        public async Task UpdateAsync(TEntity entity)
+        catch (Exception ex)
         {
-            _repository.Update(entity);
-            await _repository.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(TKey id)
-        {
-            var entity = await _repository.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _repository.Delete(entity);
-                await _repository.SaveChangesAsync();
-            }
+            _logger.LogError(ex, $"Error saving changes for {EntityName}");
+            throw new ApiException($"Failed to save changes for {EntityName}.", ex, _logger);
         }
     }
 }

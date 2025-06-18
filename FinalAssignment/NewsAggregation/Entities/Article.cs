@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NewsAggregation.Entities
 {
-    public class Article : BaseAuditEntity, BaseKeyEntity<int>
+    public class Article : BaseAuditEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int ArticleId { get; set; }
 
         [Required]
         public string Title { get; set; }
@@ -17,10 +17,13 @@ namespace NewsAggregation.Entities
         public string Content { get; set; }
         public string Source { get; set; }
         public string Url { get; set; }
-        public Guid ExternalServerId { get; set; }
-        public ICollection<UserArticleAction> UserArticleActions { get; set; }
-        public Guid CategoryId { get; set; }
         public DateTime PublishedDate { get; set; }
+
+        [ForeignKey(nameof(ExternalServerId))]
+        public int ExternalServerId { get; set; }
+        public ICollection<UserArticleReaction> UserArticleReactions { get; set; } = new List<UserArticleReaction>();
+        public ICollection<UserSavedArticle> UserSavedArticles { get; set; } = new List<UserSavedArticle>();
+        public int CategoryId { get; set; }
     }
 
 }

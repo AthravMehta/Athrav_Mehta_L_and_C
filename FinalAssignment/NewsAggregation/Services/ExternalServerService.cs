@@ -2,17 +2,15 @@
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NewsAggregation.Services
 {
+    // TODO: Modify CRUD BASE SERVICE and then edit this external server
     public class ExternalServerService : IExternalServerService
     {
-        private readonly ICrudBaseRepository<ExternalServer, Guid> _repo;
+        private readonly ICrudBaseRepository<ExternalServer> _repo;
 
-        public ExternalServerService(ICrudBaseRepository<ExternalServer, Guid> repo)
+        public ExternalServerService(ICrudBaseRepository<ExternalServer> repo)
         {
             _repo = repo;
         }
@@ -21,19 +19,18 @@ namespace NewsAggregation.Services
         {
             var entity = new ExternalServer
             {
-                Id = Guid.NewGuid(),
                 ServerName = dto.ServerName,
                 BaseUrl = dto.BaseUrl,
                 ApiKeyHash = dto.ApiKeyHash,
-                isActive = dto.IsActive
+                IsActive = dto.IsActive
             };
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
-            dto.Id = entity.Id;
+            dto.Id = entity.ExternalServerId;
             return dto;
         }
 
-        public async Task<ExternalServerDto> UpdateAsync(Guid id, ExternalServerDto dto)
+        public async Task<ExternalServerDto> UpdateAsync(int id, ExternalServerDto dto)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return null;
@@ -41,36 +38,26 @@ namespace NewsAggregation.Services
             entity.ServerName = dto.ServerName;
             entity.BaseUrl = dto.BaseUrl;
             entity.ApiKeyHash = dto.ApiKeyHash;
-            entity.isActive = dto.IsActive;
+            entity.IsActive = dto.IsActive;
 
-            _repo.Update(entity);
+            await _repo.UpdateAsync(entity);
             await _repo.SaveChangesAsync();
-            dto.Id = entity.Id;
+            dto.Id = entity.ExternalServerId;
             return dto;
         }
 
-        public async Task DeleteAsync(Guid id)
-        {
-            var entity = await _repo.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _repo.Delete(entity);
-                await _repo.SaveChangesAsync();
-            }
-        }
-
-        public async Task<ExternalServerDto> GetByIdAsync(Guid id)
+        public async Task<ExternalServerDto> GetByIdAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return null;
 
             return new ExternalServerDto
             {
-                Id = entity.Id,
+                Id = entity.ExternalServerId,
                 ServerName = entity.ServerName,
                 BaseUrl = entity.BaseUrl,
                 ApiKeyHash = entity.ApiKeyHash,
-                IsActive = entity.isActive
+                IsActive = entity.IsActive
             };
         }
 
@@ -81,11 +68,11 @@ namespace NewsAggregation.Services
 
             return entities.Select(entity => new ExternalServerDto
             {
-                Id = entity.Id,
+                Id = entity.ExternalServerId,
                 ServerName = entity.ServerName,
                 BaseUrl = entity.BaseUrl,
                 ApiKeyHash = entity.ApiKeyHash,
-                IsActive = entity.isActive
+                IsActive = entity.IsActive
             });
         }
     }

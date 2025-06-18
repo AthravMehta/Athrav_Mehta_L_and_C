@@ -4,19 +4,18 @@ using NewsAggregation.Configurations;
 
 namespace NewsAggregation.Entities
 {
-    public class UserKeyword : BaseAuditEntity, BaseKeyEntity<int>
+    public class UserKeyword : BaseAuditEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
-        [ForeignKey(nameof(User))]
-        public Guid UserId { get; set; }
-        public User? User { get; set; }
-
-        [ForeignKey(nameof(Category))]
-        public Guid CategoryId { get; set; }
+        public int UserKeywordId { get; set; }
         public string Keyword { get; set; }
-        public bool isEnabled { get; set; }
+        public bool IsEnabled { get; set; }
+
+        public int UserId { get; set; }
+        public int CategoryId { get; set; }
+        public User User { get; set; }
+        public Category Category { get; set; }
+
     }
 }

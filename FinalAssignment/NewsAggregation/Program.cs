@@ -25,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 string issuer = jwtSettings["Issuer"]!;
 string audience = jwtSettings["Audience"]!;
-string secretKey = jwtSettings["SecretKey"]!;
+string secreint = jwtSettings["Secreint"]!;
 
 builder.Services.AddAuthentication(options =>
 {
@@ -42,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secreint)),
 
             ClockSkew = TimeSpan.Zero
         };
@@ -77,8 +77,8 @@ builder.Services.AddControllers();
 //TODO: Apply Filter/Sorting in GET ALL API's
 //TODO: Check Authorize Roles above controller
 //TODO: Fix UserId1 Column in DB
-builder.Services.AddScoped(typeof(ICrudBaseRepository<,>), typeof(CrudBaseRepository<,>));
-builder.Services.AddScoped(typeof(ICrudBaseService<,>), typeof(CrudBaseService<,>));
+builder.Services.AddScoped(typeof(ICrudBaseRepository<>), typeof(CrudBaseRepository<>));
+builder.Services.AddScoped(typeof(ICrudBaseService<>), typeof(CrudBaseService<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();

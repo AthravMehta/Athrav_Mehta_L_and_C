@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NewsAggregation.Entities
 {
-    public class Category : BaseAuditEntity, BaseKeyEntity<Guid>
+    public class Category : BaseAuditEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int CategoryId { get; set; }
 
         [Required]
         [MaxLength(255)]

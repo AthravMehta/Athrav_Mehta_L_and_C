@@ -4,7 +4,7 @@ using System.Text.Json;
 
 public class NewsApiAdapter : INewsApiAdapter
 {
-    public async Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponse, Guid externalServerId, Guid categoryId)
+    public async Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponse, int externalServerId, int categoryId)
     {
         using var jsonDoc = await JsonDocument.ParseAsync(apiResponse);
         var root = jsonDoc.RootElement;

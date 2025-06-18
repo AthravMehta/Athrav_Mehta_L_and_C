@@ -2,7 +2,7 @@
 {
     public interface IUserArticleActionRepository
     {
-        Task<bool> ToggleSaveAsync(Guid userId, int articleId);
+        Task<bool> ToggleSaveAsync(int userId, int articleId);
     }
 
 }

@@ -6,20 +6,20 @@ namespace NewsAggregation.Exceptions
     {
         public ErrorResponse.ErrorEnum ErrorCode { get; set; }
 
-        public ApiException(string details, Exception ex = null, Serilog.ILogger logger = null) : base(details, ex)
+        public ApiException(string details, Exception ex = null, ILogger logger = null) : base(details, ex)
         {
             if(logger != null)
             {
-                logger.Error(Message);
+                logger.LogError(Message);
             }
             ErrorCode = ErrorResponse.ErrorEnum.BadRequest;
         }
         
-        public ApiException(ErrorResponse.ErrorEnum errCode ,string details = null, Exception ex = null, Serilog.ILogger logger = null) : base(ErrorResponse.GetErrorMessage(errCode) + " : " + details, ex)
+        public ApiException(ErrorResponse.ErrorEnum errCode ,string details = null, Exception ex = null, ILogger logger = null) : base(ErrorResponse.GetErrorMessage(errCode) + " : " + details, ex)
         {
             if(logger != null)
             {
-                logger.Error(Message);
+                logger.LogError(Message);
             }
             ErrorCode = ErrorResponse.ErrorEnum.BadRequest;
         }

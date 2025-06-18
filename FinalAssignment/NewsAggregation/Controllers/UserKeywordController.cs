@@ -27,37 +27,7 @@ namespace NewsAggregation.Controllers
                 return BadRequest(ModelState);
 
             var result = await _userKeywordService.AddAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UserKeywordDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _userKeywordService.UpdateAsync(id, dto);
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _userKeywordService.DeleteAsync(id);
-            return NoContent();
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _userKeywordService.GetByIdAsync(id);
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
+            return CreatedAtAction(nameof(Add), new { id = result.Id }, result);
         }
 
         [HttpGet]

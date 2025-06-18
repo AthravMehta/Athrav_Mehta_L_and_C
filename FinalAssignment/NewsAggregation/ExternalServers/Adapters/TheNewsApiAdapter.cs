@@ -4,7 +4,7 @@ using System.Text.Json;
 
 public class TheNewsApiAdapter : INewsApiAdapter
 {
-    public async Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponseStream, Guid externalServerId, Guid categoryId)
+    public async Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponseStream, int externalServerId, int categoryId)
     {
         var articles = new List<Article>();
 

@@ -7,9 +7,9 @@ namespace NewsAggregation.Services
 {
     public class UserNotificationService : IUserNotificationService
     {
-        private readonly ICrudBaseRepository<UserNotification, int> _repo;
+        private readonly ICrudBaseRepository<UserNotification> _repo;
 
-        public UserNotificationService(ICrudBaseRepository<UserNotification, int> repo)
+        public UserNotificationService(ICrudBaseRepository<UserNotification> repo)
         {
             _repo = repo;
         }
@@ -41,7 +41,7 @@ namespace NewsAggregation.Services
             entity.SentDateTime = dto.SentDateTime;
             entity.IsRead = dto.IsRead;
 
-            _repo.Update(entity);
+            await _repo.UpdateAsync(entity);
             await _repo.SaveChangesAsync();
 
             dto.Id = entity.Id;
@@ -53,27 +53,12 @@ namespace NewsAggregation.Services
             var entity = await _repo.GetByIdAsync(id);
             if (entity != null)
             {
-                _repo.Delete(entity);
+                await _repo.DeleteAsync(id);
                 await _repo.SaveChangesAsync();
             }
         }
 
-        public async Task<UserNotificationDto> GetByIdAsync(int id)
-        {
-            var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return null;
-
-            return new UserNotificationDto
-            {
-                Id = entity.Id,
-                UserId = entity.UserId,
-                ArticleId = entity.ArticleId,
-                SentDateTime = entity.SentDateTime,
-                IsRead = entity.IsRead
-            };
-        }
-
-        public async Task<IEnumerable<UserNotificationDto>> GetAllAsync(Guid? userId = null)
+        public async Task<IEnumerable<UserNotificationDto>> GetAllAsync(int? userId = null)
         {
             var entities = await _repo.GetAllAsync();
 

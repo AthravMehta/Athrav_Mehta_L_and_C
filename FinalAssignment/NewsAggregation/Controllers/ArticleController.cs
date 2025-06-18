@@ -6,7 +6,6 @@ using NewsAggregation.Enums;
 
 namespace NewsAggregation.Controllers
 {
-    // TODO: 
     [Route("api/[controller]")]
     [ApiController]
     [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
@@ -33,26 +32,6 @@ namespace NewsAggregation.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ArticleDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _service.UpdateAsync(id, dto);
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _service.DeleteAsync(id);
-            return NoContent();
-        }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -72,6 +51,14 @@ namespace NewsAggregation.Controllers
 
         [HttpPost("toggle-save")]
         public async Task<IActionResult> ToggleSave([FromBody] ToggleSaveRequestDto request)
+        {
+            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
+            return Ok(result);
+        }
+
+        // TODO: Implement this method
+        [HttpPost("reaction")]
+        public async Task<IActionResult> LikeDislikeArticleReaction([FromBody] ArticleReactionRequestDto request)
         {
             var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
             return Ok(result);

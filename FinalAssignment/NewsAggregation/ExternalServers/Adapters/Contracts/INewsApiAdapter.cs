@@ -4,6 +4,6 @@ namespace NewsAggregation.ExternalServers.Adapters.Contracts
 {
     public interface INewsApiAdapter
     {
-        public Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponse, Guid externalServerId, Guid categoryId);
+        public Task<IEnumerable<Article>> ConvertToArticles(Stream apiResponse, int externalServerId, int categoryId);
     }
 }

@@ -7,9 +7,9 @@ namespace NewsAggregation.Services
 {
     public class UserNotificationConfigurationService : IUserNotificationConfigurationService
     {
-        private readonly ICrudBaseRepository<UserNotificationConfiguration, int> _repo;
+        private readonly ICrudBaseRepository<UserNotificationConfiguration> _repo;
 
-        public UserNotificationConfigurationService(ICrudBaseRepository<UserNotificationConfiguration, int> repo)
+        public UserNotificationConfigurationService(ICrudBaseRepository<UserNotificationConfiguration> repo)
         {
             _repo = repo;
         }
@@ -19,7 +19,7 @@ namespace NewsAggregation.Services
             var entity = new UserNotificationConfiguration
             {
                 UserId = dto.UserId,
-                isEnabled = dto.IsEnabled
+                IsEnabled = dto.IsEnabled
             };
 
             await _repo.AddAsync(entity);
@@ -35,9 +35,9 @@ namespace NewsAggregation.Services
             if (entity == null) return null;
 
             entity.UserId = dto.UserId;
-            entity.isEnabled = dto.IsEnabled;
+            entity.IsEnabled = dto.IsEnabled;
 
-            _repo.Update(entity);
+            await _repo.UpdateAsync(entity);
             await _repo.SaveChangesAsync();
 
             dto.Id = entity.Id;
@@ -49,33 +49,21 @@ namespace NewsAggregation.Services
             var entity = await _repo.GetByIdAsync(id);
             if (entity != null)
             {
-                _repo.Delete(entity);
+                await _repo.DeleteAsync(id);
                 await _repo.SaveChangesAsync();
             }
         }
 
-        public async Task<UserNotificationConfigurationDto> GetByIdAsync(int id)
+        public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllAsync()
         {
-            var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return null;
-
-            return new UserNotificationConfigurationDto
-            {
-                Id = entity.Id,
-                UserId = entity.UserId,
-                IsEnabled = entity.isEnabled
-            };
-        }
-
-        public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllAsync(Guid? userId = null)
-        {
+            // TODO: Get User Specific Configurations Only
             var entities = await _repo.GetAllAsync();
 
             return entities.Select(entity => new UserNotificationConfigurationDto
             {
                 Id = entity.Id,
                 UserId = entity.UserId,
-                IsEnabled = entity.isEnabled
+                IsEnabled = entity.IsEnabled
             });
         }
     }

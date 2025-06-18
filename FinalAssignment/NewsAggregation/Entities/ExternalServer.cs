@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewsAggregation.Entities
 {
-    public class ExternalServer : BaseAuditEntity, BaseKeyEntity<Guid>
+    public class ExternalServer : BaseAuditEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int ExternalServerId { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -18,9 +18,8 @@ namespace NewsAggregation.Entities
         [MaxLength(255)]
         public string BaseUrl { get; set; }
 
-        // TODO: Make casing correct in next migration
         [Required]
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
 
         [Required]
         [MaxLength(255)]

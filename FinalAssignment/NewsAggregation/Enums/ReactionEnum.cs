@@ -1,9 +1,8 @@
 ﻿namespace NewsAggregation.Enums
 {
-    public enum ArticleActionEnum
+    public enum ReactionEnum
     {
         Like,
-        Dislike,
-        Saved
+        Dislike
     }
 }

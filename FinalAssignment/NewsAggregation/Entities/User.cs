@@ -5,11 +5,11 @@ using NewsAggregation.Enums;
 
 namespace NewsAggregation.Entities
 {
-    public class User : BaseKeyEntity<Guid>
+    public class User
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public int UserId { get; set; }
         [Required]
         [MaxLength(50)]
         public string Username { get; set; }
@@ -31,9 +31,9 @@ namespace NewsAggregation.Entities
 
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.UtcNow;
 
-        public ICollection<UserArticleAction>? UserArticleActions { get; set; }
-        public ICollection<UserNotification>? Notifications { get; set; }
-        public ICollection<UserNotificationConfiguration>? NotificationConfigurations { get; set; }
-        public ICollection<UserKeyword> UserKeywords { get; set; }
+        public ICollection<UserSavedArticle> UserSavedArticles{ get; set; } = new List<UserSavedArticle>();
+        public ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
+        public ICollection<UserNotificationConfiguration> UserNotificationConfigurations { get; set; } = new List<UserNotificationConfiguration>();
+        public ICollection<UserKeyword> UserKeywords { get; set; } = new List<UserKeyword>();
     }
 }

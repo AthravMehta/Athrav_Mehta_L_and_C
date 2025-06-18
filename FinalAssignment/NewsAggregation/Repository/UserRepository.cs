@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
 
@@ -6,9 +7,9 @@ namespace NewsAggregation.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly DbContext _dbContext;
+        private readonly NewsAggregationDbContext _dbContext;
 
-        public UserRepository(DbContext dbContext)
+        public UserRepository(NewsAggregationDbContext dbContext)
         {
             _dbContext = dbContext;
         }

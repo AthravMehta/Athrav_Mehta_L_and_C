@@ -11,7 +11,12 @@ namespace NewsAggregation.Configurations.FluentApiConfigurations
             builder.HasIndex(user => user.Username).IsUnique();
             builder.HasIndex(user => user.Email).IsUnique();
 
-            builder.HasMany<UserArticleAction>()
+            builder.HasMany<UserSavedArticle>()
+                .WithOne(ua => ua.User)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany<UserArticleReaction>()
                 .WithOne(ua => ua.User)
                 .HasForeignKey(ua => ua.UserId)
                 .OnDelete(DeleteBehavior.Cascade);

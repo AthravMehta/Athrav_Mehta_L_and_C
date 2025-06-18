@@ -5,10 +5,12 @@ using NewsAggregation.Services.Contracts;
 
 namespace NewsAggregation.Services
 {
+
+    // TODO: Modify CRUD BASE SERVICE and then edit this external server
     public class UserKeywordService : IUserKeywordService
     {
-        private readonly ICrudBaseRepository<UserKeyword, int> _userKeywordRepo;
-        public UserKeywordService(ICrudBaseRepository<UserKeyword, int> userKeywordRepo)
+        private readonly ICrudBaseRepository<UserKeyword> _userKeywordRepo;
+        public UserKeywordService(ICrudBaseRepository<UserKeyword> userKeywordRepo)
         {
             _userKeywordRepo = userKeywordRepo;
         }
@@ -21,13 +23,13 @@ namespace NewsAggregation.Services
                 UserId = dto.UserId,
                 CategoryId = dto.CategoryId,
                 Keyword = dto.Keyword,
-                isEnabled = dto.IsEnabled
+                IsEnabled = dto.IsEnabled
             };
 
             await _userKeywordRepo.AddAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.Id = entity.Id;
+            dto.Id = entity.UserKeywordId;
             return dto;
         }
 
@@ -39,12 +41,12 @@ namespace NewsAggregation.Services
             entity.UserId = dto.UserId;
             entity.CategoryId = dto.CategoryId;
             entity.Keyword = dto.Keyword;
-            entity.isEnabled = dto.IsEnabled;
+            entity.IsEnabled = dto.IsEnabled;
 
-            _userKeywordRepo.Update(entity);
+            await _userKeywordRepo.UpdateAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.Id = entity.Id;
+            dto.Id = entity.UserKeywordId;
             return dto;
         }
 
@@ -53,7 +55,7 @@ namespace NewsAggregation.Services
             var entity = await _userKeywordRepo.GetByIdAsync(id);
             if (entity != null)
             {
-                _userKeywordRepo.Delete(entity);
+                await _userKeywordRepo.DeleteAsync(id);
                 await _userKeywordRepo.SaveChangesAsync();
             }
         }
@@ -65,11 +67,11 @@ namespace NewsAggregation.Services
 
             return new UserKeywordDto
             {
-                Id = entity.Id,
+                Id = entity.UserKeywordId,
                 UserId = entity.UserId,
                 CategoryId = entity.CategoryId,
                 Keyword = entity.Keyword,
-                IsEnabled = entity.isEnabled
+                IsEnabled = entity.IsEnabled
             };
         }
 
@@ -78,11 +80,11 @@ namespace NewsAggregation.Services
             var entities = await _userKeywordRepo.GetAllAsync();
             return entities.Select(entity => new UserKeywordDto
             {
-                Id = entity.Id,
+                Id = entity.UserKeywordId,
                 UserId = entity.UserId,
                 CategoryId = entity.CategoryId,
                 Keyword = entity.Keyword,
-                IsEnabled = entity.isEnabled
+                IsEnabled = entity.IsEnabled
             });
         }
     }

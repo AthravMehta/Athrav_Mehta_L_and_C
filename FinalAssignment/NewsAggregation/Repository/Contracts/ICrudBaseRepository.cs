@@ -1,14 +1,12 @@
-﻿using NewsAggregation.Configurations;
-
-namespace NewsAggregation.Repository.Contracts
+﻿namespace NewsAggregation.Repository.Contracts
 {
-    public interface ICrudBaseRepository<TEntity, TKey> where TEntity : BaseKeyEntity<TKey>
+    public interface ICrudBaseRepository<TEntity> where TEntity : class
     {
-        Task AddAsync(TEntity entity);
-        void Delete(TEntity entity);
         Task<IEnumerable<TEntity>> GetAllAsync();
-        Task<TEntity> GetByIdAsync(TKey id);
+        Task<TEntity> GetByIdAsync(int id);
+        Task AddAsync(TEntity entity);
+        Task UpdateAsync(TEntity entity);
+        Task DeleteAsync(int id);
         Task SaveChangesAsync();
-        void Update(TEntity entity);
     }
 }

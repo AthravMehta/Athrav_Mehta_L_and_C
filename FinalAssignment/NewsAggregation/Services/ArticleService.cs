@@ -7,10 +7,10 @@ namespace NewsAggregation.Services
 {
     public class ArticleService : IArticleService
     {
-        private readonly ICrudBaseRepository<Article, int> _curdbaseRepository;
+        private readonly ICrudBaseRepository<Article> _curdbaseRepository;
         private readonly IArticleRepository _articleRepository;
-
-        public ArticleService(ICrudBaseRepository<Article, int> repo, IArticleRepository articleRepository)
+            
+        public ArticleService(ICrudBaseRepository<Article> repo, IArticleRepository articleRepository)
         {
             _curdbaseRepository = repo;
             _articleRepository = articleRepository;
@@ -30,37 +30,8 @@ namespace NewsAggregation.Services
             };
             await _curdbaseRepository.AddAsync(entity);
             await _curdbaseRepository.SaveChangesAsync();
-            dto.Id = entity.Id;
+            dto.Id = entity.ArticleId;
             return dto;
-        }
-
-        public async Task<ArticleDto> UpdateAsync(int id, ArticleDto dto)
-        {
-            var entity = await _curdbaseRepository.GetByIdAsync(id);
-            if (entity == null) return null;
-
-            entity.Title = dto.Title;
-            entity.Content = dto.Content;
-            entity.ExternalServerId = dto.ExternalServerId;
-            entity.CategoryId = dto.CategoryId;
-            entity.Source = dto.Source;
-            entity.Url = dto.Url;
-            entity.PublishedDate = dto.PublishedDate;
-
-            _curdbaseRepository.Update(entity);
-            await _curdbaseRepository.SaveChangesAsync();
-            dto.Id = entity.Id;
-            return dto;
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var entity = await _curdbaseRepository.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _curdbaseRepository.Delete(entity);
-                await _curdbaseRepository.SaveChangesAsync();
-            }
         }
 
         public async Task<ArticleDto> GetByIdAsync(int id)
@@ -70,7 +41,7 @@ namespace NewsAggregation.Services
 
             return new ArticleDto
             {
-                Id = entity.Id,
+                Id = entity.ArticleId,
                 Title = entity.Title,
                 Content = entity.Content,
                 ExternalServerId = entity.ExternalServerId,

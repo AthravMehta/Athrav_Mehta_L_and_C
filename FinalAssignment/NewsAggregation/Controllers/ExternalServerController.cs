@@ -31,7 +31,7 @@ namespace NewsAggregation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ExternalServerDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] ExternalServerDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -43,15 +43,8 @@ namespace NewsAggregation.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _service.DeleteAsync(id);
-            return NoContent();
-        }
-
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
             if (result == null)

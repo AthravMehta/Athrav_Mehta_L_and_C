@@ -20,23 +20,6 @@ namespace NewsAggregation.Services
             _mapper = mapper;
         }
 
-        public async Task<UserDataWithTokenDto> RegisterAsync(UserCreateDto userDto)
-        {
-            var existingUser = await _userService.GetUserByName(userDto.Username);
-            if (existingUser != null)
-            {
-                throw new ApiException("User already exist!");
-            }
-            var newUser = await _userService.CreateUserAsync(userDto);
-            var roles = new List<string> { newUser.RoleId.ToString() };
-            var userDataWithToken = new UserDataWithTokenDto
-            {
-                User = newUser,
-                token = _jwtTokenService.GenerateToken(newUser.Id.ToString(), newUser.Username, newUser.Email, roles)
-            };
-            return userDataWithToken;
-        }
-
         public async Task<UserDataWithTokenDto> LoginAsync(LoginDto userDto)
         {
             User user = await _userService.GetUserByName(userDto.Username);
@@ -50,7 +33,7 @@ namespace NewsAggregation.Services
             var userDataWithToken = new UserDataWithTokenDto
             {
                 User = _mapper.Map<UserReadDto>(user),
-                token = _jwtTokenService.GenerateToken(user.Id.ToString(), user.Username, user.Email, roles)
+                token = _jwtTokenService.GenerateToken(user.UserId.ToString(), user.Username, user.Email, roles)
             };
             return userDataWithToken;
         }

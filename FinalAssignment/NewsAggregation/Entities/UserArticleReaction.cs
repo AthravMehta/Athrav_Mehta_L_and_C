@@ -1,16 +1,16 @@
-﻿using NewsAggregation.Configurations;
+﻿using NewsAggregation.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace NewsAggregation.Entities
 {
-    public class UserNotification : BaseAuditEntity
+    public class UserArticleReaction
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        public DateTime SentDateTime { get; set; }
-        public bool IsRead { get; set; } = false;
+        public int UserArticleReactionId { get; set; }
+        public ReactionEnum Reaction { get; set; }
+        public DateTime ActionCreatedTime { get; set; }
 
         public int UserId { get; set; }
         public int ArticleId { get; set; }

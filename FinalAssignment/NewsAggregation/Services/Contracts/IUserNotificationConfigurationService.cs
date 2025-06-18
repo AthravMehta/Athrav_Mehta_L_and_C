@@ -10,7 +10,6 @@ namespace NewsAggregation.Services.Contracts
         Task<UserNotificationConfigurationDto> AddAsync(UserNotificationConfigurationDto dto);
         Task<UserNotificationConfigurationDto> UpdateAsync(int id, UserNotificationConfigurationDto dto);
         Task DeleteAsync(int id);
-        Task<UserNotificationConfigurationDto> GetByIdAsync(int id);
-        Task<IEnumerable<UserNotificationConfigurationDto>> GetAllAsync(Guid? userId = null);
+        Task<IEnumerable<UserNotificationConfigurationDto>> GetAllAsync();
     }
 }

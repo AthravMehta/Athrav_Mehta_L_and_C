@@ -19,24 +19,6 @@ namespace NewsAggregation.Controllers
             _authService = authService;
             _logger = logger;
         }
-
-        [HttpPost("signup")]
-        public async Task<ActionResult> SignUp([FromBody] UserCreateDto userDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            try
-            {
-                UserDataWithTokenDto userDataWithToken= await _authService.RegisterAsync(userDto);
-                return Ok(userDataWithToken);
-            }
-            catch (ApiException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(new { error = ex.Message });
-            }
-        }
         
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginDto userDto)

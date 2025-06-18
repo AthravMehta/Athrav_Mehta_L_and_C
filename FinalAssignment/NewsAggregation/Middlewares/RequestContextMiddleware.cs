@@ -18,7 +18,7 @@ public class RequestContextMiddleware
         {
             var userIdString = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
-            if (Guid.TryParse(userIdString, out var userId))
+            if (int.TryParse(userIdString, out var userId))
             {
                 requestContext.UserId = userId;
             }

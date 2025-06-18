@@ -31,7 +31,7 @@ public class NewsFetcherService : INewsFetcher
     public async Task FetchAndStoreNewsAsync()
     {
         var activeServers = await _context.ExternalServers
-            .Where(s => s.isActive)
+            .Where(s => s.IsActive)
             .ToListAsync();
 
         foreach (var server in activeServers)
@@ -51,7 +51,7 @@ public class NewsFetcherService : INewsFetcher
                 }
 
                 var content = await response.Content.ReadAsStreamAsync();
-                var articles = await adapter.ConvertToArticles(content, server.Id, GetCategoryId(server));
+                var articles = await adapter.ConvertToArticles(content, server.ExternalServerId, GetCategoryId(server));
 
                 await SaveArticles(articles);
                 await SendNotification(articles);
@@ -79,11 +79,11 @@ public class NewsFetcherService : INewsFetcher
         return String.Empty;
     }
 
-    private Guid GetCategoryId(ExternalServer server)
+    private int GetCategoryId(ExternalServer server)
     {
         // TODO: Implement category mapping logic
-        Guid.TryParse("409113C4-6F6F-4A08-5474-08DDA9DB0095", out var newGuid);
-        return newGuid;
+        int.TryParse("409113C4-6F6F-4A08-5474-08DDA9DB0095", out var newint);
+        return newint;
     }
 
     private async Task SaveArticles(IEnumerable<Article> articles)
@@ -108,12 +108,12 @@ public class NewsFetcherService : INewsFetcher
     private async Task SendNotification(IEnumerable<Article> articles)
     {
         var users = await _context.Users
-            .Include(u => u.NotificationConfigurations)
+            .Include(u => u.UserNotificationConfigurations)
             .ToListAsync();
 
         foreach (var user in users)
         {
-            var config = user.NotificationConfigurations;
+            var config = user.UserNotificationConfigurations;
             if (config == null)
                 continue;
 
@@ -135,7 +135,7 @@ public class NewsFetcherService : INewsFetcher
     private bool ShouldSendArticleToUser(Article article, User user, ICollection<UserNotificationConfiguration> userConfiguration)
     {
         // TODO: Write Logic to find which articles to send.
-        return  userConfiguration.FirstOrDefault(a => a.CategoryId == article.CategoryId && a.isEnabled) != null;
+        return  userConfiguration.FirstOrDefault(a => a.CategoryId == article.CategoryId && a.IsEnabled) != null;
         //foreach (var config in userConfiguration)
         //{
         //    if (config.CategoryId != null && config.isEnabled)

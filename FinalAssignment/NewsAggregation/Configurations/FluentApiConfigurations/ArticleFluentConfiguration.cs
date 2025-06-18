@@ -20,7 +20,12 @@ namespace NewsAggregation.Configurations.FluentApiConfigurations
                 .HasForeignKey(a => a.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(a => a.UserArticleActions)
+            builder.HasMany(a => a.UserSavedArticles)
+                .WithOne(ua => ua.Article)
+                .HasForeignKey(ua => ua.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(a => a.UserArticleReactions)
                 .WithOne(ua => ua.Article)
                 .HasForeignKey(ua => ua.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);

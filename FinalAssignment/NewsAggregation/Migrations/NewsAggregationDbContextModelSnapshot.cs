@@ -24,14 +24,14 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.Article", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ArticleId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArticleId"));
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -44,8 +44,8 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ExternalServerId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("ExternalServerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(1024)
@@ -69,7 +69,7 @@ namespace NewsAggregation.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ArticleId");
 
                     b.HasIndex("CategoryId");
 
@@ -80,9 +80,11 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(1024)
@@ -103,16 +105,18 @@ namespace NewsAggregation.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.HasKey("Id");
+                    b.HasKey("CategoryId");
 
                     b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.ExternalServer", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("ExternalServerId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExternalServerId"));
 
                     b.Property<string>("ApiKeyHash")
                         .IsRequired()
@@ -131,6 +135,9 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
@@ -143,19 +150,18 @@ namespace NewsAggregation.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("isActive")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
+                    b.HasKey("ExternalServerId");
 
                     b.ToTable("ExternalServers");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
@@ -184,7 +190,7 @@ namespace NewsAggregation.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -195,50 +201,45 @@ namespace NewsAggregation.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NewsAggregation.Entities.UserArticleAction", b =>
+            modelBuilder.Entity("NewsAggregation.Entities.UserArticleReaction", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserArticleReactionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserArticleReactionId"));
 
                     b.Property<DateTime>("ActionCreatedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ArticleAction")
-                        .HasColumnType("int");
-
                     b.Property<int>("ArticleId")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Reaction")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserArticleReactionId");
 
                     b.HasIndex("ArticleId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
-
-                    b.ToTable("UserArticleActions");
+                    b.ToTable("UserArticleReactions");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.UserKeyword", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserKeywordId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserKeywordId"));
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(1024)
@@ -246,6 +247,9 @@ namespace NewsAggregation.Migrations
 
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Keyword")
                         .IsRequired()
@@ -258,22 +262,14 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("isEnabled")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserKeywordId");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("UserKeywords");
                 });
@@ -309,17 +305,14 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("SentDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ArticleId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserNotifications");
                 });
@@ -332,8 +325,8 @@ namespace NewsAggregation.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(1024)
@@ -342,6 +335,9 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
@@ -349,22 +345,47 @@ namespace NewsAggregation.Migrations
                     b.Property<DateTime>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("isEnabled")
-                        .HasColumnType("bit");
+                    b.Property<int?>("UserNotificationConfigurationId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserNotificationConfigurationId");
 
                     b.ToTable("UserNotificationConfigurations");
+                });
+
+            modelBuilder.Entity("NewsAggregation.Entities.UserSavedArticle", b =>
+                {
+                    b.Property<int>("UserSavedArticleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserSavedArticleId"));
+
+                    b.Property<DateTime>("ActionCreatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserSavedArticleId");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSavedArticles");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.Article", b =>
@@ -382,10 +403,10 @@ namespace NewsAggregation.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("NewsAggregation.Entities.UserArticleAction", b =>
+            modelBuilder.Entity("NewsAggregation.Entities.UserArticleReaction", b =>
                 {
                     b.HasOne("NewsAggregation.Entities.Article", "Article")
-                        .WithMany("UserArticleActions")
+                        .WithMany("UserArticleReactions")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -396,10 +417,6 @@ namespace NewsAggregation.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NewsAggregation.Entities.User", null)
-                        .WithMany("UserArticleActions")
-                        .HasForeignKey("UserId1");
-
                     b.Navigation("Article");
 
                     b.Navigation("User");
@@ -407,58 +424,89 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.UserKeyword", b =>
                 {
-                    b.HasOne("NewsAggregation.Entities.Category", null)
+                    b.HasOne("NewsAggregation.Entities.Category", "Category")
                         .WithMany("UserKeywords")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NewsAggregation.Entities.User", null)
-                        .WithMany()
+                    b.HasOne("NewsAggregation.Entities.User", "User")
+                        .WithMany("UserKeywords")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NewsAggregation.Entities.User", "User")
-                        .WithMany("UserKeywords")
-                        .HasForeignKey("UserId1");
+                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.UserNotification", b =>
                 {
-                    b.HasOne("NewsAggregation.Entities.User", null)
+                    b.HasOne("NewsAggregation.Entities.Article", "Article")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NewsAggregation.Entities.User", "User")
-                        .WithMany("Notifications")
-                        .HasForeignKey("UserId1");
+                        .WithMany("UserNotifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.UserNotificationConfiguration", b =>
                 {
-                    b.HasOne("NewsAggregation.Entities.User", null)
+                    b.HasOne("NewsAggregation.Entities.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("NewsAggregation.Entities.User", "User")
-                        .WithMany("NotificationConfigurations")
-                        .HasForeignKey("UserId1");
+                        .WithMany("UserNotificationConfigurations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsAggregation.Entities.UserNotificationConfiguration", null)
+                        .WithMany("UserNotificationConfigurations")
+                        .HasForeignKey("UserNotificationConfigurationId");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NewsAggregation.Entities.UserSavedArticle", b =>
+                {
+                    b.HasOne("NewsAggregation.Entities.Article", "Article")
+                        .WithMany("UserSavedArticles")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsAggregation.Entities.User", "User")
+                        .WithMany("UserSavedArticles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.Article", b =>
                 {
-                    b.Navigation("UserArticleActions");
+                    b.Navigation("UserArticleReactions");
+
+                    b.Navigation("UserSavedArticles");
                 });
 
             modelBuilder.Entity("NewsAggregation.Entities.Category", b =>
@@ -470,13 +518,18 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.User", b =>
                 {
-                    b.Navigation("NotificationConfigurations");
-
-                    b.Navigation("Notifications");
-
-                    b.Navigation("UserArticleActions");
-
                     b.Navigation("UserKeywords");
+
+                    b.Navigation("UserNotificationConfigurations");
+
+                    b.Navigation("UserNotifications");
+
+                    b.Navigation("UserSavedArticles");
+                });
+
+            modelBuilder.Entity("NewsAggregation.Entities.UserNotificationConfiguration", b =>
+                {
+                    b.Navigation("UserNotificationConfigurations");
                 });
 #pragma warning restore 612, 618
         }

@@ -2,7 +2,6 @@
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
-using NewsAggregation.Enums;
 
 public class UserArticleActionRepository : IUserArticleActionRepository
 {
@@ -13,27 +12,26 @@ public class UserArticleActionRepository : IUserArticleActionRepository
         _context = context;
     }
 
-    public async Task<bool> ToggleSaveAsync(Guid userId, int articleId)
+    public async Task<bool> ToggleSaveAsync(int userId, int articleId)
     {
-        var existing = await _context.UserArticleActions
+        var existing = await _context.UserSavedArticles
             .FirstOrDefaultAsync(x => x.UserId == userId && x.ArticleId == articleId);
 
         if (existing != null)
         {
-            _context.UserArticleActions.Remove(existing);
+            _context.UserSavedArticles.Remove(existing);
             await _context.SaveChangesAsync();
             return false;
         }
         else
         {
-            var action = new UserArticleAction
+            var action = new UserSavedArticle
             {
                 UserId = userId,
                 ArticleId = articleId,
-                ArticleAction = ArticleActionEnum.Saved,
                 ActionCreatedTime = DateTime.UtcNow
             };
-            _context.UserArticleActions.Add(action);
+            _context.UserSavedArticles.Add(action);
             await _context.SaveChangesAsync();
             return true;
         }

@@ -4,17 +4,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewsAggregation.Entities
 {
-    public class UserNotificationConfiguration : BaseAuditEntity, BaseKeyEntity<int>
+    public class UserNotificationConfiguration : BaseAuditEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public bool IsEnabled { get; set; }
 
-        [ForeignKey(nameof(User))]
-        public Guid UserId { get; set; }
-        public User? User { get; set; }
-        public Guid CategoryId { get; set; }
-        // TODO: When Creating next Migration, Correct IsEnabled Casing here
-        public bool isEnabled { get; set; }
+        public int UserId { get; set; }
+        public int CategoryId { get; set; }
+        public User User { get; set; }
+        public Category Category { get; set; }
+        public ICollection<UserNotificationConfiguration> UserNotificationConfigurations { get; set; } = new List<UserNotificationConfiguration>();
     }
 }
