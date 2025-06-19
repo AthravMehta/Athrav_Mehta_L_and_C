@@ -59,9 +59,9 @@ namespace NewsAggregationConsole.Flows
             DisplayHelper.ShowExternalServers(servers);
 
             var idStr = InputHelper.GetString("Enter Server ID: ");
-            if (!Guid.TryParse(idStr, out var id))
+            if (!int.TryParse(idStr, out var id))
             {
-                InputHelper.ShowError("Invalid GUID format.");
+                InputHelper.ShowError("Invalid int format.");
                 return;
             }
 
@@ -82,9 +82,9 @@ namespace NewsAggregationConsole.Flows
             DisplayHelper.ShowExternalServers(servers);
 
             var idStr = InputHelper.GetString("Enter Server ID to update: ");
-            if (!Guid.TryParse(idStr, out var id))
+            if (!int.TryParse(idStr, out var id))
             {
-                InputHelper.ShowError("Invalid GUID format.");
+                InputHelper.ShowError("Invalid int format.");
                 return;
             }
 

@@ -23,7 +23,7 @@ namespace NewsAggregationConsole.Services
         public async Task<UserDto> SignUpAsync(RegisterDto registerDto)
         {
             var userDataWithToken = await _apiService.PostAsync<UserDataWithTokenDto>(
-                "/api/auth/signup", registerDto);
+                "/api/user", registerDto);
 
             _apiService.SetAuthToken(userDataWithToken.token);
             return userDataWithToken.User;

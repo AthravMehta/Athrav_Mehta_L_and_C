@@ -11,27 +11,27 @@ namespace NewsAggregationConsole.Services
             _apiService = apiService;
         }
 
-        public async Task<List<NotificationDto>> GetUnviewedNotificationsAsync(Guid userId)
+        public async Task<List<NotificationDto>> GetUnviewedNotificationsAsync(int userId)
         {
             return await _apiService.GetAsync<List<NotificationDto>>($"/api/usernotification?userId={userId}");
         }
 
-        //public async Task MarkNotificationsAsViewedAsync(List<Guid> notificationIds)
+        //public async Task MarkNotificationsAsViewedAsync(List<int> notificationIds)
         //{
         //    await _apiService.PostAsync<object>("/api/notifications/mark-viewed", notificationIds);
         //}
 
-        //public async Task<NotificationConfigDto> GetNotificationConfigAsync(Guid userId)
+        //public async Task<NotificationConfigDto> GetNotificationConfigAsync(int userId)
         //{
         //    return await _apiService.GetAsync<NotificationConfigDto>($"/api/notifications/config/{userId}");
         //}
 
-        //public async Task ToggleCategoryAsync(Guid userId, string categoryName)
+        //public async Task ToggleCategoryAsync(int userId, string categoryName)
         //{
         //    await _apiService.PostAsync<object>($"/api/notifications/config/toggle-category", new { userId, categoryName });
         //}
 
-        //public async Task AddKeywordAsync(Guid userId, string keyword)
+        //public async Task AddKeywordAsync(int userId, string keyword)
         //{
         //    await _apiService.PostAsync<object>($"/api/notifications/config/add-keyword", new { userId, keyword });
         //}

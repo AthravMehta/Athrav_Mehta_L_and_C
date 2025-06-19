@@ -21,12 +21,12 @@ namespace NewsAggregationConsole.Services
             return await _apiService.GetAsync<List<ExternalServerDto>>("/api/externalserver");
         }
 
-        public async Task<ExternalServerDto> GetExternalServerByIdAsync(Guid id)
+        public async Task<ExternalServerDto> GetExternalServerByIdAsync(int id)
         {
             return await _apiService.GetAsync<ExternalServerDto>($"/api/externalserver/{id}");
         }
             
-        public async Task UpdateExternalServerAsync(Guid id, ExternalServerDto dto)
+        public async Task UpdateExternalServerAsync(int id, ExternalServerDto dto)
         {
             await _apiService.PutAsync<ExternalServerDto>($"/api/externalserver/{id}", dto);
         }
