@@ -4,6 +4,7 @@ using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 using NewsAggregation.ExternalServers.Services.Contracts;
+using NewsAggregation.Notifications;
 using System.Text;
 
 namespace NewsAggregation.ExternalServers.Services

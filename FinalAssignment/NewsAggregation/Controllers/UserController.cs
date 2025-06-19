@@ -3,6 +3,7 @@ using NewsAggregation.Configurations;
 using NewsAggregation.Enums;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
+using NewsAggregation.Services.Contracts;
 
 namespace NewsAggregation.Controllers
 {
