@@ -17,6 +17,8 @@ using NewsAggregation.Models;
 using NewsAggregation.Notifications.Contracts;
 using NewsAggregation.Notifications;
 using Hangfire;
+using NewsAggregation.ExternalServers.Services;
+using NewsAggregation.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);

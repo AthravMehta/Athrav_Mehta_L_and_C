@@ -1,4 +1,5 @@
-﻿using NewsAggregation.ExternalServers.Adapters.Contracts;
+﻿using NewsAggregation.ExternalServers.Adapters;
+using NewsAggregation.ExternalServers.Adapters.Contracts;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 
 namespace NewsAggregation.ExternalServers.Factory
