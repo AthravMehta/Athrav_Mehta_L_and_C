@@ -3,37 +3,40 @@ using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
 
-public class UserArticleActionRepository : IUserArticleActionRepository
+namespace NewsAggregation.Repository
 {
-    private readonly NewsAggregationDbContext _context;
-
-    public UserArticleActionRepository(NewsAggregationDbContext context)
+    public class UserArticleActionRepository : IUserArticleActionRepository
     {
-        _context = context;
-    }
+        private readonly NewsAggregationDbContext _context;
 
-    public async Task<bool> ToggleSaveAsync(int userId, int articleId)
-    {
-        var existing = await _context.UserSavedArticles
-            .FirstOrDefaultAsync(x => x.UserId == userId && x.ArticleId == articleId);
-
-        if (existing != null)
+        public UserArticleActionRepository(NewsAggregationDbContext context)
         {
-            _context.UserSavedArticles.Remove(existing);
-            await _context.SaveChangesAsync();
-            return false;
+            _context = context;
         }
-        else
+
+        public async Task<bool> ToggleSaveAsync(int userId, int articleId)
         {
-            var action = new UserSavedArticle
+            var existing = await _context.UserSavedArticles
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.ArticleId == articleId);
+
+            if (existing != null)
             {
-                UserId = userId,
-                ArticleId = articleId,
-                ActionCreatedTime = DateTime.UtcNow
-            };
-            _context.UserSavedArticles.Add(action);
-            await _context.SaveChangesAsync();
-            return true;
+                _context.UserSavedArticles.Remove(existing);
+                await _context.SaveChangesAsync();
+                return false;
+            }
+            else
+            {
+                var action = new UserSavedArticle
+                {
+                    UserId = userId,
+                    ArticleId = articleId,
+                    ActionCreatedTime = DateTime.UtcNow
+                };
+                _context.UserSavedArticles.Add(action);
+                await _context.SaveChangesAsync();
+                return true;
+            }
         }
     }
 }

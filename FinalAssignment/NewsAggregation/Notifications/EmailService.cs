@@ -5,35 +5,38 @@ using NewsAggregation.Models;
 using NewsAggregation.Notifications.Contracts;
 using MailKit.Security;
 
-public class EmailService : IEmailService
+namespace NewsAggregation.Notifications
 {
-    private readonly EmailSettings _settings;
-
-    public EmailService(IOptions<EmailSettings> options)
+    public class EmailService : IEmailService
     {
-        _settings = options.Value;
-    }
+        private readonly EmailSettings _settings;
 
-    public async Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
-    {
-        var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
-        message.To.Add(MailboxAddress.Parse(toEmail));
-        message.Subject = subject;
-
-        var builder = new BodyBuilder
+        public EmailService(IOptions<EmailSettings> options)
         {
-            HtmlBody = isHtml ? body : null,
-            TextBody = !isHtml ? body : null
-        };
-        message.Body = builder.ToMessageBody();
+            _settings = options.Value;
+        }
 
-        using (var client = new SmtpClient())
+        public async Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
         {
-            await client.ConnectAsync(_settings.Host, _settings.Port, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_settings.UserName, _settings.Password);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+
+            var builder = new BodyBuilder
+            {
+                HtmlBody = isHtml ? body : null,
+                TextBody = !isHtml ? body : null
+            };
+            message.Body = builder.ToMessageBody();
+
+            using (var client = new SmtpClient())
+            {
+                await client.ConnectAsync(_settings.Host, _settings.Port, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_settings.UserName, _settings.Password);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+            }
         }
     }
 }

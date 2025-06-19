@@ -6,31 +6,34 @@ using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 
-public class ArticleRepository : IArticleRepository
+namespace NewsAggregation.Repository
 {
-    private readonly NewsAggregationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly RequestContext _requestContext;
-
-    public ArticleRepository(NewsAggregationDbContext context, IMapper mapper, RequestContext requestContext)
+    public class ArticleRepository : IArticleRepository
     {
-        _context = context;
-        _mapper = mapper;
-        _requestContext = requestContext;
-    }
+        private readonly NewsAggregationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly RequestContext _requestContext;
 
-    public async Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate)
-    {
-        var userId = _requestContext.UserId;
-        var query = _context.Articles
-            .Where(a => a.PublishedDate >= startDate && a.PublishedDate <= endDate);
+        public ArticleRepository(NewsAggregationDbContext context, IMapper mapper, RequestContext requestContext)
+        {
+            _context = context;
+            _mapper = mapper;
+            _requestContext = requestContext;
+        }
 
-        //query = query.Where(a => a.UserArticleActions.Any(ua => ua.UserId == userId));
+        public async Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate)
+        {
+            var userId = _requestContext.UserId;
+            var query = _context.Articles
+                .Where(a => a.PublishedDate >= startDate && a.PublishedDate <= endDate);
 
-        var articleDtos = await query
-            .ProjectTo<ArticleDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            //query = query.Where(a => a.UserArticleActions.Any(ua => ua.UserId == userId));
 
-        return articleDtos;
+            var articleDtos = await query
+                .ProjectTo<ArticleDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            return articleDtos;
+        }
     }
 }

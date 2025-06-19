@@ -1,21 +1,24 @@
 ﻿using NewsAggregation.Notifications.Contracts;
 using NewsAggregation.Notifications;
 
-public class NotificationSenderFactory
+namespace NewsAggregation.Notifications
 {
-    private readonly IServiceProvider _provider;
-
-    public NotificationSenderFactory(IServiceProvider provider)
+    public class NotificationSenderFactory
     {
-        _provider = provider;
-    }
+        private readonly IServiceProvider _provider;
 
-    public INotificationSender GetSender(string type)
-    {
-        return type switch
+        public NotificationSenderFactory(IServiceProvider provider)
         {
-            "Email" => _provider.GetRequiredService<EmailNotificationSender>(),
-            _ => throw new NotImplementedException()
-        };
+            _provider = provider;
+        }
+
+        public INotificationSender GetSender(string type)
+        {
+            return type switch
+            {
+                "Email" => _provider.GetRequiredService<EmailNotificationSender>(),
+                _ => throw new NotImplementedException()
+            };
+        }
     }
 }

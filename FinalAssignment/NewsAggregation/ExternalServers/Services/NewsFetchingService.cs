@@ -1,34 +1,37 @@
 ﻿using NewsAggregation.ExternalServers.Services.Contracts;
 
-public class NewsFetchingService : BackgroundService
+namespace NewsAggregation.ExternalServers.Services
 {
-    private readonly IServiceProvider _services;
-    private readonly ILogger<NewsFetchingService> _logger;
-
-    public NewsFetchingService(IServiceProvider services, ILogger<NewsFetchingService> logger)
+    public class NewsFetchingService : BackgroundService
     {
-        _services = services;
-        _logger = logger;
-    }
+        private readonly IServiceProvider _services;
+        private readonly ILogger<NewsFetchingService> _logger;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        public NewsFetchingService(IServiceProvider services, ILogger<NewsFetchingService> logger)
         {
-            using var scope = _services.CreateScope();
-            var fetcher = scope.ServiceProvider.GetRequiredService<INewsFetcher>();
+            _services = services;
+            _logger = logger;
+        }
 
-            try
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await fetcher.FetchAndStoreNewsAsync();
-                _logger.LogInformation("News fetch completed successfully");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching news");
-            }
+                using var scope = _services.CreateScope();
+                var fetcher = scope.ServiceProvider.GetRequiredService<INewsFetcher>();
 
-            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                try
+                {
+                    await fetcher.FetchAndStoreNewsAsync();
+                    _logger.LogInformation("News fetch completed successfully");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred while fetching news");
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using NewsAggregation.Entities;
 using NewsAggregation.Models;
-
 public class UserProfile : Profile
 {
     public UserProfile()
