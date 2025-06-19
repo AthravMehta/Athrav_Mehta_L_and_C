@@ -14,6 +14,7 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
         public DbSet<Article> Articles { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ExternalServer> ExternalServers { get; set; }
+        public DbSet<Keywords> Keywords { get; set; }
         public DbSet<UserKeyword> UserKeywords { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<UserArticleReaction> UserArticleReactions { get; set; }
@@ -25,6 +26,11 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
             modelBuilder.ApplyConfiguration(new UserFluentConfiguration());
             modelBuilder.ApplyConfiguration(new ArticleFluentConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryFluentConfiguration());
+
+            modelBuilder.Entity<Keywords>()
+                .HasOne(k => k.Category)
+                .WithMany(k => k.Keywords)
+                .HasForeignKey(k => k.CategoryId);
 
             modelBuilder.Entity<UserKeyword>()
                 .HasOne(uk => uk.User)

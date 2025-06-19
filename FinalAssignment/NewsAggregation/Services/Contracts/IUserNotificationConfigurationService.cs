@@ -1,7 +1,4 @@
 ﻿using NewsAggregation.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace NewsAggregation.Services.Contracts
 {
@@ -10,6 +7,15 @@ namespace NewsAggregation.Services.Contracts
         Task<UserNotificationConfigurationDto> AddAsync(UserNotificationConfigurationDto dto);
         Task<UserNotificationConfigurationDto> UpdateAsync(int id, UserNotificationConfigurationDto dto);
         Task DeleteAsync(int id);
-        Task<IEnumerable<UserNotificationConfigurationDto>> GetAllAsync();
+        Task<IEnumerable<UserNotificationConfigurationDto>> GetAllConfigurationAsync();
+        Task<IEnumerable<UserNotificationConfigurationDto>> GetAllUserConfigurationAsync();
+        Task<bool> ExistsAsync(int userId, int categoryId);
+        Task SaveChangesAsync();
+
+        /// <summary>
+        /// Initializes UserNotificationConfiguration for all existing users and categories,
+        /// creating missing configurations with IsEnabled = true.
+        /// </summary>
+        Task InitializeNotificationConfigurationsAsync();
     }
 }

@@ -12,18 +12,18 @@ namespace NewsAggregation.Services
     public class UserService : CrudBaseService<User>, IUserService
     {
         private readonly IMapper _mapper;
-        private readonly PasswordHasher<User> _passwordHasher;
+        private readonly EncryptionService _encryptionService;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<CrudBaseService<User>> _logger;
         private readonly IJwtTokenService _jwtTokenService;
 
-        public UserService(ICrudBaseRepository<User> repository, IMapper mapper, IUserRepository userRepository, ILogger<CrudBaseService<User>> logger, IJwtTokenService jwtTokenService) : base(repository, logger)
+        public UserService(ICrudBaseRepository<User> repository, IMapper mapper, IUserRepository userRepository, ILogger<CrudBaseService<User>> logger, IJwtTokenService jwtTokenService, EncryptionService encryptionService) : base(repository, logger)
         {
             _mapper = mapper;
             _userRepository = userRepository;
-            _passwordHasher = new PasswordHasher<User>();
             _logger = logger;
             _jwtTokenService = jwtTokenService;
+            _encryptionService = encryptionService;
         }
 
         public async Task<UserDataWithTokenDto> CreateUserAsync(UserCreateDto userDto)
@@ -56,8 +56,8 @@ namespace NewsAggregation.Services
         }
         public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync()
         {
-            var users = await GetAllAsync();
-            return _mapper.Map<IEnumerable<UserReadDto>>(users);
+            var users = await _userRepository.GetAllUsersAsync();
+            return users;
         }
 
         public async Task<User> GetUserByName(string username)
@@ -68,13 +68,13 @@ namespace NewsAggregation.Services
 
         public bool VerifyPassword(User user, string providedPassword)
         {
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, providedPassword);
-            return result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded;
+            var result = _encryptionService.Verify(user.PasswordHash, providedPassword);
+            return result;
         }
 
         private string HashPassword(User user, string password)
         {
-            return _passwordHasher.HashPassword(user, password);
+            return _encryptionService.Encrypt(password);
         }
 
         // TODO: Proper Exception code can be returned.

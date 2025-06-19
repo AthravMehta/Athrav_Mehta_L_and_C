@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Models;
+﻿using NewsAggregation.Entities;
+using NewsAggregation.Models;
 
 namespace NewsAggregation.Services.Contracts
 {
@@ -7,5 +8,6 @@ namespace NewsAggregation.Services.Contracts
         Task<CategoryDto> AddAsync(CategoryDto dto);
         Task<CategoryDto> UpdateAsync(int id, CategoryDto dto);
         Task<IEnumerable<CategoryDto>> GetAllAsync();
+        Task<int> GetCategoryIdAsync(Article article, List<Keywords>? keywords, List<CategoryDto>? categories);
     }
 }

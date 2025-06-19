@@ -21,25 +21,23 @@ namespace NewsAggregation.Controllers
 
         [HttpPost]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
-        public async Task<IActionResult> Add([FromBody] CategoryDto dto)
+        public async Task<IActionResult> Add([FromBody] CategoryDto categoryDto)
         {
-            // TODO: Whenever a Category gets created, in user notification configuration
-            // for all User that configuration should get added with some default value
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _categoryService.AddAsync(dto);
-            return CreatedAtAction(nameof(Add), new { id = result.Id }, result);
+            var result = await _categoryService.AddAsync(categoryDto);
+            return CreatedAtAction(nameof(Add), new { id = result.CategoryId }, result);
         }
 
         [HttpPut("{id}")]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
-        public async Task<IActionResult> Update(int id, [FromBody] CategoryDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] CategoryDto categoryDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _categoryService.UpdateAsync(id, dto);
+            var result = await _categoryService.UpdateAsync(id, categoryDto);
             if (result == null)
                 return NotFound();
 

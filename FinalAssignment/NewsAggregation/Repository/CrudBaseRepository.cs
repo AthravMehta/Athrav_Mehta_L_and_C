@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NewsAggregation.Configurations;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Repository.Contracts;
 
@@ -13,7 +12,7 @@ namespace NewsAggregation.Repository
 
         public CrudBaseRepository(NewsAggregationDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<TEntity>();
         }
 

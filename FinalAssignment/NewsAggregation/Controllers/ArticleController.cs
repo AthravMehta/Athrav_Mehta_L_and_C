@@ -29,7 +29,7 @@ namespace NewsAggregation.Controllers
                 return BadRequest(ModelState);
 
             var result = await _service.AddAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            return CreatedAtAction(nameof(GetById), new { id = result.ArticleId }, result);
         }
 
         [HttpGet("{id}")]

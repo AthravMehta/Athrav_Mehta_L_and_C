@@ -1,79 +1,66 @@
-﻿using NewsAggregation.Entities;
+﻿using AutoMapper;
+using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
 namespace NewsAggregation.Services
 {
-    // TODO: Modify CRUD BASE SERVICE and then edit this external server
     public class ExternalServerService : IExternalServerService
     {
-        private readonly ICrudBaseRepository<ExternalServer> _repo;
+        private readonly ICrudBaseRepository<ExternalServer> _crudBaseRepository;
+        private readonly IExternalServerRepository _externalServerRepository;
+        private readonly EncryptionService _encryptionService;
+        private readonly IMapper _mapper;
 
-        public ExternalServerService(ICrudBaseRepository<ExternalServer> repo)
+        public ExternalServerService(
+            ICrudBaseRepository<ExternalServer> crudBaseRepository,
+            IExternalServerRepository externalServerRepository,
+            EncryptionService encryptionService,
+            IMapper mapper)
         {
-            _repo = repo;
+            _crudBaseRepository = crudBaseRepository;
+            _externalServerRepository = externalServerRepository;
+            _encryptionService = encryptionService;
+            _mapper = mapper;
         }
 
         public async Task<ExternalServerDto> AddAsync(ExternalServerDto dto)
         {
-            var entity = new ExternalServer
-            {
-                ServerName = dto.ServerName,
-                BaseUrl = dto.BaseUrl,
-                ApiKeyHash = dto.ApiKeyHash,
-                IsActive = dto.IsActive
-            };
-            await _repo.AddAsync(entity);
-            await _repo.SaveChangesAsync();
-            dto.Id = entity.ExternalServerId;
-            return dto;
+            var entity = _mapper.Map<ExternalServer>(dto);
+            entity.ApiKeyHash = _encryptionService.Encrypt(dto.ApiKeyHash);
+
+            await _crudBaseRepository.AddAsync(entity);
+            await _crudBaseRepository.SaveChangesAsync();
+
+            return _mapper.Map<ExternalServerDto>(entity);
         }
 
         public async Task<ExternalServerDto> UpdateAsync(int id, ExternalServerDto dto)
         {
-            var entity = await _repo.GetByIdAsync(id);
+            var entity = await _crudBaseRepository.GetByIdAsync(id);
             if (entity == null) return null;
 
-            entity.ServerName = dto.ServerName;
-            entity.BaseUrl = dto.BaseUrl;
-            entity.ApiKeyHash = dto.ApiKeyHash;
-            entity.IsActive = dto.IsActive;
+            entity = _mapper.Map(dto, entity);
+            entity.ApiKeyHash = _encryptionService.Encrypt(dto.ApiKeyHash);
 
-            await _repo.UpdateAsync(entity);
-            await _repo.SaveChangesAsync();
-            dto.Id = entity.ExternalServerId;
-            return dto;
+            await _crudBaseRepository.SaveChangesAsync();
+
+            return _mapper.Map<ExternalServerDto>(entity);
         }
 
         public async Task<ExternalServerDto> GetByIdAsync(int id)
         {
-            var entity = await _repo.GetByIdAsync(id);
+            var entity = await _crudBaseRepository.GetByIdAsync(id);
             if (entity == null) return null;
 
-            return new ExternalServerDto
-            {
-                Id = entity.ExternalServerId,
-                ServerName = entity.ServerName,
-                BaseUrl = entity.BaseUrl,
-                ApiKeyHash = entity.ApiKeyHash,
-                IsActive = entity.IsActive
-            };
+            return _mapper.Map<ExternalServerDto>(entity);
         }
 
-        public async Task<IEnumerable<ExternalServerDto>> GetAllAsync()
+        public async Task<IEnumerable<ExternalServerDto>> GetAllAsync(bool? isActiveFilter = null)
         {
-
-            var entities = await _repo.GetAllAsync();
-
-            return entities.Select(entity => new ExternalServerDto
-            {
-                Id = entity.ExternalServerId,
-                ServerName = entity.ServerName,
-                BaseUrl = entity.BaseUrl,
-                ApiKeyHash = entity.ApiKeyHash,
-                IsActive = entity.IsActive
-            });
+            var entities = await _externalServerRepository.GetAllAsync(isActiveFilter);
+            return _mapper.Map<IEnumerable<ExternalServerDto>>(entities);
         }
     }
 }

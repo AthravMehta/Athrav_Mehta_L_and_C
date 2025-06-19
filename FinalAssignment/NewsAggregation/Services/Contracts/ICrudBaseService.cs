@@ -2,7 +2,7 @@
 
 namespace NewsAggregation.Services.Contracts
 {
-    public interface ICrudBaseService<TEntity>
+    public interface ICrudBaseService<TEntity> where TEntity : class
     {
         Task<IEnumerable<TEntity>> GetAllAsync();
         Task<TEntity> GetByIdAsync(int id);

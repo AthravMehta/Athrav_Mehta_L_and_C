@@ -7,6 +7,6 @@ namespace NewsAggregation.Services.Contracts
         Task<ExternalServerDto> AddAsync(ExternalServerDto dto);
         Task<ExternalServerDto> UpdateAsync(int id, ExternalServerDto dto);
         Task<ExternalServerDto> GetByIdAsync(int id);
-        Task<IEnumerable<ExternalServerDto>> GetAllAsync();
+        Task<IEnumerable<ExternalServerDto>> GetAllAsync(bool? isActiveFilter = null );
     }
 }

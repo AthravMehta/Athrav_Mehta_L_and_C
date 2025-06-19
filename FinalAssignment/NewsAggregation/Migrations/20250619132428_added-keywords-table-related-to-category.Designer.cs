@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 
@@ -11,9 +12,11 @@ using NewsAggregation.Configurations.DatabaseConfigurations;
 namespace NewsAggregation.Migrations
 {
     [DbContext(typeof(NewsAggregationDbContext))]
-    partial class NewsAggregationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250619132428_added-keywords-table-related-to-category")]
+    partial class addedkeywordstablerelatedtocategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,6 +175,9 @@ namespace NewsAggregation.Migrations
 
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Keyword")
                         .IsRequired()

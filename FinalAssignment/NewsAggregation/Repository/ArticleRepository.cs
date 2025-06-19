@@ -27,13 +27,22 @@ namespace NewsAggregation.Repository
             var query = _context.Articles
                 .Where(a => a.PublishedDate >= startDate && a.PublishedDate <= endDate);
 
-            //query = query.Where(a => a.UserArticleActions.Any(ua => ua.UserId == userId));
-
             var articleDtos = await query
+                .Include(a => a.UserArticleReactions)
                 .ProjectTo<ArticleDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             return articleDtos;
+        }
+
+        public async Task AddRangeAsync(IEnumerable<Article> articles)
+        {
+            await _context.Articles.AddRangeAsync(articles);
+        }
+
+        public async Task<bool> ArticleExistsAsync(Article article)
+        {
+            return await _context.Articles.AnyAsync(a => a.Url == article.Url);
         }
     }
 }

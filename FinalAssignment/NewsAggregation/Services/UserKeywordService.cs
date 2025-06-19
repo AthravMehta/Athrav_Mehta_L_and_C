@@ -29,7 +29,7 @@ namespace NewsAggregation.Services
             await _userKeywordRepo.AddAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.Id = entity.UserKeywordId;
+            dto.UserKeywordId = entity.UserKeywordId;
             return dto;
         }
 
@@ -46,7 +46,7 @@ namespace NewsAggregation.Services
             await _userKeywordRepo.UpdateAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.Id = entity.UserKeywordId;
+            dto.UserKeywordId = entity.UserKeywordId;
             return dto;
         }
 
@@ -67,7 +67,7 @@ namespace NewsAggregation.Services
 
             return new UserKeywordDto
             {
-                Id = entity.UserKeywordId,
+                UserKeywordId = entity.UserKeywordId,
                 UserId = entity.UserId,
                 CategoryId = entity.CategoryId,
                 Keyword = entity.Keyword,
@@ -80,7 +80,7 @@ namespace NewsAggregation.Services
             var entities = await _userKeywordRepo.GetAllAsync();
             return entities.Select(entity => new UserKeywordDto
             {
-                Id = entity.UserKeywordId,
+                UserKeywordId = entity.UserKeywordId,
                 UserId = entity.UserId,
                 CategoryId = entity.CategoryId,
                 Keyword = entity.Keyword,

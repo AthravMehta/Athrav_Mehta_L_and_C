@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using NewsAggregation.Configurations;
-using NewsAggregation.Enums;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
@@ -9,7 +8,7 @@ namespace NewsAggregation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRoles(nameof(RoleEnum.User), nameof(RoleEnum.Admin))]
+    [AllowAnonymous]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;

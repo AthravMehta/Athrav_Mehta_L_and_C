@@ -27,7 +27,7 @@ namespace NewsAggregation.Controllers
                 return BadRequest(ModelState);
 
             var result = await _userKeywordService.AddAsync(dto);
-            return CreatedAtAction(nameof(Add), new { id = result.Id }, result);
+            return CreatedAtAction(nameof(Add), new { id = result.UserKeywordId }, result);
         }
 
         [HttpGet]

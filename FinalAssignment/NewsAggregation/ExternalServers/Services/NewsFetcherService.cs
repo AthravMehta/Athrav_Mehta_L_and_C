@@ -1,10 +1,11 @@
 ﻿using Hangfire;
-using Microsoft.EntityFrameworkCore;
-using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 using NewsAggregation.ExternalServers.Services.Contracts;
+using NewsAggregation.Models;
 using NewsAggregation.Notifications;
+using NewsAggregation.Services;
+using NewsAggregation.Services.Contracts;
 using System.Text;
 
 namespace NewsAggregation.ExternalServers.Services
@@ -13,29 +14,42 @@ namespace NewsAggregation.ExternalServers.Services
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly INewsApiFactory _apiFactory;
-        private readonly NewsAggregationDbContext _context;
         private readonly ILogger<NewsFetcherService> _logger;
         private readonly NotificationSenderFactory _notificationSenderFactory;
+        private readonly EncryptionService _encryptionService;
+        private readonly ICategoryService _categoryService;
+        private readonly IArticleService _articleSerivce;
+        private readonly IUserService _userService;
+        private readonly IExternalServerService _externalServerService;
+        private readonly IKeywordService _keywordService;
 
         public NewsFetcherService(
             IHttpClientFactory clientFactory,
             INewsApiFactory apiFactory,
-            NewsAggregationDbContext context,
             ILogger<NewsFetcherService> logger,
-            NotificationSenderFactory notificationSenderFactory)
+            NotificationSenderFactory notificationSenderFactory,
+            EncryptionService encryptionService,
+            ICategoryService categoryService,
+            IArticleService articleService,
+            IUserService userService,
+            IExternalServerService externalServerService,
+            IKeywordService keywordService)
         {
             _clientFactory = clientFactory;
             _apiFactory = apiFactory;
-            _context = context;
             _logger = logger;
             _notificationSenderFactory = notificationSenderFactory;
+            _encryptionService = encryptionService;
+            _categoryService = categoryService;
+            _articleSerivce = articleService;
+            _userService = userService;
+            _externalServerService = externalServerService;
+            _keywordService = keywordService;
         }
 
         public async Task FetchAndStoreNewsAsync()
         {
-            var activeServers = await _context.ExternalServers
-                .Where(s => s.IsActive)
-                .ToListAsync();
+            var activeServers = await _externalServerService.GetAllAsync(isActiveFilter: true);
 
             foreach (var server in activeServers)
             {
@@ -54,7 +68,8 @@ namespace NewsAggregation.ExternalServers.Services
                     }
 
                     var content = await response.Content.ReadAsStreamAsync();
-                    var articles = await adapter.ConvertToArticles(content, server.ExternalServerId, GetCategoryId(server));
+                    var articles = await adapter.ConvertToArticles(content, server.ExternalServerId!.Value);
+                    articles = await GetArticlesCategory(articles);
 
                     await SaveArticles(articles);
                     await SendNotification(articles);
@@ -68,38 +83,48 @@ namespace NewsAggregation.ExternalServers.Services
             }
         }
 
-        private string GetApiUrl(ExternalServer? server)
+        private string GetApiUrl(ExternalServerDto? server)
         {
             if (server != null)
             {
+               var apiKey = GetDecryptedApiKey(server.ApiKeyHash);
                 return server.BaseUrl switch
                 {
-                    string s when s.Contains("newsapi.org") => $"{server.BaseUrl}apiKey={server.ApiKeyHash}",
-                    string s when s.Contains("thenewsapi.com") => $"{server.BaseUrl}api_token={server.ApiKeyHash}",
+                    string s when s.Contains("newsapi.org") => $"{server.BaseUrl}{apiKey}",
+                    string s when s.Contains("thenewsapi.com") => $"{server.BaseUrl}{apiKey}",
                     _ => throw new NotSupportedException("Unsupported API")
                 };
             }
             return String.Empty;
         }
 
-        private int GetCategoryId(ExternalServer server)
+        private string GetDecryptedApiKey(string hashedApiKey)
         {
-            // TODO: Implement category mapping logic
-            int.TryParse("409113C4-6F6F-4A08-5474-08DDA9DB0095", out var newint);
-            return newint;
+            return _encryptionService.Decrypt(hashedApiKey);
         }
+
+        private async Task<List<Article>> GetArticlesCategory(IEnumerable<Article> articles)
+        {
+            List<Keywords>? keywords = await _keywordService.GetAllKeywordsAsync();
+            List<CategoryDto>? categories = (await _categoryService.GetAllAsync()).ToList();
+
+            var updatedArticles = new List<Article>();
+
+            foreach (var article in articles)
+            {
+                article.CategoryId = await _categoryService.GetCategoryIdAsync(article, keywords, categories);
+                updatedArticles.Add(article);
+            }
+
+            return updatedArticles;
+        }
+
 
         private async Task SaveArticles(IEnumerable<Article> articles)
         {
-            foreach (var article in articles)
-            {
-                var entry = _context.Entry(article);
-                _context.Articles.Add(article);
-                Console.WriteLine(entry);
-            }
             try
             {
-                await _context.SaveChangesAsync();
+                await _articleSerivce.AddAllArticlesAsync(articles);
             }
             catch (Exception ex)
             {
@@ -110,14 +135,12 @@ namespace NewsAggregation.ExternalServers.Services
 
         private async Task SendNotification(IEnumerable<Article> articles)
         {
-            var users = await _context.Users
-                .Include(u => u.UserNotificationConfigurations)
-                .ToListAsync();
+            var users = await _userService.GetAllUsersAsync();
 
             foreach (var user in users)
             {
                 var config = user.UserNotificationConfigurations;
-                if (config == null)
+                if (config == null || !config.Any())
                     continue;
 
                 var userArticles = articles
@@ -135,21 +158,15 @@ namespace NewsAggregation.ExternalServers.Services
             }
         }
 
-        private bool ShouldSendArticleToUser(Article article, User user, ICollection<UserNotificationConfiguration> userConfiguration)
+        private bool ShouldSendArticleToUser(Article article, UserReadDto? user, ICollection<UserNotificationConfigurationDto>? userConfiguration)
         {
-            // TODO: Write Logic to find which articles to send.
-            return userConfiguration.FirstOrDefault(a => a.CategoryId == article.CategoryId && a.IsEnabled) != null;
-            //foreach (var config in userConfiguration)
-            //{
-            //    if (config.CategoryId != null && config.isEnabled)
-            //    {
-            //        return article.CategoryId == config.CategoryId;
-            //    }
-            //}
-            //return false;
+            if (userConfiguration == null || article == null)
+                return false;
+
+            return userConfiguration.Any(config => config.CategoryId == article.CategoryId && config.IsEnabled);
         }
 
-        private string BuildEmailBody(User user, List<Article> articles)
+        private string BuildEmailBody(UserReadDto user, List<Article> articles)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"<h2>Hello {user.Username},</h2>");

@@ -27,7 +27,7 @@ namespace NewsAggregation.Services
             await _repo.AddAsync(entity);
             await _repo.SaveChangesAsync();
 
-            dto.Id = entity.Id;
+            dto.UserNotificationId = entity.UserNotificationId;
             return dto;
         }
 
@@ -44,7 +44,7 @@ namespace NewsAggregation.Services
             await _repo.UpdateAsync(entity);
             await _repo.SaveChangesAsync();
 
-            dto.Id = entity.Id;
+            dto.UserNotificationId = entity.UserNotificationId;
             return dto;
         }
 
@@ -64,7 +64,7 @@ namespace NewsAggregation.Services
 
             return entities.Select(entity => new UserNotificationDto
             {
-                Id = entity.Id,
+                UserNotificationId = entity.UserNotificationId,
                 UserId = entity.UserId,
                 ArticleId = entity.ArticleId,
                 SentDateTime = entity.SentDateTime,

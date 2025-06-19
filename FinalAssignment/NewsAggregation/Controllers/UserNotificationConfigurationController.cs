@@ -3,6 +3,7 @@ using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
 using NewsAggregation.Enums;
 using NewsAggregation.Configurations;
+using NewsAggregation.Services;
 
 namespace NewsAggregation.Controllers
 {
@@ -36,8 +37,24 @@ namespace NewsAggregation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllUserConfigurationAsync();
             return Ok(result);
+        }
+
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        [HttpPost("Initialize")]
+        public async Task<IActionResult> InitializeNotificationConfigurations()
+        {
+            try
+            {
+                await _service.InitializeNotificationConfigurationsAsync();
+                return Ok(new { Message = "User notification configurations initialized successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing user notification configurations.");
+                return StatusCode(500, "An error occurred while initializing configurations.");
+            }
         }
     }
 }

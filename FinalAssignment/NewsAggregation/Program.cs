@@ -27,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 string issuer = jwtSettings["Issuer"]!;
 string audience = jwtSettings["Audience"]!;
-string secreint = jwtSettings["Secreint"]!;
+string secretKey = jwtSettings["SecretKey"]!;
 
 builder.Services.AddAuthentication(options =>
 {
@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(options =>
 
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secreint)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
 
             ClockSkew = TimeSpan.Zero
         };
@@ -78,27 +78,42 @@ builder.Services.AddControllers();
 //TODO: Add services to the container.
 //TODO: Apply Filter/Sorting in GET ALL API's
 //TODO: Check Authorize Roles above controller
-//TODO: Fix UserId1 Column in DB
-builder.Services.AddScoped(typeof(ICrudBaseRepository<>), typeof(CrudBaseRepository<>));
 builder.Services.AddScoped(typeof(ICrudBaseService<>), typeof(CrudBaseService<>));
+builder.Services.AddScoped(typeof(ICrudBaseRepository<>), typeof(CrudBaseRepository<>));
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+builder.Services.AddScoped<IKeywordService, KeywordService>();
 builder.Services.AddScoped<IUserKeywordService, UserKeywordService>();
+
 builder.Services.AddScoped<IExternalServerService, ExternalServerService>();
+builder.Services.AddScoped<IExternalServerRepository, ExternalServerRepository>();
+
 builder.Services.AddScoped<IUserNotificationConfigurationService, UserNotificationConfigurationService>();
+builder.Services.AddScoped<IUserNotificationConfigurationRepository, UserNotificationConfigurationRepository>();
+
 builder.Services.AddScoped<IArticleService, ArticleService>();
-builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+
 builder.Services.AddScoped<INewsApiFactory, NewsApiFactory>();
 builder.Services.AddScoped<INewsFetcher, NewsFetcherService>();
-builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+
 builder.Services.AddScoped<IUserArticleActionService, UserArticleActionService>();
 builder.Services.AddScoped<IUserArticleActionRepository, UserArticleActionRepository>();
+
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<EmailNotificationSender>();
 builder.Services.AddSingleton<NotificationSenderFactory>();
+
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<EncryptionService>();
 
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));

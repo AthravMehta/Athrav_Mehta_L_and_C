@@ -8,7 +8,7 @@ namespace NewsAggregation.Entities
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int UserNotificationId { get; set; }
         public DateTime SentDateTime { get; set; }
         public bool IsRead { get; set; } = false;
 
