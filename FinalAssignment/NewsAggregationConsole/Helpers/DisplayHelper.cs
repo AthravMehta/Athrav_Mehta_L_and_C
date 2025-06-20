@@ -51,7 +51,7 @@ namespace NewsAggregationConsole.Helpers
             Console.WriteLine($"Base URL     : {server.BaseUrl}");
             Console.WriteLine($"Active       : {(server.IsActive ? "Yes" : "No")}");
             Console.WriteLine($"API Key Hash : {server.ApiKeyHash}");
-            //Console.WriteLine($"Last Accessed: {server.LastAccessed:yyyy-MM-dd HH:mm}");
+            Console.WriteLine($"Last Accessed: {server.ModifiedDateTime:yyyy-MM-dd HH:mm}");
             Console.WriteLine("------------------------------------------------");
         }
         public static void ShowUpdateExternalServerPrompt(ExternalServerDto server)
@@ -79,7 +79,8 @@ namespace NewsAggregationConsole.Helpers
             }
             foreach (var n in notifications)
             {
-                Console.WriteLine($"[{n.UserNotificationId}] {n.IsRead} (Article: {n.ArticleId}, Date: {n.SentDateTime:yyyy-MM-dd HH:mm})");
+                Console.WriteLine($"[{n.UserNotificationId}] --> ");
+                DisplayHelper.DisplayArticleDetails(n.articleDto);
             }
             Console.WriteLine();
         }
@@ -114,17 +115,16 @@ namespace NewsAggregationConsole.Helpers
         }
 
 
-        //public static void ShowNotificationConfig(NotificationConfigurationDto config)
-        //{
-        //    Console.Clear();
-        //    Console.WriteLine("Notification Configuration:");
-        //    int i = 1;
-        //    foreach (var cat in config.Categories)
-        //    {
-        //        Console.WriteLine($"{i++}. {cat.CategoryName} - {(cat.IsEnabled ? "Enabled" : "Disabled")}");
-        //    }
-        //    Console.WriteLine($"{i++}. Keywords - {(config.KeywordsEnabled ? "Enabled" : "Disabled")}");
-        //    Console.WriteLine();
-        //}
+        public static void ShowNotificationConfig(List<NotificationConfigurationDto> configs)
+        {
+            Console.Clear();
+            Console.WriteLine("Notification Configuration:");
+            int i = 1;
+            foreach (var config in configs)
+            {
+                Console.WriteLine($"{i++}. {config.Category!.Name} - {(config.IsEnabled ? "Enabled" : "Disabled")}");
+            }
+            Console.WriteLine();
+        }
     }
 }

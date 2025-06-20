@@ -7,6 +7,7 @@
         public int ArticleId { get; set; }
         public DateTime SentDateTime { get; set; }
         public bool IsRead { get; set; }
+        public ArticleDto articleDto { get; set; }
 
         public DateTime? CreatedDateTime { get; set; }
         public DateTime? ModifiedDateTime { get; set; }
