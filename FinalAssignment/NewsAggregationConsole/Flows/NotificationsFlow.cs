@@ -6,7 +6,7 @@ namespace NewsAggregationConsole.Flows
 {
     public static class NotificationsFlow
     {
-        public static async Task Run(UserDto currentUser, ApiService apiService)
+        public static async Task Run(UserReadDto currentUser, ApiService apiService)
         {
             var notificationService = new NotificationService(apiService);
 
@@ -39,21 +39,21 @@ namespace NewsAggregationConsole.Flows
             }
         }
 
-        private static async Task ViewNotifications(NotificationService notificationService, UserDto user)
+        private static async Task ViewNotifications(NotificationService notificationService, UserReadDto user)
         {
-            var notifications = await notificationService.GetUnviewedNotificationsAsync(user.Id);
+            var notifications = await notificationService.GetUnviewedNotificationsAsync(user.UserId);
             DisplayHelper.ShowNotifications(notifications);
 
             if (notifications.Any())
             {
-                var ids = notifications.Select(n => n.Id).ToList();
+                var ids = notifications.Select(n => n.UserId).ToList();
                 //await notificationService.MarkNotificationsAsViewedAsync(ids);
             }
 
             InputHelper.GetString("Press Enter to continue...");
         }
 
-        //private static async Task ConfigureNotifications(NotificationService notificationService, UserDto user)
+        //private static async Task ConfigureNotifications(NotificationService notificationService, UserReadDto user)
         //{
         //    while (true)
         //    {

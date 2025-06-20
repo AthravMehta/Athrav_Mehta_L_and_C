@@ -13,7 +13,7 @@ namespace NewsAggregationConsole
         private static ApiService _apiService;
         private static AuthService _authService;
         private static string _baseApiUrl = "https://localhost:7112/";
-        private static UserDto _currentUser;
+        private static UserReadDto _currentUser;
 
         static async Task Main(string[] args)   
         {

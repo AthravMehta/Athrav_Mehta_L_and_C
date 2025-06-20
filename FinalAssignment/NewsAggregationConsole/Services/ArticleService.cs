@@ -1,4 +1,5 @@
-﻿using NewsAggregationConsole.Models;
+﻿using NewsAggregationConsole.Helpers;
+using NewsAggregationConsole.Models;
 using NewsAggregationConsole.Services;
 
 public class ArticleService
@@ -10,15 +11,26 @@ public class ArticleService
         _apiService = apiService;
     }
 
-    public async Task<List<ArticleDto>> GetArticlesByDateRangeAsync(DateTime startDate, DateTime endDate)
+    public async Task<List<ArticleDto>> GetFilteredArticlesAsync(ArticleQueryDto query)
     {
-        string url = $"/api/article?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}";
+        string queryString = QueryStringHelper.ToQueryString(query);
+        string url = $"/api/article{(string.IsNullOrEmpty(queryString) ? "" : "?" + queryString)}";
         return await _apiService.GetAsync<List<ArticleDto>>(url);
     }
 
-    public async Task<bool> SaveArticleForUserAsync(int articleId)
+    public async Task<List<ArticleDto>> GetSavedArticleForUserAsync()
     {
-        var result = await _apiService.PostAsync<bool>("/api/article/toggle-save", new { ArticleId = articleId });
+        string url = "/api/article/saved";
+        return await _apiService.GetAsync<List<ArticleDto>>(url);
+    }
+
+    public async Task<ToggleSaveResponseDto> SaveArticleForUserAsync(int articleId)
+    {
+        return await _apiService.PostAsync<ToggleSaveResponseDto>("/api/article/toggle-save", new { ArticleId = articleId });
+    }
+    public async Task<bool> AddArticleReactionAsync(ArticleReactionRequestDto articleReactionRequestDto)
+    {
+        var result = await _apiService.PostAsync<bool>("/api/article/reaction", articleReactionRequestDto);
         return result;
     }
 }

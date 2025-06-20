@@ -1,9 +1,12 @@
 ﻿namespace NewsAggregationConsole.Models
 {
-    public class CategoryDto
+    public class UserKeywordDto
     {
-        public int? CategoryId { get; set; }
-        public string Name { get; set; }
+        public int? UserKeywordId { get; set; }
+        public int UserId { get; set; }
+        public int CategoryId { get; set; }
+        public string Keyword { get; set; }
+        public bool IsEnabled { get; set; } = true;
 
         public DateTime? CreatedDateTime { get; set; }
         public DateTime? ModifiedDateTime { get; set; }

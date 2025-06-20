@@ -6,7 +6,7 @@ namespace NewsAggregationConsole.Flows
 {
     public static class UserFlowManager
     {
-        public static async Task Run(UserDto currentUser, ApiService apiService)
+        public static async Task Run(UserReadDto currentUser, ApiService apiService)
         {
             while (true)
             {
@@ -26,10 +26,10 @@ namespace NewsAggregationConsole.Flows
                         await HeadlinesFlow.Run(currentUser, apiService);
                         break;
                     case 2:
-                        // await SavedArticlesMenu();
+                        await SavedArticlesFlow.Run(currentUser, apiService);
                         break;
                     case 3:
-                        // await SearchMenu();
+                        await SearchFlow.Run(currentUser, apiService);
                         break;
                     case 4:
                         await NotificationsFlow.Run(currentUser, apiService);

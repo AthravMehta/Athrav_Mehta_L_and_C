@@ -6,7 +6,7 @@ namespace NewsAggregationConsole.Flows
 {
     public static class AdminFlowManager
     {
-        public static async Task Run(UserDto currentUser, ApiService apiService)
+        public static async Task Run(UserReadDto currentUser, ApiService apiService)
         {
             var categoryService = new CategoryService(apiService);
             var externalServerService = new ExternalServerService(apiService);
@@ -105,11 +105,11 @@ namespace NewsAggregationConsole.Flows
             if (!string.IsNullOrWhiteSpace(newStatusStr))
                 server.IsActive = newStatusStr.Trim().ToLower().StartsWith("y");
 
-            await service.UpdateExternalServerAsync(server.Id.Value, server);
+            await service.UpdateExternalServerAsync(server.ExternalServerId!.Value, server);
             InputHelper.ShowSuccess("External server updated successfully!");
         }
     
-        private static async Task AddCategory(CategoryService categoryService, UserDto currentUser)
+        private static async Task AddCategory(CategoryService categoryService, UserReadDto currentUser)
         {
             DisplayHelper.ShowHeader(currentUser, true);
             Console.WriteLine("Add New News Category");
@@ -126,7 +126,7 @@ namespace NewsAggregationConsole.Flows
             }
         }
 
-        private static async Task ListCategory(CategoryService categoryService, UserDto currentUser)
+        private static async Task ListCategory(CategoryService categoryService, UserReadDto currentUser)
         {
             DisplayHelper.ShowHeader(currentUser, true);
             Console.WriteLine("All News Category");

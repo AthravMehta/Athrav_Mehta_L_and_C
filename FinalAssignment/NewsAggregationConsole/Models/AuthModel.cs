@@ -21,7 +21,7 @@ namespace NewsAggregationConsole.Models
 
     public class UserDataWithTokenDto
     {
-        public UserDto User { get; set; }
+        public UserReadDto User { get; set; }
         public string token { get; set; }
     }
 }

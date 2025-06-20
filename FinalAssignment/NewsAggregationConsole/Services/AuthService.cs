@@ -11,7 +11,7 @@ namespace NewsAggregationConsole.Services
             _apiService = apiService;
         }
 
-        public async Task<UserDto> LoginAsync(LoginDto loginDto)
+        public async Task<UserReadDto> LoginAsync(LoginDto loginDto)
         {
             var userDataWithToken = await _apiService.PostAsync<UserDataWithTokenDto>(
                 "/api/auth/login", loginDto);
@@ -20,7 +20,7 @@ namespace NewsAggregationConsole.Services
             return userDataWithToken.User;
         }
         
-        public async Task<UserDto> SignUpAsync(RegisterDto registerDto)
+        public async Task<UserReadDto> SignUpAsync(RegisterDto registerDto)
         {
             var userDataWithToken = await _apiService.PostAsync<UserDataWithTokenDto>(
                 "/api/user", registerDto);

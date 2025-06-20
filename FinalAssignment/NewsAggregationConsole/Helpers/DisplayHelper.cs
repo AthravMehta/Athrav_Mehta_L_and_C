@@ -4,7 +4,7 @@ namespace NewsAggregationConsole.Helpers
 {
     public static class DisplayHelper
     {
-        public static void ShowHeader(UserDto user, bool isAdmin = false)
+        public static void ShowHeader(UserReadDto user, bool isAdmin = false)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -36,7 +36,7 @@ namespace NewsAggregationConsole.Helpers
 
             foreach (var s in servers)
             {
-                Console.WriteLine($"{s.Id} | {s.ServerName,-20} | {(s.IsActive ? "Yes" : "No"),-6}");
+                Console.WriteLine($"{s.ExternalServerId} | {s.ServerName,-20} | {(s.IsActive ? "Yes" : "No"),-6}");
             }
             Console.WriteLine("--------------------------------------------------------------------------------");
         }
@@ -46,7 +46,7 @@ namespace NewsAggregationConsole.Helpers
             Console.Clear();
             Console.WriteLine("External Server Details:");
             Console.WriteLine("------------------------------------------------");
-            Console.WriteLine($"ID           : {server.Id}");
+            Console.WriteLine($"ID           : {server.ExternalServerId}");
             Console.WriteLine($"Name         : {server.ServerName}");
             Console.WriteLine($"Base URL     : {server.BaseUrl}");
             Console.WriteLine($"Active       : {(server.IsActive ? "Yes" : "No")}");
@@ -59,7 +59,7 @@ namespace NewsAggregationConsole.Helpers
             Console.Clear();
             Console.WriteLine("Update External Server:");
             Console.WriteLine("------------------------------------------------");
-            Console.WriteLine($"ID           : {server.Id}");
+            Console.WriteLine($"ID           : {server.ExternalServerId}");
             Console.WriteLine($"Name         : {server.ServerName}");
             Console.WriteLine($"Base URL     : {server.BaseUrl}");
             Console.WriteLine($"Active       : {(server.IsActive ? "Yes" : "No")}");
@@ -79,10 +79,40 @@ namespace NewsAggregationConsole.Helpers
             }
             foreach (var n in notifications)
             {
-                Console.WriteLine($"[{n.Id}] {n.IsRead} (Article: {n.ArticleId}, Date: {n.SentDateTime:yyyy-MM-dd HH:mm})");
+                Console.WriteLine($"[{n.UserNotificationId}] {n.IsRead} (Article: {n.ArticleId}, Date: {n.SentDateTime:yyyy-MM-dd HH:mm})");
             }
             Console.WriteLine();
         }
+
+        public static void DisplayArticles(IEnumerable<ArticleDto> articles)
+        {
+            foreach (var article in articles)
+            {
+                Console.WriteLine($"Article ID: {article.ArticleId}");
+                Console.WriteLine($"Headline: {article.Title}");
+                Console.WriteLine($"Source: {article.Source}");
+                Console.WriteLine($"Category: {article.CategoryId}");
+                Console.WriteLine($"Published Date: {article.PublishedDate:yyyy-MM-dd}");
+                Console.WriteLine($"URL: {article.Url}");
+                Console.WriteLine("Content:");
+                Console.WriteLine(article.Content);
+                Console.WriteLine(new string('-', 50));
+            }
+        }
+
+        public static void DisplayArticleDetails(ArticleDto article)
+        {
+            Console.WriteLine($"Article ID: {article.ArticleId}");
+            Console.WriteLine($"Headline: {article.Title}");
+            Console.WriteLine($"Source: {article.Source}");
+            Console.WriteLine($"Category: {article.CategoryId}");
+            Console.WriteLine($"Published Date: {article.PublishedDate:yyyy-MM-dd}");
+            Console.WriteLine($"URL: {article.Url}");
+            Console.WriteLine("Content:");
+            Console.WriteLine(article.Content);
+            Console.WriteLine(new string('-', 50));
+        }
+
 
         //public static void ShowNotificationConfig(NotificationConfigurationDto config)
         //{
