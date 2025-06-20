@@ -3,6 +3,7 @@ using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using System.Collections.Generic;
 
 namespace NewsAggregation.Services
 {
@@ -109,7 +110,9 @@ namespace NewsAggregation.Services
             try
             {
                 var entities = await _userNotificationRepository.GetAllUserNotificationAsync(_requestContext.UserId);
-                return _mapper.Map<IEnumerable<UserNotificationDto>>(entities);
+                IEnumerable < UserNotificationDto > notifications = _mapper.Map<IEnumerable<UserNotificationDto>>(entities);
+                await _userNotificationRepository.MarkAllUserNotificationsAsRead(_requestContext.UserId);
+                return notifications;
             }
             catch (Exception ex)
             {

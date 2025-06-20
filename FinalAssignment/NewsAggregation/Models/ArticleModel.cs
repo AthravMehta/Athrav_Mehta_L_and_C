@@ -12,15 +12,15 @@ namespace NewsAggregation.Models
         public DateTime PublishedDate { get; set; }
         public int ExternalServerId { get; set; }
         public int CategoryId { get; set; }
+        public int UserArticleReactions { get; set; }   
+        public int UserSavedArticles { get; set; }
         public int LikeCount { get; set; }
         public int DislikeCount { get; set; }
-        public DateTime? CreatedDateTime { get; set; }
-        public DateTime? ModifiedDateTime { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? ModifiedBy { get; set; }
-
+        public DateTime CreatedDateTime { get; set; }
+        public DateTime ModifiedDateTime { get; set; }
+        public string CreatedBy { get; set; }
+        public string ModifiedBy { get; set; }
     }
-
     public class ArticleQueryDto
     {
         public string SearchText { get; set; }
@@ -35,6 +35,7 @@ namespace NewsAggregation.Models
     {
         public int ArticleId { get; set; }
     }
+
     public class ToggleSaveResponseDto
     {
         public bool IsSaved { get; set; }

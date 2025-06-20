@@ -8,7 +8,9 @@ namespace NewsAggregation.Configurations.MappingConfigurations
     {
         public UserNotificationProfile()
         {
-            CreateMap<UserNotification, UserNotificationDto>().ReverseMap();
+            CreateMap<UserNotification, UserNotificationDto>()
+                .ForMember(dest => dest.articleDto, opt => opt.MapFrom(src => src.Article))
+                .ReverseMap();
         }
     }
 }

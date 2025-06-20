@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
 using NewsAggregation.Enums;
 using NewsAggregation.Configurations;

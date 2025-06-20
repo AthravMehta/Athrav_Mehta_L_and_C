@@ -10,7 +10,6 @@ public class UserProfile : Profile
         CreateMap<UserUpdateDto, User>();
 
         CreateMap<UserSavedArticle, UserSavedArticleDto>().ReverseMap();
-        CreateMap<UserNotificationConfiguration, UserNotificationConfigurationDto>().ReverseMap();
         CreateMap<UserKeyword, UserKeywordDto>().ReverseMap();
     }
 }

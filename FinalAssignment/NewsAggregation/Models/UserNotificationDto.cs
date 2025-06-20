@@ -5,6 +5,7 @@
         public int UserNotificationId { get; set; }
         public int UserId { get; set; }
         public int ArticleId { get; set; }
+        public ArticleDto? articleDto { get; set; }
         public DateTime SentDateTime { get; set; }
         public bool IsRead { get; set; }
 

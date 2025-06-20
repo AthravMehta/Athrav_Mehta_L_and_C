@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Entities;
+﻿using AutoMapper;
+using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
@@ -7,15 +8,16 @@ namespace NewsAggregation.Services
 {
     public class UserNotificationConfigurationService : IUserNotificationConfigurationService
     {
-
+        private readonly IMapper _mapper;
         private readonly ICrudBaseRepository<User> _userRepository;
         private readonly ICrudBaseRepository<Category> _categoryRepository;
         private readonly ICrudBaseRepository<UserNotificationConfiguration> _crudBaseRepository;
         private readonly IUserNotificationConfigurationRepository _userNotificationConfigurationRepository;
 
-        public UserNotificationConfigurationService(ICrudBaseRepository<User> userRepository, ICrudBaseRepository<Category> categoryRepository,
+        public UserNotificationConfigurationService(IMapper mapper, ICrudBaseRepository<User> userRepository, ICrudBaseRepository<Category> categoryRepository,
             ICrudBaseRepository<UserNotificationConfiguration> crudBaseRepository, IUserNotificationConfigurationRepository userNotificationConfigurationRepository)
         {
+            _mapper = mapper;
             _userRepository = userRepository;
             _categoryRepository = categoryRepository;
             _crudBaseRepository = crudBaseRepository;
@@ -66,24 +68,14 @@ namespace NewsAggregation.Services
         {
             var entities = await _crudBaseRepository.GetAllAsync();
 
-            return entities.Select(entity => new UserNotificationConfigurationDto
-            {
-                UserNotificationConfigurationId = entity.UserNotificationConfigurationId,
-                UserId = entity.UserId,
-                IsEnabled = entity.IsEnabled
-            });
+            return _mapper.Map<IEnumerable<UserNotificationConfigurationDto>>(entities);
         }
 
         public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllUserConfigurationAsync()
         {
             var entities = await _userNotificationConfigurationRepository.GetAllUserConfigurationAsync();
 
-            return entities.Select(entity => new UserNotificationConfigurationDto
-            {
-                UserNotificationConfigurationId = entity.UserNotificationConfigurationId,
-                UserId = entity.UserId,
-                IsEnabled = entity.IsEnabled
-            });
+            return _mapper.Map<IEnumerable<UserNotificationConfigurationDto>>(entities);
         }
 
         public async Task<bool> ExistsAsync(int userId, int categoryId)

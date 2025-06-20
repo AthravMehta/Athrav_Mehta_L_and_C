@@ -30,8 +30,25 @@ namespace NewsAggregation.Repository
                 return Enumerable.Empty<UserNotification>();
 
             return await _dbContext.UserNotifications
-                .Where(un => un.UserId == userId)
+                .Where(un => un.UserId == userId && !un.IsRead)
+                .Include(un => un.Article)
                 .ToListAsync();
+        }
+
+        public async Task MarkAllUserNotificationsAsRead(int? UserId = null)
+        {
+            var notifications = await _dbContext.UserNotifications
+                .Where(n => n.UserId == UserId && !n.IsRead)
+                .ToListAsync();
+
+            if (notifications.Any())
+            {
+                foreach (var notification in notifications)
+                {
+                    notification.IsRead = true;
+                }
+            }
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

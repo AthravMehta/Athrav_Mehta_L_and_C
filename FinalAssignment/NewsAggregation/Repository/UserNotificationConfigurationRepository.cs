@@ -28,6 +28,7 @@ namespace NewsAggregation.Repository
 
             return await _context.UserNotificationConfigurations
                 .Where(config => config.UserId == userId)
+                .Include(config => config.Category)
                 .ToListAsync();
         }
         public async Task<bool> ExistsAsync(int userId, int categoryId)
