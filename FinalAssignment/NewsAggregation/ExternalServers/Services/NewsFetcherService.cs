@@ -22,6 +22,7 @@ namespace NewsAggregation.ExternalServers.Services
         private readonly IUserService _userService;
         private readonly IExternalServerService _externalServerService;
         private readonly IKeywordService _keywordService;
+        private readonly IUserNotificationService _userNotificationService;
 
         public NewsFetcherService(
             IHttpClientFactory clientFactory,
@@ -33,7 +34,8 @@ namespace NewsAggregation.ExternalServers.Services
             IArticleService articleService,
             IUserService userService,
             IExternalServerService externalServerService,
-            IKeywordService keywordService)
+            IKeywordService keywordService,
+            IUserNotificationService userNotificationService)
         {
             _clientFactory = clientFactory;
             _apiFactory = apiFactory;
@@ -45,6 +47,7 @@ namespace NewsAggregation.ExternalServers.Services
             _userService = userService;
             _externalServerService = externalServerService;
             _keywordService = keywordService;
+            _userNotificationService = userNotificationService;
         }
 
         public async Task FetchAndStoreNewsAsync()
@@ -71,7 +74,7 @@ namespace NewsAggregation.ExternalServers.Services
                     var articles = await adapter.ConvertToArticles(content, server.ExternalServerId!.Value);
                     articles = await GetArticlesCategory(articles);
 
-                    await SaveArticles(articles);
+                    articles = await SaveArticles(articles);
                     await SendNotification(articles);
                     break;
                 }
@@ -120,11 +123,11 @@ namespace NewsAggregation.ExternalServers.Services
         }
 
 
-        private async Task SaveArticles(IEnumerable<Article> articles)
+        private async Task<IEnumerable<Article>> SaveArticles(IEnumerable<Article> articles)
         {
             try
             {
-                await _articleSerivce.AddAllArticlesAsync(articles);
+                return await _articleSerivce.AddAllArticlesAsync(articles);
             }
             catch (Exception ex)
             {
@@ -155,7 +158,22 @@ namespace NewsAggregation.ExternalServers.Services
 
                 var sender = _notificationSenderFactory.GetSender("Email");
                 BackgroundJob.Enqueue(() => sender.SendAsync(user.Email, subject, body));
+
+                await SaveNotifications(user.UserId, userArticles);
             }
+        }
+
+        private async Task SaveNotifications(int userId, List<Article>? articles)
+        {
+            var notifications = articles.Select(article => new UserNotification
+            {
+                UserId = userId,
+                ArticleId = article.ArticleId,
+                SentDateTime = DateTime.UtcNow,
+                IsRead = false
+            }).ToList();
+
+            await _userNotificationService.AddRangeAsync(notifications);
         }
 
         private bool ShouldSendArticleToUser(Article article, UserReadDto? user, ICollection<UserNotificationConfigurationDto>? userConfiguration)

@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Models;
+﻿using NewsAggregation.Entities;
+using NewsAggregation.Models;
 
 namespace NewsAggregation.Services.Contracts
 {
@@ -11,6 +12,7 @@ namespace NewsAggregation.Services.Contracts
         Task<IEnumerable<UserNotificationConfigurationDto>> GetAllUserConfigurationAsync();
         Task<bool> ExistsAsync(int userId, int categoryId);
         Task SaveChangesAsync();
+        Task CreateNotificationConfigForAllUsersAsync(int? categoryId = null, User? user = null);
 
         /// <summary>
         /// Initializes UserNotificationConfiguration for all existing users and categories,

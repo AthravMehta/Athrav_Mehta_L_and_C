@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NewsAggregation.Entities;
 using NewsAggregation.Models;
+using NewsAggregation.Repository;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
@@ -8,15 +9,19 @@ namespace NewsAggregation.Services
 {
     public class ArticleService : IArticleService
     {
+        private readonly IUserArticleActionService _userArticleActionService;
         private readonly ICrudBaseRepository<Article> _curdbaseRepository;
         private readonly IArticleRepository _articleRepository;
         private readonly ILogger<ArticleService> _logger;
+        private readonly RequestContext _requestContext;
         private readonly IMapper _mapper;
-            
-        public ArticleService(ICrudBaseRepository<Article> repo, IArticleRepository articleRepository, ILogger<ArticleService> logger, IMapper mapper)
+
+        public ArticleService(IUserArticleActionService userArticleActionService, ICrudBaseRepository<Article> crudBaseRepository, IArticleRepository articleRepository, ILogger<ArticleService> logger, RequestContext requestContext , IMapper mapper)
         {
-            _curdbaseRepository = repo;
+            _userArticleActionService = userArticleActionService;
+            _curdbaseRepository = crudBaseRepository;
             _articleRepository = articleRepository;
+            _requestContext = requestContext;
             _logger = logger;
             _mapper = mapper;
         }
@@ -30,30 +35,32 @@ namespace NewsAggregation.Services
             return dto;
         }
 
-        public async Task AddAllArticlesAsync(IEnumerable<Article> articles)
+        public async Task<IEnumerable<Article>> AddAllArticlesAsync(IEnumerable<Article> articles)
         {
-            var articlesToAdd = new List<Article>();
-
-            foreach (var article in articles)
+            try
             {
-                if (!await this.ArticleExistsAsync(article))
+                var articlesToAdd = new List<Article>();
+
+                foreach (var article in articles)
                 {
-                    articlesToAdd.Add(article);
+                    if (!await this.ArticleExistsAsync(article))
+                    {
+                        articlesToAdd.Add(article);
+                    }
                 }
-            }
 
-            if (articlesToAdd.Any())
-            {
-                await _articleRepository.AddRangeAsync(articlesToAdd);
-                try
+                if (articlesToAdd.Any())
                 {
+                    await _articleRepository.AddRangeAsync(articlesToAdd);
                     await _curdbaseRepository.SaveChangesAsync();
+                    return articlesToAdd;
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to save articles");
-                    throw;
-                }
+                return Enumerable.Empty<Article>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save articles");
+                throw;
             }
         }
 
@@ -65,11 +72,19 @@ namespace NewsAggregation.Services
             return _mapper.Map<ArticleDto>(entity);
         }
 
-        public async Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<ArticleDto>> GetAllAsync(ArticleQueryDto query)
         {
-            var entities = await _articleRepository.GetAllAsync(startDate, endDate);
+            var articles = await _articleRepository.GetAllAsync(query);
+            return _mapper.Map<IEnumerable<ArticleDto>>(articles);
+        }
 
-            return entities;
+        public async Task<IEnumerable<ArticleDto>> GetSavedArticlesForCurrentUserAsync()
+        {
+            var userId = _requestContext.UserId;
+            var savedArticleIds = await _userArticleActionService.GetSavedArticleIdsByUserIdAsync();
+
+            var articles = await _articleRepository.GetArticlesByIdsAsync(savedArticleIds);
+            return _mapper.Map<IEnumerable<ArticleDto>>(articles);
         }
 
         public async Task<bool> ArticleExistsAsync(Article article)

@@ -6,8 +6,9 @@ namespace NewsAggregation.Services.Contracts
     public interface IArticleService
     {
         Task<ArticleDto> AddAsync(ArticleDto dto);
-        Task AddAllArticlesAsync(IEnumerable<Article> articles);
+        Task<IEnumerable<Article>> AddAllArticlesAsync(IEnumerable<Article> articles);
         Task<ArticleDto> GetByIdAsync(int id);
-        Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate);
+        Task<IEnumerable<ArticleDto>> GetAllAsync(ArticleQueryDto articleQueryDto);
+        Task<IEnumerable<ArticleDto>> GetSavedArticlesForCurrentUserAsync();
     }
 }

@@ -5,7 +5,8 @@ namespace NewsAggregation.Repository.Contracts
 {
     public interface IArticleRepository
     {
-        Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate);
+        Task<IEnumerable<Article>> GetAllAsync(ArticleQueryDto articleQueryDto);
+        Task<IEnumerable<Article>> GetArticlesByIdsAsync(IEnumerable<int> articleIds);
         Task AddRangeAsync(IEnumerable<Article> articlesToAdd);
         Task<bool> ArticleExistsAsync(Article article);
     }

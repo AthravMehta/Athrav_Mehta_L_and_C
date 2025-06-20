@@ -15,6 +15,5 @@ namespace NewsAggregation.Entities
         public int CategoryId { get; set; }
         public User User { get; set; }
         public Category Category { get; set; }
-        public ICollection<UserNotificationConfiguration> UserNotificationConfigurations { get; set; } = new List<UserNotificationConfiguration>();
     }
 }

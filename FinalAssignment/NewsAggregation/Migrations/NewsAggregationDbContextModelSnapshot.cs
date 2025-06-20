@@ -312,11 +312,11 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.UserNotification", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserNotificationId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserNotificationId"));
 
                     b.Property<int>("ArticleId")
                         .HasColumnType("int");
@@ -344,7 +344,7 @@ namespace NewsAggregation.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserNotificationId");
 
                     b.HasIndex("ArticleId");
 
@@ -355,11 +355,11 @@ namespace NewsAggregation.Migrations
 
             modelBuilder.Entity("NewsAggregation.Entities.UserNotificationConfiguration", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserNotificationConfigurationId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserNotificationConfigurationId"));
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -384,16 +384,11 @@ namespace NewsAggregation.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserNotificationConfigurationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserNotificationConfigurationId");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserNotificationConfigurationId");
 
                     b.ToTable("UserNotificationConfigurations");
                 });
@@ -521,10 +516,6 @@ namespace NewsAggregation.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NewsAggregation.Entities.UserNotificationConfiguration", null)
-                        .WithMany("UserNotificationConfigurations")
-                        .HasForeignKey("UserNotificationConfigurationId");
-
                     b.Navigation("Category");
 
                     b.Navigation("User");
@@ -574,11 +565,6 @@ namespace NewsAggregation.Migrations
                     b.Navigation("UserNotifications");
 
                     b.Navigation("UserSavedArticles");
-                });
-
-            modelBuilder.Entity("NewsAggregation.Entities.UserNotificationConfiguration", b =>
-                {
-                    b.Navigation("UserNotificationConfigurations");
                 });
 #pragma warning restore 612, 618
         }

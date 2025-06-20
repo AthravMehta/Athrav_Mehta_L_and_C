@@ -1,6 +1,5 @@
 ﻿using NewsAggregation.Entities;
 using NewsAggregation.Models;
-using NewsAggregation.Repository;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
@@ -14,7 +13,7 @@ namespace NewsAggregation.Services
         private readonly ICrudBaseRepository<UserNotificationConfiguration> _crudBaseRepository;
         private readonly IUserNotificationConfigurationRepository _userNotificationConfigurationRepository;
 
-        public UserNotificationConfigurationService(ICrudBaseRepository<User> userRepository, ICrudBaseRepository<Category> categoryRepository, 
+        public UserNotificationConfigurationService(ICrudBaseRepository<User> userRepository, ICrudBaseRepository<Category> categoryRepository,
             ICrudBaseRepository<UserNotificationConfiguration> crudBaseRepository, IUserNotificationConfigurationRepository userNotificationConfigurationRepository)
         {
             _userRepository = userRepository;
@@ -74,7 +73,7 @@ namespace NewsAggregation.Services
                 IsEnabled = entity.IsEnabled
             });
         }
-        
+
         public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllUserConfigurationAsync()
         {
             var entities = await _userNotificationConfigurationRepository.GetAllUserConfigurationAsync();
@@ -95,6 +94,48 @@ namespace NewsAggregation.Services
         public Task SaveChangesAsync()
         {
             return _crudBaseRepository.SaveChangesAsync();
+        }
+
+        public async Task CreateNotificationConfigForAllUsersAsync(int? categoryId = null, User? newUser = null)
+        {
+            if (newUser != null)
+            {
+                var categories = await _categoryRepository.GetAllAsync();
+                foreach (var category in categories)
+                {
+                    bool exists = await _userNotificationConfigurationRepository.ExistsAsync(newUser.UserId, category.CategoryId);
+                    if (!exists)
+                    {
+                        var config = new UserNotificationConfiguration
+                        {
+                            UserId = newUser.UserId,
+                            CategoryId = category.CategoryId,
+                            IsEnabled = true
+                        };
+                        await _crudBaseRepository.AddAsync(config);
+                    }
+                }
+            }
+            else if (categoryId != null)
+            {
+                var users = await _userRepository.GetAllAsync();
+
+                foreach (var user in users)
+                {
+                    bool exists = await this.ExistsAsync(user.UserId, categoryId!.Value);
+                    if (!exists)
+                    {
+                        var config = new UserNotificationConfigurationDto
+                        {
+                            UserId = user.UserId,
+                            CategoryId = categoryId!.Value,
+                            IsEnabled = true
+                        };
+                        await this.AddAsync(config);
+                    }
+                }
+            }
+            await this.SaveChangesAsync();
         }
 
 

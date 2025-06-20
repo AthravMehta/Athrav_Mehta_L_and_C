@@ -103,7 +103,9 @@ builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 
 builder.Services.AddScoped<INewsApiFactory, NewsApiFactory>();
 builder.Services.AddScoped<INewsFetcher, NewsFetcherService>();
+
 builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+builder.Services.AddScoped<IUserNotificationRepository, UserNotificationRepository>();
 
 builder.Services.AddScoped<IUserArticleActionService, UserArticleActionService>();
 builder.Services.AddScoped<IUserArticleActionRepository, UserArticleActionRepository>();

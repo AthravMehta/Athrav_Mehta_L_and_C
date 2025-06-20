@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 
@@ -21,18 +21,57 @@ namespace NewsAggregation.Repository
             _requestContext = requestContext;
         }
 
-        public async Task<IEnumerable<ArticleDto>> GetAllAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Article>> GetAllAsync(ArticleQueryDto articleQueryDto)
         {
-            var userId = _requestContext.UserId;
-            var query = _context.Articles
-                .Where(a => a.PublishedDate >= startDate && a.PublishedDate <= endDate);
+            var articleQuery = _context.Articles.AsQueryable();
 
-            var articleDtos = await query
+            if (!string.IsNullOrWhiteSpace(articleQueryDto.SearchText))
+            {
+                articleQuery = articleQuery.Where(a =>
+                    a.Title.Contains(articleQueryDto.SearchText) ||
+                    a.Content.Contains(articleQueryDto.SearchText));
+            }
+
+            if (articleQueryDto.StartDate.HasValue)
+            {
+                articleQuery = articleQuery.Where(a => a.PublishedDate >= articleQueryDto.StartDate.Value);
+            }
+
+            if (articleQueryDto.EndDate.HasValue)
+            {
+                articleQuery = articleQuery.Where(a => a.PublishedDate <= articleQueryDto.EndDate.Value);
+            }
+
+            if (articleQueryDto.CategoryId.HasValue && articleQueryDto.CategoryId.Value > 0)
+            {
+                articleQuery = articleQuery.Where(a => a.CategoryId == articleQueryDto.CategoryId.Value);
+            }
+
+            if (articleQueryDto.SortByLikes)
+            {
+                articleQuery = articleQuery.OrderByDescending(a => a.UserArticleReactions.Count(r => r.Reaction == ReactionEnum.Like));
+            }
+            else if (articleQueryDto.SortByDislikes)
+            {
+                articleQuery = articleQuery.OrderByDescending(a => a.UserArticleReactions.Count(r => r.Reaction == ReactionEnum.Dislike));
+            }
+            else
+            {
+                articleQuery = articleQuery.OrderByDescending(a => a.PublishedDate);
+            }
+
+            return await articleQuery
                 .Include(a => a.UserArticleReactions)
-                .ProjectTo<ArticleDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
+        public async Task<IEnumerable<Article>> GetArticlesByIdsAsync(IEnumerable<int> articleIds)
+        {
+            if (articleIds == null || !articleIds.Any())
+                return Enumerable.Empty<Article>();
 
-            return articleDtos;
+            return await _context.Articles
+                .Where(a => articleIds.Contains(a.ArticleId))
+                .ToListAsync();
         }
 
         public async Task AddRangeAsync(IEnumerable<Article> articles)

@@ -1,5 +1,4 @@
-﻿using NewsAggregation.Entities;
-using NewsAggregation.Enums;
+﻿using NewsAggregation.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace NewsAggregation.Models
@@ -21,7 +20,6 @@ namespace NewsAggregation.Models
         public RoleEnum RoleId { get; set; } = RoleEnum.User;
     }
 
-    // DTO for updating a user (input)
     public class UserUpdateDto
     {
         [MaxLength(50)]
@@ -38,7 +36,7 @@ namespace NewsAggregation.Models
 
     public class UserReadDto
     {
-        public int Id { get; set; }
+        public int UserId { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public RoleEnum RoleId { get; set; }

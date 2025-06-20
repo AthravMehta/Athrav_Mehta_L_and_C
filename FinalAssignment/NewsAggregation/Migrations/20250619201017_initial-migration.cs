@@ -68,6 +68,30 @@ namespace NewsAggregation.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Keywords",
+                columns: table => new
+                {
+                    KeywordId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Keyword = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.KeywordId);
+                    table.ForeignKey(
+                        name: "FK_Keywords_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "CategoryId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Articles",
                 columns: table => new
                 {
@@ -78,8 +102,8 @@ namespace NewsAggregation.Migrations
                     Source = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PublishedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExternalServerId = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
+                    ExternalServerId = table.Column<int>(type: "int", nullable: false),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
@@ -138,12 +162,11 @@ namespace NewsAggregation.Migrations
                 name: "UserNotificationConfigurations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    UserNotificationConfigurationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
-                    UserNotificationConfigurationId = table.Column<int>(type: "int", nullable: true),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
@@ -151,18 +174,13 @@ namespace NewsAggregation.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserNotificationConfigurations", x => x.Id);
+                    table.PrimaryKey("PK_UserNotificationConfigurations", x => x.UserNotificationConfigurationId);
                     table.ForeignKey(
                         name: "FK_UserNotificationConfigurations_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserNotificationConfigurations_UserNotificationConfigurations_UserNotificationConfigurationId",
-                        column: x => x.UserNotificationConfigurationId,
-                        principalTable: "UserNotificationConfigurations",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_UserNotificationConfigurations_Users_UserId",
                         column: x => x.UserId,
@@ -203,7 +221,7 @@ namespace NewsAggregation.Migrations
                 name: "UserNotifications",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    UserNotificationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SentDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),
@@ -216,7 +234,7 @@ namespace NewsAggregation.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserNotifications", x => x.Id);
+                    table.PrimaryKey("PK_UserNotifications", x => x.UserNotificationId);
                     table.ForeignKey(
                         name: "FK_UserNotifications_Articles_ArticleId",
                         column: x => x.ArticleId,
@@ -269,6 +287,11 @@ namespace NewsAggregation.Migrations
                 column: "ExternalServerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Keywords_CategoryId",
+                table: "Keywords",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserArticleReactions_ArticleId",
                 table: "UserArticleReactions",
                 column: "ArticleId");
@@ -297,11 +320,6 @@ namespace NewsAggregation.Migrations
                 name: "IX_UserNotificationConfigurations_UserId",
                 table: "UserNotificationConfigurations",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserNotificationConfigurations_UserNotificationConfigurationId",
-                table: "UserNotificationConfigurations",
-                column: "UserNotificationConfigurationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserNotifications_ArticleId",
@@ -339,6 +357,9 @@ namespace NewsAggregation.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Keywords");
+
             migrationBuilder.DropTable(
                 name: "UserArticleReactions");
 

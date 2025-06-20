@@ -29,7 +29,7 @@ namespace NewsAggregation.Services
             await _categoryRepository.AddAsync(category);
             await _categoryRepository.SaveChangesAsync();
 
-            await CreateNotificationConfigForAllUsersAsync(category.CategoryId);
+            await _userNotificationConfigurationService.CreateNotificationConfigForAllUsersAsync(category.CategoryId);
 
             return new CategoryDto { CategoryId = category.CategoryId, Name = category.Name };
         }
@@ -72,28 +72,6 @@ namespace NewsAggregation.Services
                 return allCategory.CategoryId!.Value;
             }
             return 0;
-        }
-
-        private async Task CreateNotificationConfigForAllUsersAsync(int categoryId)
-        {
-            var users = await _userRepository.GetAllAsync();
-
-            foreach (var user in users)
-            {
-                bool exists = await _userNotificationConfigurationService.ExistsAsync(user.UserId, categoryId);
-                if (!exists)
-                {
-                    var config = new UserNotificationConfigurationDto
-                    {
-                        UserId = user.UserId,
-                        CategoryId = categoryId,
-                        IsEnabled = true
-                    };
-                    await _userNotificationConfigurationService.AddAsync(config);
-                }
-            }
-
-            await _userNotificationConfigurationService.SaveChangesAsync();
         }
     }
 }

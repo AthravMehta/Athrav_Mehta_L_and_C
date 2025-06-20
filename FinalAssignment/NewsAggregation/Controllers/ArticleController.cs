@@ -32,6 +32,20 @@ namespace NewsAggregation.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.ArticleId }, result);
         }
 
+        [HttpPost("toggle-save")]
+        public async Task<IActionResult> ToggleSave([FromBody] ToggleSaveRequestDto request)
+        {
+            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
+            return Ok(result);
+        }
+
+        [HttpPost("reaction")]
+        public async Task<IActionResult> AddArticleReaction([FromBody] ArticleReactionRequestDto request)
+        {
+            var result = await _userArticleActionService.AddArticleReaction(request);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -43,24 +57,24 @@ namespace NewsAggregation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> GetAll([FromQuery] ArticleQueryDto query)
         {
-            var result = await _service.GetAllAsync(startDate, endDate);
+            var result = await _service.GetAllAsync(query);
             return Ok(result);
         }
 
-        [HttpPost("toggle-save")]
-        public async Task<IActionResult> ToggleSave([FromBody] ToggleSaveRequestDto request)
+        [HttpGet("saved")]
+        public async Task<IActionResult> GetAllSavedArticles()
         {
-            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
-            return Ok(result);
+            var savedArticles = await _service.GetSavedArticlesForCurrentUserAsync();
+            return Ok(savedArticles);
         }
 
-        // TODO: Implement this method
-        [HttpPost("reaction")]
-        public async Task<IActionResult> LikeDislikeArticleReaction([FromBody] ArticleReactionRequestDto request)
+
+        [HttpDelete("reaction")]
+        public async Task<IActionResult> DeleteArticleReaction([FromBody] int articleId)
         {
-            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
+            var result = await _userArticleActionService.DeleteArticleReaction(articleId);
             return Ok(result);
         }
     }

@@ -16,14 +16,18 @@ namespace NewsAggregation.Services
         private readonly IUserRepository _userRepository;
         private readonly ILogger<CrudBaseService<User>> _logger;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IUserNotificationConfigurationService _userNotificationConfigurationService;
 
-        public UserService(ICrudBaseRepository<User> repository, IMapper mapper, IUserRepository userRepository, ILogger<CrudBaseService<User>> logger, IJwtTokenService jwtTokenService, EncryptionService encryptionService) : base(repository, logger)
+        public UserService(ICrudBaseRepository<User> repository, IMapper mapper, IUserRepository userRepository, ILogger<CrudBaseService<User>> logger, 
+            IJwtTokenService jwtTokenService, EncryptionService encryptionService, IUserNotificationConfigurationService userNotificationConfigurationService)
+            : base(repository, logger)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _logger = logger;
             _jwtTokenService = jwtTokenService;
             _encryptionService = encryptionService;
+            _userNotificationConfigurationService = userNotificationConfigurationService;
         }
 
         public async Task<UserDataWithTokenDto> CreateUserAsync(UserCreateDto userDto)
@@ -42,7 +46,7 @@ namespace NewsAggregation.Services
             user.LastUpdatedDateTime = DateTime.UtcNow;
 
             await AddAsync(user);
-
+            await _userNotificationConfigurationService.CreateNotificationConfigForAllUsersAsync(null, user);
             var userReadDto = _mapper.Map<UserReadDto>(user);
 
             var roles = new List<string> { userReadDto.RoleId.ToString() };

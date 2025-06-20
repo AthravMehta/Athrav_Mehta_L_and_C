@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
+using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 
 namespace NewsAggregation.Repository
@@ -14,7 +15,49 @@ namespace NewsAggregation.Repository
             _context = context;
         }
 
-        public async Task<bool> ToggleSaveAsync(int userId, int articleId)
+        public async Task<bool> AddArticleReaction(int userId, ArticleReactionRequestDto articleReactionRequestDto)
+        {
+            
+            var existingReaction = await _context.UserArticleReactions
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.ArticleId == articleReactionRequestDto.ArticleId);
+
+            if (existingReaction != null)
+            {
+                if (existingReaction.Reaction == articleReactionRequestDto.ArticleReaction)
+                    return false;
+
+                existingReaction.Reaction = articleReactionRequestDto.ArticleReaction;
+                existingReaction.ActionCreatedTime = DateTime.UtcNow;
+                _context.UserArticleReactions.Update(existingReaction);
+            }
+            else
+            {
+                var newReaction = new UserArticleReaction
+                {
+                    UserId = userId,
+                    ArticleId = articleReactionRequestDto.ArticleId,
+                    Reaction = articleReactionRequestDto.ArticleReaction,
+                    ActionCreatedTime = DateTime.UtcNow
+                };
+                await _context.UserArticleReactions.AddAsync(newReaction);
+            }
+            return true;
+        }
+
+        public async Task<bool> DeleteArticleReaction(int userId, int articleId)
+        {
+            var existingReaction = await _context.UserArticleReactions
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.ArticleId == articleId);
+
+            if (existingReaction == null)
+                return false;
+
+            _context.UserArticleReactions.Remove(existingReaction);
+            return true;
+        }
+
+
+        public async Task<ToggleSaveResponseDto> ToggleSaveAsync(int userId, int articleId)
         {
             var existing = await _context.UserSavedArticles
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.ArticleId == articleId);
@@ -22,8 +65,11 @@ namespace NewsAggregation.Repository
             if (existing != null)
             {
                 _context.UserSavedArticles.Remove(existing);
-                await _context.SaveChangesAsync();
-                return false;
+                return new ToggleSaveResponseDto
+                {
+                    IsSaved = false,
+                    Message = "Article Unsaved Successfully"
+                };
             }
             else
             {
@@ -35,8 +81,25 @@ namespace NewsAggregation.Repository
                 };
                 _context.UserSavedArticles.Add(action);
                 await _context.SaveChangesAsync();
-                return true;
+                return new ToggleSaveResponseDto
+                {
+                    IsSaved = true,
+                    Message = "Article Saved Successfully"
+                };
             }
+        }
+
+        public async Task<IEnumerable<int>> GetSavedArticleIdsByUserIdAsync(int userId)
+        {
+            return await _context.UserSavedArticles
+                .Where(x => x.UserId == userId)
+                .Select(x => x.ArticleId)
+                .ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

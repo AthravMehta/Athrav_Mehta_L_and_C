@@ -42,25 +42,35 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
                 .WithMany(c => c.UserKeywords)
                 .HasForeignKey(uk => uk.CategoryId);
 
-            modelBuilder.Entity<UserNotification>()
-                .HasOne(un => un.User)
-                .WithMany(u => u.UserNotifications)
-                .HasForeignKey(un => un.UserId);
+            modelBuilder.Entity<UserNotification>(entity =>
+            {
+                entity.HasKey(e => e.UserNotificationId);
 
-            modelBuilder.Entity<UserNotification>()
-                .HasOne(un => un.Article)
-                .WithMany()
-                .HasForeignKey(un => un.ArticleId);
+                modelBuilder.Entity<UserNotification>()
+                    .HasOne(un => un.User)
+                    .WithMany(u => u.UserNotifications)
+                    .HasForeignKey(un => un.UserId);
 
-            modelBuilder.Entity<UserNotificationConfiguration>()
-                .HasOne(unc => unc.User)
-                .WithMany(u => u.UserNotificationConfigurations)
-                .HasForeignKey(unc => unc.UserId);
+                modelBuilder.Entity<UserNotification>()
+                    .HasOne(un => un.Article)
+                    .WithMany()
+                    .HasForeignKey(un => un.ArticleId);
+            });
 
-            modelBuilder.Entity<UserNotificationConfiguration>()
-                .HasOne(unc => unc.Category)
-                .WithMany()
-                .HasForeignKey(unc => unc.CategoryId);
+            modelBuilder.Entity<UserNotificationConfiguration>(entity =>
+            {
+                entity.HasKey(e => e.UserNotificationConfigurationId);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.UserNotificationConfigurations)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Category)
+                    .WithMany()
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<UserSavedArticle>()
                 .HasOne(usa => usa.User)

@@ -23,7 +23,7 @@ namespace NewsAggregation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetAllUserNotificationAsync();
             return Ok(result);
         }
     }

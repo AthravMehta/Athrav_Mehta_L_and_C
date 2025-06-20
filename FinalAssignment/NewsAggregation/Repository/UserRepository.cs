@@ -4,7 +4,7 @@ using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
-using Polly;
+using NewsAggregation.Enums;
 
 namespace NewsAggregation.Repository
 {
@@ -31,6 +31,7 @@ namespace NewsAggregation.Repository
                 .Include(u => u.UserNotifications)
                 .Include(u => u.UserNotificationConfigurations)
                 .Include(u => u.UserKeywords)
+                .Where(user => user.RoleId != RoleEnum.Admin)
                 .ToListAsync();
 
             return _mapper.Map<List<UserReadDto>>(users);

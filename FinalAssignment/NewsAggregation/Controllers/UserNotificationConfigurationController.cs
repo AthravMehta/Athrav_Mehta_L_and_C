@@ -9,7 +9,6 @@ namespace NewsAggregation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
     public class UserNotificationConfigurationController : ControllerBase
     {
         private readonly ILogger<UserNotificationConfigurationController> _logger;
@@ -22,6 +21,7 @@ namespace NewsAggregation.Controllers
         }
 
         [HttpPut("{id}")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
         public async Task<IActionResult> Update(int id, [FromBody] UserNotificationConfigurationDto dto)
         {
             if (!ModelState.IsValid)
@@ -35,6 +35,7 @@ namespace NewsAggregation.Controllers
         }
 
         [HttpGet]
+        [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
         public async Task<IActionResult> GetAll()
         {
             var result = await _service.GetAllUserConfigurationAsync();
