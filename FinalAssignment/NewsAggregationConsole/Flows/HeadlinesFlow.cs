@@ -40,7 +40,7 @@ namespace NewsAggregationConsole.Flows
 
         private static async Task ShowArticlesForToday(ArticleService articleService, UserReadDto user)
         {
-            var today = DateTime.Today;
+            var today = DateTime.Today.ToString("yyyy-MM-dd");
             var query = new ArticleQueryDto
             {
                 StartDate = today,
@@ -72,20 +72,17 @@ namespace NewsAggregationConsole.Flows
 
             var query = new ArticleQueryDto
             {
-                StartDate = startDate,
-                EndDate = endDate,
+                StartDate = startDate.ToString("yyyy-MM-dd"),
+                EndDate = endDate.ToString("yyyy-MM-dd"),
                 CategoryId = selectedCategory.CategoryId
             };
 
             List<ArticleDto> articles;
             if (selectedCategory.CategoryId == 0)
             {
-                articles = await articleService.GetFilteredArticlesAsync(query);
+                query.CategoryId = null;
             }
-            else
-            {
-                articles = await articleService.GetFilteredArticlesAsync(query);
-            }
+            articles = await articleService.GetFilteredArticlesAsync(query);
 
             await ShowArticlesPage(articles, user, articleService);
         }
@@ -102,8 +99,11 @@ namespace NewsAggregationConsole.Flows
                 if (!articles.Any())
                 {
                     Console.WriteLine("No Articles Found!!");
-                    continue;
+                    Console.WriteLine("Press Enter to go back...");
+                    Console.ReadLine();
+                    return; 
                 }
+
                 foreach (var article in articles)
                 {
                     Console.WriteLine($"{article.ArticleId} | {article.Title}");
@@ -138,6 +138,7 @@ namespace NewsAggregationConsole.Flows
                 }
             }
         }
+
 
         private static async Task ShowArticleDetails(ArticleDto article, UserReadDto user, ArticleService articleService)
         {

@@ -52,8 +52,8 @@ namespace NewsAggregationConsole.Flows
                 var queryOptions = new ArticleQueryDto
                 {
                     SearchText = searchText,
-                    StartDate = startDate,
-                    EndDate = endDate,
+                    StartDate = startDate?.ToString("yyyy-MM-dd"),
+                    EndDate = endDate?.ToString("yyyy-MM-dd"),
                     SortByLikes = sortChoice == 1,
                     SortByDislikes = sortChoice == 2
                 };
