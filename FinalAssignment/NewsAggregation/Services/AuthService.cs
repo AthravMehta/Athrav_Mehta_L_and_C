@@ -3,6 +3,7 @@ using NewsAggregation.Entities;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Services
 {
@@ -24,10 +25,10 @@ namespace NewsAggregation.Services
         {
             User user = await _userService.GetUserByName(userDto.Username);
             if (user == null)
-                throw new ApiException("Invalid Username. User Don't Exist!");
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid Username. User Don't Exist!");
 
             if (!_userService.VerifyPassword(user, userDto.Password))
-                throw new ApiException("Invalid username or password.");
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid username or password.");
 
             var roles = new List<string> { user.RoleId.ToString() };
             var userDataWithToken = new UserDataWithTokenDto

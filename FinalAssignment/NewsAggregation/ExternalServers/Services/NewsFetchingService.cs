@@ -30,7 +30,7 @@ namespace NewsAggregation.ExternalServers.Services
                     _logger.LogError(ex, "Error occurred while fetching news");
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(3), stoppingToken);
             }
         }
     }

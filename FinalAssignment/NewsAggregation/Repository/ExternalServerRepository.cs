@@ -2,6 +2,7 @@
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
+using Polly;
 
 namespace NewsAggregation.Repository
 {
@@ -11,7 +12,7 @@ namespace NewsAggregation.Repository
 
         public ExternalServerRepository(NewsAggregationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(DbContext));
         }
 
         public async Task<IEnumerable<ExternalServer>> GetAllAsync(bool? isActiveFilter = null)

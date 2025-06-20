@@ -11,7 +11,7 @@ namespace NewsAggregation.Repository
 
         public UserNotificationRepository(NewsAggregationDbContext context)
         {
-            _dbContext = context;
+            _dbContext = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task AddRangeAsync(IEnumerable<UserNotification> notifications)

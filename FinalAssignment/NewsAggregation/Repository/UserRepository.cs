@@ -5,6 +5,7 @@ using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Enums;
+using Polly;
 
 namespace NewsAggregation.Repository
 {
@@ -15,7 +16,7 @@ namespace NewsAggregation.Repository
 
         public UserRepository(NewsAggregationDbContext dbContext, IMapper mapper)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(DbContext));
             _mapper = mapper;   
         }
         public async Task<User> GetUserByName(string username)

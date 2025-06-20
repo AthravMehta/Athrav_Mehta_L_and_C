@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
-using NewsAggregation.Configurations;
 using NewsAggregation.Enums;
+using NewsAggregation.Configurations;
 
 namespace NewsAggregation.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
     public class ArticleController : ControllerBase
     {
@@ -15,7 +15,10 @@ namespace NewsAggregation.Controllers
         private readonly IArticleService _service;
         private readonly IUserArticleActionService _userArticleActionService;
 
-        public ArticleController(ILogger<ArticleController> logger, IArticleService service, IUserArticleActionService userArticleActionService)
+        public ArticleController(
+            ILogger<ArticleController> logger,
+            IArticleService service,
+            IUserArticleActionService userArticleActionService)
         {
             _logger = logger;
             _service = service;
@@ -59,8 +62,16 @@ namespace NewsAggregation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] ArticleQueryDto query)
         {
-            var result = await _service.GetAllAsync(query);
-            return Ok(result);
+            try
+            {
+                var articles = await _service.GetAllAsync(query);
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching articles");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
         }
 
         [HttpGet("saved")]
@@ -69,7 +80,6 @@ namespace NewsAggregation.Controllers
             var savedArticles = await _service.GetSavedArticlesForCurrentUserAsync();
             return Ok(savedArticles);
         }
-
 
         [HttpDelete("reaction")]
         public async Task<IActionResult> DeleteArticleReaction([FromBody] int articleId)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Controllers
 {
@@ -24,18 +25,10 @@ namespace NewsAggregation.Controllers
         public async Task<ActionResult> Login(LoginDto userDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid Auth Object");
 
-            try
-            {
-                UserDataWithTokenDto userDataWithToken = await _authService.LoginAsync(userDto);
-                return Ok(userDataWithToken);
-            }
-            catch (ApiException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return Unauthorized(new { error = ex.Message });
-            }
+            UserDataWithTokenDto userDataWithToken = await _authService.LoginAsync(userDto);
+            return Ok(userDataWithToken);
         }
     }
 }

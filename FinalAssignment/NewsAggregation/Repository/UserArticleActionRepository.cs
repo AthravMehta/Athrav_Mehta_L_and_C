@@ -12,7 +12,7 @@ namespace NewsAggregation.Repository
 
         public UserArticleActionRepository(NewsAggregationDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task<bool> AddArticleReaction(int userId, ArticleReactionRequestDto articleReactionRequestDto)

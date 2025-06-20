@@ -1,53 +1,44 @@
-﻿using NewsAggregation.Entities;
+﻿using AutoMapper;
+using NewsAggregation.Entities;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
 namespace NewsAggregation.Services
 {
-
-    // TODO: Modify CRUD BASE SERVICE and then edit this external server
     public class UserKeywordService : IUserKeywordService
     {
+        private readonly IMapper _mapper;
         private readonly ICrudBaseRepository<UserKeyword> _userKeywordRepo;
-        public UserKeywordService(ICrudBaseRepository<UserKeyword> userKeywordRepo)
+        public UserKeywordService(IMapper mapper, ICrudBaseRepository<UserKeyword> userKeywordRepo)
         {
             _userKeywordRepo = userKeywordRepo;
+            _mapper = mapper;
         }
 
-        // TODO: Configure Mapper here
-        public async Task<UserKeywordDto> AddAsync(UserKeywordDto dto)
+        public async Task<UserKeywordDto> AddAsync(UserKeywordDto userKeywordDto)
         {
-            var entity = new UserKeyword
-            {
-                UserId = dto.UserId,
-                CategoryId = dto.CategoryId,
-                Keyword = dto.Keyword,
-                IsEnabled = dto.IsEnabled
-            };
+            var entity = _mapper.Map<UserKeyword>(userKeywordDto);
 
             await _userKeywordRepo.AddAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.UserKeywordId = entity.UserKeywordId;
-            return dto;
+            userKeywordDto.UserKeywordId = entity.UserKeywordId;
+            return userKeywordDto;
         }
 
-        public async Task<UserKeywordDto> UpdateAsync(int id, UserKeywordDto dto)
+        public async Task<UserKeywordDto> UpdateAsync(int id, UserKeywordDto userKeywordDto)
         {
             var entity = await _userKeywordRepo.GetByIdAsync(id);
             if (entity == null) return null;
 
-            entity.UserId = dto.UserId;
-            entity.CategoryId = dto.CategoryId;
-            entity.Keyword = dto.Keyword;
-            entity.IsEnabled = dto.IsEnabled;
+            entity = _mapper.Map<UserKeyword>(userKeywordDto);
 
             await _userKeywordRepo.UpdateAsync(entity);
             await _userKeywordRepo.SaveChangesAsync();
 
-            dto.UserKeywordId = entity.UserKeywordId;
-            return dto;
+            userKeywordDto.UserKeywordId = entity.UserKeywordId;
+            return userKeywordDto;
         }
 
         public async Task DeleteAsync(int id)
@@ -65,27 +56,13 @@ namespace NewsAggregation.Services
             var entity = await _userKeywordRepo.GetByIdAsync(id);
             if (entity == null) return null;
 
-            return new UserKeywordDto
-            {
-                UserKeywordId = entity.UserKeywordId,
-                UserId = entity.UserId,
-                CategoryId = entity.CategoryId,
-                Keyword = entity.Keyword,
-                IsEnabled = entity.IsEnabled
-            };
+            return _mapper.Map<UserKeywordDto>(entity);
         }
 
         public async Task<IEnumerable<UserKeywordDto>> GetAllAsync()
         {
             var entities = await _userKeywordRepo.GetAllAsync();
-            return entities.Select(entity => new UserKeywordDto
-            {
-                UserKeywordId = entity.UserKeywordId,
-                UserId = entity.UserId,
-                CategoryId = entity.CategoryId,
-                Keyword = entity.Keyword,
-                IsEnabled = entity.IsEnabled
-            });
+            return _mapper.Map<IEnumerable<UserKeywordDto>>(entities);
         }
     }
 }

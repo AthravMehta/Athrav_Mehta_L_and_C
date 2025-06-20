@@ -11,6 +11,7 @@
             ContentTypeError = 415,
             DatabaseError = 422,
             TooEarly = 425,
+            InternalServerError = 500,
             NullObject = 700,
             Validation = 701,
             Duplicate = 702,
@@ -48,6 +49,9 @@
             },
             {
                 ErrorEnum.TooEarly, "Result Unavailable - Processing In Progress"
+            },
+            {
+                ErrorEnum.InternalServerError, $"Unexpected error Occured!"
             },
         };
 

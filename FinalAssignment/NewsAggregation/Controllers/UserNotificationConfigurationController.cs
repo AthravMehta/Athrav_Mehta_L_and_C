@@ -46,16 +46,8 @@ namespace NewsAggregation.Controllers
         [HttpPost("Initialize")]
         public async Task<IActionResult> InitializeNotificationConfigurations()
         {
-            try
-            {
-                await _service.InitializeNotificationConfigurationsAsync();
-                return Ok(new { Message = "User notification configurations initialized successfully." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error initializing user notification configurations.");
-                return StatusCode(500, "An error occurred while initializing configurations.");
-            }
+            await _service.InitializeNotificationConfigurationsAsync();
+            return Ok(new { Message = "User notification configurations initialized successfully." });
         }
     }
 }

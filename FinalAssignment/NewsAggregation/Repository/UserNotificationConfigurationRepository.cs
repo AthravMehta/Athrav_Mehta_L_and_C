@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
-using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 
 namespace NewsAggregation.Repository

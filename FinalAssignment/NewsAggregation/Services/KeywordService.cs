@@ -15,18 +15,9 @@ namespace NewsAggregation.Services
 
         public async Task<List<Keywords>> GetAllKeywordsAsync()
         {
-            try
-            {
-                IEnumerable<Keywords> keywordsEnumerable = await _keywordRepo.GetAllAsync();
-                var keywordsList = keywordsEnumerable.ToList();
-                return keywordsList;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error fetching keywords: {ex.Message}");
-                return new List<Keywords>();
-            }
+            IEnumerable<Keywords> keywordsEnumerable = await _keywordRepo.GetAllAsync();
+            var keywordsList = keywordsEnumerable.ToList();
+            return keywordsList;
         }
-
     }
 }

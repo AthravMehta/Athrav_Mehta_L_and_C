@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Enums;
+﻿using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 
 namespace NewsAggregation.Models
 {
@@ -12,8 +13,6 @@ namespace NewsAggregation.Models
         public DateTime PublishedDate { get; set; }
         public int ExternalServerId { get; set; }
         public int CategoryId { get; set; }
-        public int UserArticleReactions { get; set; }   
-        public int UserSavedArticles { get; set; }
         public int LikeCount { get; set; }
         public int DislikeCount { get; set; }
         public DateTime CreatedDateTime { get; set; }
@@ -23,9 +22,9 @@ namespace NewsAggregation.Models
     }
     public class ArticleQueryDto
     {
-        public string SearchText { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public string? SearchText { get; set; }
+        public string? StartDate { get; set; }
+        public string? EndDate { get; set; }
         public int? CategoryId { get; set; }
         public bool SortByLikes { get; set; }
         public bool SortByDislikes { get; set; }

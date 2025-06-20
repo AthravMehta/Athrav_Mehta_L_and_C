@@ -5,6 +5,7 @@ using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 using System.Text.RegularExpressions;
 
 namespace NewsAggregation.Services
@@ -81,17 +82,16 @@ namespace NewsAggregation.Services
             return _encryptionService.Encrypt(password);
         }
 
-        // TODO: Proper Exception code can be returned.
         private void ValidateUserCreateDto(UserCreateDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Username) || dto.Username.Length < 8)
-                throw new ApiException("Username must be at least 8 characters long.");
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Username must be at least 8 characters long.");
 
             if (string.IsNullOrWhiteSpace(dto.Password) || !IsValidPassword(dto.Password))
-                throw new ApiException("Password must be at least 8 characters long and contain uppercase, lowercase, and special character.");
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Password must be at least 8 characters long and contain uppercase, lowercase, and special character.");
 
             if (string.IsNullOrWhiteSpace(dto.Email) || !IsValidEmail(dto.Email))
-                throw new ApiException("Email format is invalid.");
+                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Email format is invalid.");
         }
 
         private bool IsValidPassword(string password)

@@ -5,6 +5,7 @@ using NewsAggregation.Entities;
 using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
+using System.Globalization;
 
 namespace NewsAggregation.Repository
 {
@@ -14,9 +15,12 @@ namespace NewsAggregation.Repository
         private readonly IMapper _mapper;
         private readonly RequestContext _requestContext;
 
-        public ArticleRepository(NewsAggregationDbContext context, IMapper mapper, RequestContext requestContext)
+        public ArticleRepository(
+            NewsAggregationDbContext context,
+            IMapper mapper,
+            RequestContext requestContext)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(ArticleRepository));
             _mapper = mapper;
             _requestContext = requestContext;
         }
@@ -32,14 +36,18 @@ namespace NewsAggregation.Repository
                     a.Content.Contains(articleQueryDto.SearchText));
             }
 
-            if (articleQueryDto.StartDate.HasValue)
+            if (!string.IsNullOrWhiteSpace(articleQueryDto.StartDate) &&
+        DateTime.TryParseExact(articleQueryDto.StartDate, "yyyy-MM-dd",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime startDate))
             {
-                articleQuery = articleQuery.Where(a => a.PublishedDate >= articleQueryDto.StartDate.Value);
+                articleQuery = articleQuery.Where(a => a.PublishedDate >= startDate);
             }
 
-            if (articleQueryDto.EndDate.HasValue)
+            if (!string.IsNullOrWhiteSpace(articleQueryDto.EndDate) &&
+                DateTime.TryParseExact(articleQueryDto.EndDate, "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime endDate))
             {
-                articleQuery = articleQuery.Where(a => a.PublishedDate <= articleQueryDto.EndDate.Value);
+                articleQuery = articleQuery.Where(a => a.PublishedDate <= endDate);
             }
 
             if (articleQueryDto.CategoryId.HasValue && articleQueryDto.CategoryId.Value > 0)
@@ -64,6 +72,7 @@ namespace NewsAggregation.Repository
                 .Include(a => a.UserArticleReactions)
                 .ToListAsync();
         }
+
         public async Task<IEnumerable<Article>> GetArticlesByIdsAsync(IEnumerable<int> articleIds)
         {
             if (articleIds == null || !articleIds.Any())

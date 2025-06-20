@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using NewsAggregation.Entities;
 using NewsAggregation.Models;
-using NewsAggregation.Repository;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
@@ -16,7 +15,13 @@ namespace NewsAggregation.Services
         private readonly RequestContext _requestContext;
         private readonly IMapper _mapper;
 
-        public ArticleService(IUserArticleActionService userArticleActionService, ICrudBaseRepository<Article> crudBaseRepository, IArticleRepository articleRepository, ILogger<ArticleService> logger, RequestContext requestContext , IMapper mapper)
+        public ArticleService(
+            IUserArticleActionService userArticleActionService,
+            ICrudBaseRepository<Article> crudBaseRepository,
+            IArticleRepository articleRepository,
+            ILogger<ArticleService> logger,
+            RequestContext requestContext,
+            IMapper mapper)
         {
             _userArticleActionService = userArticleActionService;
             _curdbaseRepository = crudBaseRepository;
@@ -37,38 +42,29 @@ namespace NewsAggregation.Services
 
         public async Task<IEnumerable<Article>> AddAllArticlesAsync(IEnumerable<Article> articles)
         {
-            try
-            {
-                var articlesToAdd = new List<Article>();
+            var articlesToAdd = new List<Article>();
 
-                foreach (var article in articles)
-                {
-                    if (!await this.ArticleExistsAsync(article))
-                    {
-                        articlesToAdd.Add(article);
-                    }
-                }
-
-                if (articlesToAdd.Any())
-                {
-                    await _articleRepository.AddRangeAsync(articlesToAdd);
-                    await _curdbaseRepository.SaveChangesAsync();
-                    return articlesToAdd;
-                }
-                return Enumerable.Empty<Article>();
-            }
-            catch (Exception ex)
+            foreach (var article in articles)
             {
-                _logger.LogError(ex, "Failed to save articles");
-                throw;
+                if (!await this.ArticleExistsAsync(article))
+                {
+                    articlesToAdd.Add(article);
+                }
             }
+
+            if (articlesToAdd.Any())
+            {
+                await _articleRepository.AddRangeAsync(articlesToAdd);
+                await _curdbaseRepository.SaveChangesAsync();
+                return articlesToAdd;
+            }
+            return Enumerable.Empty<Article>();
         }
 
         public async Task<ArticleDto> GetByIdAsync(int id)
         {
             var entity = await _curdbaseRepository.GetByIdAsync(id);
             if (entity == null) return null;
-
             return _mapper.Map<ArticleDto>(entity);
         }
 
@@ -82,7 +78,6 @@ namespace NewsAggregation.Services
         {
             var userId = _requestContext.UserId;
             var savedArticleIds = await _userArticleActionService.GetSavedArticleIdsByUserIdAsync();
-
             var articles = await _articleRepository.GetArticlesByIdsAsync(savedArticleIds);
             return _mapper.Map<IEnumerable<ArticleDto>>(articles);
         }
