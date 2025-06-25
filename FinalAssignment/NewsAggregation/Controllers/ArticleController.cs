@@ -62,16 +62,8 @@ namespace NewsAggregation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] ArticleQueryDto query)
         {
-            try
-            {
-                var articles = await _service.GetAllAsync(query);
-                return Ok(articles);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching articles");
-                return StatusCode(500, new { error = "Internal server error" });
-            }
+             var articles = await _service.GetAllAsync(query);
+             return Ok(articles);
         }
 
         [HttpGet("saved")]

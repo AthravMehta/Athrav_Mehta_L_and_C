@@ -6,7 +6,7 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
 {
     public class NewsAggregationDbContext : AuditDbBaseContext
     {
-        public NewsAggregationDbContext(DbContextOptions<NewsAggregationDbContext> options) : base(options)
+        public NewsAggregationDbContext(DbContextOptions<NewsAggregationDbContext> options, RequestContext requestContext) : base(options, requestContext)
         {
         }
 

@@ -1,5 +1,6 @@
 ﻿using NewsAggregation.Notifications.Contracts;
 using NewsAggregation.Notifications;
+using NewsAggregation.Constants;
 
 namespace NewsAggregation.Notifications
 {
@@ -16,7 +17,7 @@ namespace NewsAggregation.Notifications
         {
             return type switch
             {
-                "Email" => _provider.GetRequiredService<EmailNotificationSender>(),
+                AppConstants.Email => _provider.GetRequiredService<EmailNotificationSender>(),
                 _ => throw new NotImplementedException()
             };
         }

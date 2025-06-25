@@ -1,4 +1,5 @@
-﻿using NewsAggregation.ExternalServers.Adapters;
+﻿using NewsAggregation.Constants;
+using NewsAggregation.ExternalServers.Adapters;
 using NewsAggregation.ExternalServers.Adapters.Contracts;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 
@@ -10,9 +11,9 @@ namespace NewsAggregation.ExternalServers.Factory
         {
             return baseUrl switch
             {
-                string s when s.Contains("newsapi.org") => new NewsApiAdapter(),
-                string s when s.Contains("thenewsapi.com") => new TheNewsApiAdapter(),
-                _ => throw new NotSupportedException("Unsupported API")
+                string s when s.Contains(AppConstants.NewsApiBase) => new NewsApiAdapter(),
+                string s when s.Contains(AppConstants.TheNewsApiBase) => new TheNewsApiAdapter(),
+                _ => throw new NotSupportedException(AppConstants.UnsupportedApi)
             };
         }
     }

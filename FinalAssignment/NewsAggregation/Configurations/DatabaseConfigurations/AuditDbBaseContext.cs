@@ -5,10 +5,11 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
 {
     public class AuditDbBaseContext : DbContext
     {
-        public AuditDbBaseContext(DbContextOptions options) : base(options)
-        {  
+        private readonly RequestContext _requestContext;
+        public AuditDbBaseContext(DbContextOptions options, RequestContext requestContext) : base(options)
+        {
+            _requestContext = requestContext;
         }
-        // TODO: Write Logic for CreatedBy and ModifiedBy + Verify Changes
         private void SetAuditProperties()
         {
             List<EntityEntry> updatedEntries = this.ChangeTracker.Entries()
@@ -23,8 +24,10 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
                     if (entry.State == EntityState.Added)
                     {
                         entity.CreatedDateTime = DateTime.UtcNow;
+                        entity.CreatedBy = _requestContext.Email;
                     }
                     entity.ModifiedDateTime = DateTime.UtcNow;
+                    entity.ModifiedBy = _requestContext.Email;
                 }
             }
         }

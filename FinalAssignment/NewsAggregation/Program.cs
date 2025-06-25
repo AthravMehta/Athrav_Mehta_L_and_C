@@ -19,15 +19,16 @@ using NewsAggregation.Notifications;
 using Hangfire;
 using NewsAggregation.ExternalServers.Services;
 using NewsAggregation.Middlewares;
+using NewsAggregation.Constants;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Authentication Configuration using JWT
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-string issuer = jwtSettings["Issuer"]!;
-string audience = jwtSettings["Audience"]!;
-string secretKey = jwtSettings["SecretKey"]!;
+var jwtSettings = builder.Configuration.GetSection(AppConstants.JwtSection);
+string issuer = jwtSettings[AppConstants.JwtIssuer]!;
+string audience = jwtSettings[AppConstants.JwtAudience]!;
+string secretKey = jwtSettings[AppConstants.JwtSecretKey]!;
 
 builder.Services.AddAuthentication(options =>
 {
@@ -53,7 +54,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // Logger Configuration
-var logDirectory = Path.Combine(AppContext.BaseDirectory, "Logs");
+var logDirectory = Path.Combine(AppContext.BaseDirectory, AppConstants.LogsFolder);
 Directory.CreateDirectory(logDirectory); // Ensure Directory Exists
 
 Log.Logger = new LoggerConfiguration()
@@ -62,7 +63,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-string databaseConnectionString = builder.Configuration.GetConnectionString(name: "DatabaseConnection")!;
+string databaseConnectionString = builder.Configuration.GetConnectionString(name: AppConstants.DatabaseConnection)!;
 
 // Database Configuration
 builder.Services.AddDbContext<NewsAggregationDbContext>(optionsAction => optionsAction.UseSqlServer(databaseConnectionString));
@@ -118,11 +119,11 @@ builder.Services.AddDataProtection();
 builder.Services.AddScoped<EncryptionService>();
 
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(AppConstants.EmailSettingsSection));
 builder.Services.AddScoped<RequestContext>();
 builder.Services.AddHostedService<NewsFetchingService>();
 
-builder.Services.AddHttpClient("NewsAPI")
+builder.Services.AddHttpClient(AppConstants.NewsApi)
     .AddTransientHttpErrorPolicy(policyBuilder =>
     policyBuilder.WaitAndRetryAsync(
         3,
