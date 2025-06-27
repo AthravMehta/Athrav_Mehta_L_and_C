@@ -19,6 +19,7 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<UserArticleReaction> UserArticleReactions { get; set; }
         public DbSet<UserSavedArticle> UserSavedArticles { get; set; }
+        public DbSet<UserArticleReport> UserArticleReports { get; set; }
         public DbSet<UserNotificationConfiguration> UserNotificationConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -92,6 +93,20 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
                 .WithMany(a => a.UserArticleReactions)
                 .HasForeignKey(uar => uar.ArticleId);
 
+            modelBuilder.Entity<UserArticleReport>()
+                .HasOne(uar => uar.User)
+                .WithMany(uar => uar.UserArticleReports)
+                .HasForeignKey(uar => uar.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserArticleReport>()
+                .HasOne(uar => uar.Article)
+                .WithMany(uar => uar.UserArticleReports)
+                .HasForeignKey(uar => uar.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Category>().HasData(SeedData.GetCategories());
+            modelBuilder.Entity<Keywords>().HasData(SeedData.GetKeywords());
 
             base.OnModelCreating(modelBuilder);
         }

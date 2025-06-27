@@ -2,7 +2,7 @@
 {
     public enum ReactionEnum
     {
-        Like,
-        Dislike
+        Like = 0,
+        Dislike = 1
     }
 }

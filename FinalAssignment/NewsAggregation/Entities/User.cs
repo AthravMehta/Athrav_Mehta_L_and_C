@@ -32,6 +32,7 @@ namespace NewsAggregation.Entities
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserSavedArticle> UserSavedArticles{ get; set; } = new List<UserSavedArticle>();
+        public ICollection<UserArticleReport> UserArticleReports{ get; set; } = new List<UserArticleReport>();
         public ICollection<UserNotification> UserNotifications { get; set; } = new List<UserNotification>();
         public ICollection<UserNotificationConfiguration> UserNotificationConfigurations { get; set; } = new List<UserNotificationConfiguration>();
         public ICollection<UserKeyword> UserKeywords { get; set; } = new List<UserKeyword>();

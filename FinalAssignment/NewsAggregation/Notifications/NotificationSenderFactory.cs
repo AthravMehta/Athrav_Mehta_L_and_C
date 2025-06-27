@@ -17,7 +17,7 @@ namespace NewsAggregation.Notifications
         {
             return type switch
             {
-                AppConstants.Email => _provider.GetRequiredService<EmailNotificationSender>(),
+                NotificationType.Email => _provider.GetRequiredService<EmailNotificationSender>(),
                 _ => throw new NotImplementedException()
             };
         }

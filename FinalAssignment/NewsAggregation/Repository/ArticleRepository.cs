@@ -73,6 +73,12 @@ namespace NewsAggregation.Repository
                 .ToListAsync();
         }
 
+        public async Task<Article> GetArticleByIdAsync(int articleId)
+        {
+            return await _context.Articles
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+        }
+
         public async Task<IEnumerable<Article>> GetArticlesByIdsAsync(IEnumerable<int> articleIds)
         {
             if (articleIds == null || !articleIds.Any())
@@ -91,6 +97,19 @@ namespace NewsAggregation.Repository
         public async Task<bool> ArticleExistsAsync(Article article)
         {
             return await _context.Articles.AnyAsync(a => a.Url == article.Url);
+        }
+
+        public async Task<bool> UpdateArticle(Article article)
+        {
+            _context.Update(article);
+            return await this.SaveChangesAsync();
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            if (await _context.SaveChangesAsync() > 0)
+                return true;
+            else return false;
         }
     }
 }

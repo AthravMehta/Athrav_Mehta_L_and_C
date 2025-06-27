@@ -29,6 +29,11 @@ namespace NewsAggregation.Configurations.FluentApiConfigurations
                 .WithOne(ua => ua.Article)
                 .HasForeignKey(ua => ua.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(a => a.UserArticleReports)
+                .WithOne(ua => ua.Article)
+                .HasForeignKey(ua => ua.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

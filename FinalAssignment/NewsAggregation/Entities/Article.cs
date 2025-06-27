@@ -1,6 +1,7 @@
 ﻿using NewsAggregation.Configurations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using NewsAggregation.Enums;
 
 namespace NewsAggregation.Entities
 {
@@ -19,10 +20,13 @@ namespace NewsAggregation.Entities
         public string Url { get; set; }
         public DateTime PublishedDate { get; set; }
         public int CategoryId { get; set; }
+        public bool IsHidden { get; set; } = false;
+        public HideReasonEnum HideReason { get; set; } = HideReasonEnum.Other;
 
         [ForeignKey(nameof(ExternalServerId))]
         public int ExternalServerId { get; set; }
         public ICollection<UserArticleReaction> UserArticleReactions { get; set; } = new List<UserArticleReaction>();
+        public ICollection<UserArticleReport> UserArticleReports { get; set; } = new List<UserArticleReport>();
         public ICollection<UserSavedArticle> UserSavedArticles { get; set; } = new List<UserSavedArticle>();
     }
 

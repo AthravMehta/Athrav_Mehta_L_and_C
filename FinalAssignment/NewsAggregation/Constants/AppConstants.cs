@@ -2,6 +2,8 @@
 {
     public static class AppConstants
     {
+        public const int ReportThreshold = 3;
+
         // JWT
         public const string JwtSection = "Jwt";
         public const string JwtIssuer = "Issuer";
@@ -22,9 +24,5 @@
         public const string NewsApiBase = "newsapi.org";
         public const string TheNewsApiBase = "thenewsapi.com";
         public const string UnsupportedApi = "Unsupported API";
-
-        // Notification Types
-        public const string Email = "Email";
-
     }
 }

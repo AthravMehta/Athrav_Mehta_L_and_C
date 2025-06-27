@@ -74,7 +74,11 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 
 builder.Services.AddHttpClient();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    );
+
 
 //TODO: Add services to the container.
 //TODO: Apply Filter/Sorting in GET ALL API's

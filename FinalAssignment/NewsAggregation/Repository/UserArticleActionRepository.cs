@@ -97,6 +97,21 @@ namespace NewsAggregation.Repository
                 .ToListAsync();
         }
 
+        public async Task<bool> HasUserReportedArticleAsync(int articleId, int userId)
+        => await _context.UserArticleReports
+            .AnyAsync(r => r.ArticleId == articleId && r.UserId == userId);
+
+        public async Task AddReportAsync(UserArticleReport report)
+        {
+            _context.UserArticleReports.Add(report);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetReportCountForArticleAsync(int articleId) {
+            return await _context.UserArticleReports
+                .CountAsync(r => r.ArticleId == articleId);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

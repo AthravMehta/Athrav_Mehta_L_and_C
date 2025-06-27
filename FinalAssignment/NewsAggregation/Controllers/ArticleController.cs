@@ -3,6 +3,7 @@ using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
 using NewsAggregation.Enums;
 using NewsAggregation.Configurations;
+using NewsAggregation.Exceptions;
 
 namespace NewsAggregation.Controllers
 {
@@ -62,8 +63,8 @@ namespace NewsAggregation.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] ArticleQueryDto query)
         {
-             var articles = await _service.GetAllAsync(query);
-             return Ok(articles);
+            var articles = await _service.GetAllAsync(query);
+            return Ok(articles);
         }
 
         [HttpGet("saved")]
@@ -78,6 +79,14 @@ namespace NewsAggregation.Controllers
         {
             var result = await _userArticleActionService.DeleteArticleReaction(articleId);
             return Ok(result);
+        }
+
+        [HttpPost("{articleId}/report")]
+        public async Task<IActionResult> ReportArticle(UserArticleReportDto userArticleReportDto)
+        {
+            await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
+            return Ok(new { Message = "Article reported successfully" });
+
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
@@ -59,9 +60,9 @@ namespace NewsAggregation.Services
                 token = token
             };
         }
-        public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync(RoleEnum role = RoleEnum.User)
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var users = await _userRepository.GetAllUsersAsync(role);
             return users;
         }
 

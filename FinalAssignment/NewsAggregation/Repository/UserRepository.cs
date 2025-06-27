@@ -25,14 +25,14 @@ namespace NewsAggregation.Repository
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<List<UserReadDto>> GetAllUsersAsync()
+        public async Task<List<UserReadDto>> GetAllUsersAsync(RoleEnum role = RoleEnum.User)
         {
-            var users = await _dbContext.Users
+            var users = _dbContext.Users
                 .Include(u => u.UserSavedArticles)
                 .Include(u => u.UserNotifications)
                 .Include(u => u.UserNotificationConfigurations)
                 .Include(u => u.UserKeywords)
-                .Where(user => user.RoleId != RoleEnum.Admin)
+                .Where(user => user.RoleId == role)
                 .ToListAsync();
 
             return _mapper.Map<List<UserReadDto>>(users);
