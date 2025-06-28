@@ -30,16 +30,23 @@ namespace NewsAggregationConsole.Helpers
         {
             Console.Clear();
             Console.WriteLine("External Servers List:");
-            Console.WriteLine("--------------------------------------------------------------------------------");
-            Console.WriteLine("ID                                   | Name                | Active | Last Accessed");
-            Console.WriteLine("--------------------------------------------------------------------------------");
+            Console.WriteLine("---------------------------------------------------------------------------------------------");
+            Console.WriteLine("{0,-10} | {1,-20} | {2,-6} | {3,-20}", "ID", "Name", "Active", "Last Accessed");
+            Console.WriteLine("---------------------------------------------------------------------------------------------");
 
             foreach (var s in servers)
             {
-                Console.WriteLine($"{s.ExternalServerId} | {s.ServerName,-20} | {(s.IsActive ? "Yes" : "No"),-6}");
+                Console.WriteLine(
+                    "{0,-10} | {1,-20} | {2,-6} | {3,-20}",
+                    s.ExternalServerId,
+                    s.ServerName,
+                    s.IsActive ? "Yes" : "No",
+                    s.ModifiedDateTime?.ToString("yyyy-MM-dd HH:mm:ss")
+                );
             }
-            Console.WriteLine("--------------------------------------------------------------------------------");
+            Console.WriteLine("---------------------------------------------------------------------------------------------");
         }
+
 
         public static void ShowExternalServerDetails(ExternalServerDto server)
         {

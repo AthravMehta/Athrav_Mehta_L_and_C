@@ -150,8 +150,9 @@ namespace NewsAggregationConsole.Flows
                 Console.WriteLine("1. Save Article");
                 Console.WriteLine("2. Like Article");
                 Console.WriteLine("3. Dislike Article");
-                Console.WriteLine("4. Back");
-                Console.WriteLine("5. Logout");
+                Console.WriteLine("4. Report Article");
+                Console.WriteLine("5. Back");
+                Console.WriteLine("6. Logout");
 
                 int choice = InputHelper.GetInt("Choose option: ", 1, 5);
 
@@ -187,9 +188,21 @@ namespace NewsAggregationConsole.Flows
                         break;
 
                     case 4:
-                        return;
+                        var reportReason = InputHelper.GetString("Enter report reason: ");
+                        UserArticleReportResponseDto result = await articleService.ReportArticleAsync(
+                            article.ArticleId,
+                            reportReason
+                        );
+
+                        Console.WriteLine(result.Message);
+                        Console.WriteLine("Press Enter to continue...");
+                        Console.ReadLine();
+                        break;
 
                     case 5:
+                        return;
+
+                    case 6:
                         Environment.Exit(0);
                         break;
                 }

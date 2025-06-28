@@ -47,7 +47,8 @@ namespace NewsAggregationConsole.Services
             if (!response.IsSuccessStatusCode)
                 //throw new HttpRequestException($"API request failed: {response.StatusCode} : {response}");
                 Console.WriteLine($"API request failed: {response.StatusCode} : {response}");
-            return await response.Content.ReadFromJsonAsync<T>();
+            T res = await response.Content.ReadFromJsonAsync<T>();
+            return res;
         }
     }
 }

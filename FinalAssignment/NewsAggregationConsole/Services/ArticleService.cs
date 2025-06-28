@@ -33,4 +33,15 @@ public class ArticleService
         var result = await _apiService.PostAsync<bool>("/api/article/reaction", articleReactionRequestDto);
         return result;
     }
+    
+    public async Task<UserArticleReportResponseDto> ReportArticleAsync(int articleId, string reportReason)
+    {
+        var articleReportDto = new UserArticleReportDto
+        {
+            ArticleId = articleId,
+            ReportReason = reportReason
+        };
+        UserArticleReportResponseDto result = await _apiService.PostAsync<UserArticleReportResponseDto>($"/api/article/{articleId}/report", articleReportDto);
+        return result;
+    }
 }
