@@ -9,7 +9,7 @@ namespace NewsAggregation.Services.Contracts
         Task<ToggleSaveResponseDto> ToggleSaveAsync(int articleId);
         Task<bool> AddArticleReaction(ArticleReactionRequestDto articleReactionRequestDto);
         Task<bool> DeleteArticleReaction(int articleId);
-        Task ReportArticleAsync(UserArticleReportDto userArticleReportDto);
+        Task<UserArticleReportResponseDto> ReportArticleAsync(UserArticleReportDto userArticleReportDto);
     }
 
 }

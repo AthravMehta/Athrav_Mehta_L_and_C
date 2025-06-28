@@ -84,8 +84,8 @@ namespace NewsAggregation.Controllers
         [HttpPost("{articleId}/report")]
         public async Task<IActionResult> ReportArticle(UserArticleReportDto userArticleReportDto)
         {
-            await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
-            return Ok(new { Message = "Article reported successfully" });
+            UserArticleReportResponseDto result = await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
+            return Ok(result);
 
         }
     }

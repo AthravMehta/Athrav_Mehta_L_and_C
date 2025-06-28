@@ -59,11 +59,20 @@ namespace NewsAggregation.Services
             return await _userArticleActionRepository.GetSavedArticleIdsByUserIdAsync(userId);
         }
 
-        public async Task ReportArticleAsync(UserArticleReportDto userArticleReportDto)
+        public async Task<UserArticleReportResponseDto> ReportArticleAsync(UserArticleReportDto userArticleReportDto)
         {
+            UserArticleReportResponseDto responseDto = new UserArticleReportResponseDto
+            {
+                Success = false,
+                Message = string.Empty
+            };
             int articleId = userArticleReportDto.ArticleId;
             if (await _userArticleActionRepository.HasUserReportedArticleAsync(articleId, userId))
-                throw new ApiException("You have already reported this article.");
+            {
+                responseDto.Success = true;
+                responseDto.Message = "You have already reported this article.";
+                return responseDto;
+            }
 
             await _userArticleActionRepository.AddReportAsync(new UserArticleReport
             {
@@ -93,6 +102,10 @@ namespace NewsAggregation.Services
                 article.Content,
                 article.PublishedDate
             ));
+
+            responseDto.Success = true;
+            responseDto.Message = "Article reported successfully. Thank you for your feedback!";
+            return responseDto;
         }
 
         public void NotifyAdminArticleReportedWrapper(int articleId, string title, string content, DateTime publishedDate)

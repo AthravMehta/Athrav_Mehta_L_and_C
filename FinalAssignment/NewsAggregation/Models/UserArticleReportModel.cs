@@ -15,4 +15,10 @@ namespace NewsAggregation.Models
         public int UserId { get; set; }
         public int ArticleId { get; set; }
     }
+
+    public class UserArticleReportResponseDto
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+    }
 }
