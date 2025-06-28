@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using NewsAggregation.Enums;
+using System.Text.Json.Serialization;
 
 namespace NewsAggregation.Entities
 {
@@ -25,8 +26,14 @@ namespace NewsAggregation.Entities
 
         [ForeignKey(nameof(ExternalServerId))]
         public int ExternalServerId { get; set; }
+
+        [JsonIgnore]
         public ICollection<UserArticleReaction> UserArticleReactions { get; set; } = new List<UserArticleReaction>();
+
+        [JsonIgnore]
         public ICollection<UserArticleReport> UserArticleReports { get; set; } = new List<UserArticleReport>();
+
+        [JsonIgnore]
         public ICollection<UserSavedArticle> UserSavedArticles { get; set; } = new List<UserSavedArticle>();
     }
 

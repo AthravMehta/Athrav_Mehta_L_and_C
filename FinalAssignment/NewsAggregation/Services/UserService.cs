@@ -63,7 +63,7 @@ namespace NewsAggregation.Services
         public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync(RoleEnum role = RoleEnum.User)
         {
             var users = await _userRepository.GetAllUsersAsync(role);
-            return users;
+            return _mapper.Map<IEnumerable<UserReadDto>>(users);
         }
 
         public async Task<User> GetUserByName(string username)

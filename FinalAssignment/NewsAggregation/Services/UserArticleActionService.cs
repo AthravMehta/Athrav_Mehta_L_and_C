@@ -18,11 +18,14 @@ namespace NewsAggregation.Services
         private readonly NotificationSenderFactory _notificationSenderFactory;
         private readonly RequestContext _requestContext;
 
-       public UserArticleActionService(IArticleRepository articleRepository, 
+       public UserArticleActionService(
+           IUserRepository userRepository,
+           IArticleRepository articleRepository, 
            IUserArticleActionRepository userArticleActionRepository, 
            NotificationSenderFactory notificationSenderFactory,
            RequestContext requestContext)
         {
+            _userRepository = userRepository;
             _articleRepository = articleRepository;
             _userArticleActionRepository = userArticleActionRepository;
             _notificationSenderFactory = notificationSenderFactory;
@@ -83,17 +86,31 @@ namespace NewsAggregation.Services
                 }
             }
 
-            BackgroundJob.Enqueue(() => this.NotifyAdminArticleReported(articleId, article));
+            // TODO: Figure out a way to less the params, since sending whole article object is causing error
+            BackgroundJob.Enqueue(() => NotifyAdminArticleReportedWrapper(
+                articleId,
+                article.Title,
+                article.Content,
+                article.PublishedDate
+            ));
         }
 
-        public async Task<bool> NotifyAdminArticleReported(int articleId, Article article)
+        public void NotifyAdminArticleReportedWrapper(int articleId, string title, string content, DateTime publishedDate)
+        {
+            NotifyAdminArticleReported(articleId, title, content, publishedDate).Wait();
+        }
+
+        private async Task<bool> NotifyAdminArticleReported(int articleId,
+            string title,
+            string content,
+            DateTime publishedDate)
         {
             var admins = await _userRepository.GetAllUsersAsync(RoleEnum.Admin);
 
             if (admins == null || !admins.Any())
                 return false;
 
-            string messageBody = this.CreateReportMessageBody(articleId, article);
+            string messageBody = this.CreateReportMessageBody(articleId, title, content, publishedDate);
 
             var sender = _notificationSenderFactory.GetSender(NotificationType.Email);
 
@@ -105,14 +122,17 @@ namespace NewsAggregation.Services
             return true;
         }
 
-        private string CreateReportMessageBody(int articleId, Article article)
+        private string CreateReportMessageBody(int articleId,
+            string title,
+            string content,
+            DateTime publishedDate)
         {
             return $@"
                 <h3>Article Reported</h3>
                 <p>The article with ID <strong>{articleId}</strong> has been reported by users.</p>
-                <p><strong>Title:</strong> {article.Title}</p>
-                <p><strong>Published Date:</strong> {article.PublishedDate:yyyy-MM-dd HH:mm}</p>
-                <p><strong>Description:</strong> {article.Content}</p>
+                <p><strong>Title:</strong> {title}</p>
+                <p><strong>Published Date:</strong> {publishedDate:yyyy-MM-dd HH:mm}</p>
+                <p><strong>Description:</strong> {content}</p>
                 <p>Please review the article and take necessary action.</p>
             ";
         }
