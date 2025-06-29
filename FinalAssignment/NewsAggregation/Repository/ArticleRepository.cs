@@ -73,6 +73,32 @@ namespace NewsAggregation.Repository
                 .ToListAsync();
         }
 
+        public async Task<ArticleDetailsDto> GetArticleWithUserStatusAsync(int articleId)
+        {
+            var userId = _requestContext.UserId;
+
+            var article = await _context.Articles
+                .Include(a => a.UserArticleReactions)
+                .Include(a => a.UserArticleReports)
+                .Include(a => a.UserSavedArticles)
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+            if (article == null) return null;
+
+            var dto = _mapper.Map<ArticleDetailsDto>(article);
+
+            dto.IsSavedByUser = article.UserSavedArticles.Any(usa => usa.UserId == userId);
+            dto.IsReportedByUser = article.UserArticleReports.Any(uar => uar.UserId == userId);
+
+            var userReaction = article.UserArticleReactions
+                .FirstOrDefault(r => r.UserId == userId);
+            dto.UserReaction = userReaction?.Reaction;
+
+            return dto;
+        }
+
+
+
         public async Task<Article> GetArticleByIdAsync(int articleId)
         {
             return await _context.Articles

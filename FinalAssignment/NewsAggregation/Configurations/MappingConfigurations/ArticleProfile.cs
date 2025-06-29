@@ -14,5 +14,11 @@ public class ArticleProfile : Profile
                 opt => opt.MapFrom(src => src.UserArticleReactions.Count(r => r.Reaction == ReactionEnum.Dislike)));
 
         CreateMap<ArticleDto, Article>();
+
+        CreateMap<Article, ArticleDetailsDto>()
+            .IncludeBase<Article, ArticleDto>()
+            .ForMember(dest => dest.IsSavedByUser, opt => opt.Ignore())
+            .ForMember(dest => dest.IsReportedByUser, opt => opt.Ignore())
+            .ForMember(dest => dest.UserReaction, opt => opt.Ignore());
     }
 }

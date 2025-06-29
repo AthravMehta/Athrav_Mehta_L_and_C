@@ -61,11 +61,10 @@ namespace NewsAggregation.Services
             return Enumerable.Empty<Article>();
         }
 
-        public async Task<ArticleDto> GetByIdAsync(int id)
+        public async Task<ArticleDetailsDto> GetByIdWithUserDetailsAsync(int id)
         {
-            var entity = await _curdbaseRepository.GetByIdAsync(id);
-            if (entity == null) return null;
-            return _mapper.Map<ArticleDto>(entity);
+            var articleWithUserDetail = await _articleRepository.GetArticleWithUserStatusAsync(id);
+            return articleWithUserDetail;
         }
 
         public async Task<IEnumerable<ArticleDto>> GetAllAsync(ArticleQueryDto query)
