@@ -20,6 +20,14 @@ namespace NewsAggregationConsole.Models
         public string ModifiedBy { get; set; }
     }
 
+    public class ArticleDetailsDto : ArticleDto
+    {
+        public bool IsSavedByUser { get; set; }
+        public bool IsReportedByUser { get; set; }
+        public ReactionEnum? UserReaction { get; set; }
+    }
+
+
     public class ArticleQueryDto
     {
         public string? SearchText { get; set; }

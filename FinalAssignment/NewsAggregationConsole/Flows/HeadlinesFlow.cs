@@ -119,15 +119,18 @@ namespace NewsAggregationConsole.Flows
                 if (choice == 1)
                 {
                     int articleId = InputHelper.GetInt("Enter Article ID: ");
-                    var selectedArticle = articles.FirstOrDefault(a => a.ArticleId == articleId);
+                    var selectedArticle = await articleService.GetArticleByIdAsync(articleId);
+
                     if (selectedArticle == null)
                     {
                         Console.WriteLine("Invalid Article ID. Press Enter to continue...");
                         Console.ReadLine();
                         continue;
                     }
+
                     await ShowArticleDetails(selectedArticle, user, articleService);
                 }
+
                 else if (choice == 2)
                 {
                     return;
@@ -140,12 +143,18 @@ namespace NewsAggregationConsole.Flows
         }
 
 
-        private static async Task ShowArticleDetails(ArticleDto article, UserReadDto user, ArticleService articleService)
+        private static async Task ShowArticleDetails(ArticleDetailsDto article, UserReadDto user, ArticleService articleService)
         {
             while (true)
             {
                 Console.Clear();
                 DisplayHelper.DisplayArticleDetails(article);
+
+                Console.WriteLine("\nYour Status:");
+                Console.WriteLine($"- Saved: {(article.IsSavedByUser ? "Yes" : "No")}");
+                Console.WriteLine($"- Reported: {(article.IsReportedByUser ? "Yes" : "No")}");
+                Console.WriteLine($"- Your reaction: {article.UserReaction?.ToString() ?? "None"}");
+
                 Console.WriteLine("\nOptions:");
                 Console.WriteLine("1. Save Article");
                 Console.WriteLine("2. Like Article");
@@ -154,15 +163,20 @@ namespace NewsAggregationConsole.Flows
                 Console.WriteLine("5. Back");
                 Console.WriteLine("6. Logout");
 
-                int choice = InputHelper.GetInt("Choose option: ", 1, 5);
+                int choice = InputHelper.GetInt("Choose option: ", 1, 6);
 
                 switch (choice)
                 {
                     case 1:
-                        ToggleSaveResponseDto saved = await articleService.SaveArticleForUserAsync(article.ArticleId);
-                        Console.WriteLine(saved.Message);
-                        Console.WriteLine("Press Enter to continue...");
-                        Console.ReadLine();
+                        if (article.IsSavedByUser)
+                        {
+                            Console.WriteLine("You have already saved this article.");
+                        }
+                        else
+                        {
+                            ToggleSaveResponseDto saved = await articleService.SaveArticleForUserAsync(article.ArticleId);
+                            Console.WriteLine(saved.Message);
+                        }
                         break;
 
                     case 2:
@@ -172,8 +186,6 @@ namespace NewsAggregationConsole.Flows
                             ArticleReaction = ReactionEnum.Like
                         });
                         Console.WriteLine("You liked the article!");
-                        Console.WriteLine("Press Enter to continue...");
-                        Console.ReadLine();
                         break;
 
                     case 3:
@@ -183,8 +195,6 @@ namespace NewsAggregationConsole.Flows
                             ArticleReaction = ReactionEnum.Dislike
                         });
                         Console.WriteLine("You disliked the article!");
-                        Console.WriteLine("Press Enter to continue...");
-                        Console.ReadLine();
                         break;
 
                     case 4:
@@ -193,10 +203,7 @@ namespace NewsAggregationConsole.Flows
                             article.ArticleId,
                             reportReason
                         );
-
                         Console.WriteLine(result.Message);
-                        Console.WriteLine("Press Enter to continue...");
-                        Console.ReadLine();
                         break;
 
                     case 5:
@@ -206,6 +213,11 @@ namespace NewsAggregationConsole.Flows
                         Environment.Exit(0);
                         break;
                 }
+
+                article = await articleService.GetArticleByIdAsync(article.ArticleId);
+
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();
             }
         }
 

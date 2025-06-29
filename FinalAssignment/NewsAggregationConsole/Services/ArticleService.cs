@@ -11,6 +11,11 @@ public class ArticleService
         _apiService = apiService;
     }
 
+    public async Task<ArticleDetailsDto> GetArticleByIdAsync(int articleId)
+    {
+        return await _apiService.GetAsync<ArticleDetailsDto>($"/api/article/{articleId}");
+    }
+
     public async Task<List<ArticleDto>> GetFilteredArticlesAsync(ArticleQueryDto query)
     {
         string queryString = QueryStringHelper.ToQueryString(query);
