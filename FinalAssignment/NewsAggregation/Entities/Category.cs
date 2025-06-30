@@ -13,6 +13,8 @@ namespace NewsAggregation.Entities
         [Required]
         [MaxLength(255)]
         public string Name { get; set; }
+        public bool IsHidden { get; set; }
+        public string? HideReason { get; set; }
         public ICollection<Article> Articles { get; set; }
         public ICollection<Keywords> Keywords { get; set; }
         public ICollection<UserKeyword> UserKeywords { get; set; }

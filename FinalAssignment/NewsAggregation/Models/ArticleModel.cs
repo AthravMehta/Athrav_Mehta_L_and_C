@@ -34,6 +34,8 @@ namespace NewsAggregation.Models
         public string? StartDate { get; set; }
         public string? EndDate { get; set; }
         public int? CategoryId { get; set; }
+        public bool IsHidden { get; set; } = false;
+        public HideReasonEnum? HideReason { get; set; }
         public bool SortByLikes { get; set; }
         public bool SortByDislikes { get; set; }
     }

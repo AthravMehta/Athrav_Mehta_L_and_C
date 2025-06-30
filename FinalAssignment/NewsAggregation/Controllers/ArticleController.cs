@@ -4,6 +4,7 @@ using NewsAggregation.Services.Contracts;
 using NewsAggregation.Enums;
 using NewsAggregation.Configurations;
 using NewsAggregation.Exceptions;
+using NewsAggregation.Services;
 
 namespace NewsAggregation.Controllers
 {
@@ -84,6 +85,16 @@ namespace NewsAggregation.Controllers
             UserArticleReportResponseDto result = await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
             return Ok(result);
 
+        }
+
+        [HttpPost("hide")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> HideArticle([FromQuery] int articleId)
+        {
+            var result = await _service.HideArticleAsync(articleId);
+            if (!result)
+                return NotFound(new { message = "Article not found for the given ID." });
+            return Ok(new { message = "Article hidden successfully." });
         }
     }
 }

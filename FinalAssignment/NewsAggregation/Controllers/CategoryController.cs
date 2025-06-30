@@ -51,5 +51,26 @@ namespace NewsAggregation.Controllers
             var result = await _categoryService.GetAllAsync();
             return Ok(result);
         }
+
+
+        [HttpPost("hide")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> HideCategory([FromQuery] int categoryId, [FromBody] string reason)
+        {
+            var result = await _categoryService.HideCategoryAsync(categoryId, reason);
+            if (!result)
+                return NotFound(new { message = "Category not found for the given ID." });
+            return Ok(new { message = "Category hidden successfully." });
+        }
+
+        [HttpPost("unhide")]
+        [AuthorizeRoles(nameof(RoleEnum.Admin))]
+        public async Task<IActionResult> UnhideCategory([FromQuery] int categoryId)
+        {
+            var result = await _categoryService.UnhideCategoryAsync(categoryId);
+            if (!result)
+                return NotFound(new { message = "Category not found for the given ID." });
+            return Ok(new { message = "Category unhidden successfully." });
+        }
     }
 }

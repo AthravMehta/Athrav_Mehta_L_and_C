@@ -2,7 +2,6 @@
 using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
-using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Notifications;
 using NewsAggregation.Repository.Contracts;
@@ -57,6 +56,11 @@ namespace NewsAggregation.Services
         public async Task<IEnumerable<int>> GetSavedArticleIdsByUserIdAsync()
         {
             return await _userArticleActionRepository.GetSavedArticleIdsByUserIdAsync(userId);
+        }
+
+        public async Task<int> GetReportCountForArticleAsync(int articleId)
+        {
+            return await _userArticleActionRepository.GetReportCountForArticleAsync(articleId);
         }
 
         public async Task<UserArticleReportResponseDto> ReportArticleAsync(UserArticleReportDto userArticleReportDto)

@@ -1,4 +1,5 @@
 ﻿using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
@@ -7,16 +8,19 @@ namespace NewsAggregation.Services
 {
     public class CategoryService : ICategoryService
     {
+        private readonly IArticleService _articleService;
         private readonly IKeywordService _keywordService;
         private readonly ICrudBaseRepository<User> _userRepository;
         private readonly ICrudBaseRepository<Category> _categoryRepository;
         private readonly IUserNotificationConfigurationService _userNotificationConfigurationService;
 
         public CategoryService(
+            IArticleService articleService,
             ICrudBaseRepository<Category> categoryRepo,
             IKeywordService keywordService,
             IUserNotificationConfigurationService userNotificationConfigurationService)
         {
+            _articleService = articleService ?? throw new ArgumentNullException(nameof(articleService));
             _categoryRepository = categoryRepo;
             _keywordService = keywordService;
             _userNotificationConfigurationService = userNotificationConfigurationService;
@@ -72,6 +76,44 @@ namespace NewsAggregation.Services
                 return allCategory.CategoryId!.Value;
             }
             return 0;
+        }
+
+        public async Task<bool> HideCategoryAsync(int categoryId, string reason)
+        {
+            var category = await _categoryRepository.GetByIdAsync(categoryId);
+            if (category == null) return false;
+            category.IsHidden = true;
+            category.HideReason = reason;
+            await _categoryRepository.UpdateAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
+            ArticleQueryDto articleQueryDto = new ArticleQueryDto
+            {
+                CategoryId = categoryId,
+                IsHidden = false
+            };
+            await _articleService.HideArticlesByCategoryAsync(articleQueryDto);
+            return true;
+        }
+
+        public async Task<bool> UnhideCategoryAsync(int categoryId)
+        {
+            var category = await _categoryRepository.GetByIdAsync(categoryId);
+            if (category == null) return false;
+            category.IsHidden = false;
+            category.HideReason = null;
+            await _categoryRepository.UpdateAsync(category);
+            await _categoryRepository.SaveChangesAsync();
+
+            ArticleQueryDto articleQueryDto = new ArticleQueryDto
+            {
+                CategoryId = categoryId,
+                IsHidden = true,
+                HideReason = HideReasonEnum.AdminHiddenCategory
+            };
+
+            await _articleService.UnhideArticlesByCategoryAsync(articleQueryDto);
+            return true;
         }
     }
 }

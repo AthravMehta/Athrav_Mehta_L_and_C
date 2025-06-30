@@ -10,6 +10,7 @@ namespace NewsAggregation.Services.Contracts
         Task<bool> AddArticleReaction(ArticleReactionRequestDto articleReactionRequestDto);
         Task<bool> DeleteArticleReaction(int articleId);
         Task<UserArticleReportResponseDto> ReportArticleAsync(UserArticleReportDto userArticleReportDto);
+        Task<int> GetReportCountForArticleAsync(int articleId);
     }
 
 }

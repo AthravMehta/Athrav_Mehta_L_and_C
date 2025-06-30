@@ -22,7 +22,7 @@ namespace NewsAggregation.Entities
         public DateTime PublishedDate { get; set; }
         public int CategoryId { get; set; }
         public bool IsHidden { get; set; } = false;
-        public HideReasonEnum HideReason { get; set; } = HideReasonEnum.Other;
+        public HideReasonEnum HideReason { get; set; } = HideReasonEnum.NotHidden;
 
         [ForeignKey(nameof(ExternalServerId))]
         public int ExternalServerId { get; set; }

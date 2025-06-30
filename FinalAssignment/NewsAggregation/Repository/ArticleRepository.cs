@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
@@ -53,6 +54,20 @@ namespace NewsAggregation.Repository
             if (articleQueryDto.CategoryId.HasValue && articleQueryDto.CategoryId.Value > 0)
             {
                 articleQuery = articleQuery.Where(a => a.CategoryId == articleQueryDto.CategoryId.Value);
+            }
+
+            if (articleQueryDto.IsHidden)
+            {
+                articleQuery = articleQuery.Where(a => a.IsHidden);
+
+                if (articleQueryDto.HideReason  == null || articleQueryDto.HideReason != HideReasonEnum.NotHidden)
+                {
+                    articleQuery = articleQuery.Where(a => a.HideReason == articleQueryDto.HideReason);
+                }
+            }
+            else
+            {
+                articleQuery = articleQuery.Where(a => !a.IsHidden);
             }
 
             if (articleQueryDto.SortByLikes)

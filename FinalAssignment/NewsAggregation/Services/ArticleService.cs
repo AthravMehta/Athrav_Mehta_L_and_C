@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
@@ -10,6 +11,7 @@ namespace NewsAggregation.Services
     {
         private readonly IUserArticleActionService _userArticleActionService;
         private readonly ICrudBaseRepository<Article> _curdbaseRepository;
+        private readonly ICrudBaseRepository<Keywords> _keywordsRepository;
         private readonly IArticleRepository _articleRepository;
         private readonly ILogger<ArticleService> _logger;
         private readonly RequestContext _requestContext;
@@ -85,5 +87,111 @@ namespace NewsAggregation.Services
         {
             return await _articleRepository.ArticleExistsAsync(article);
         }
+
+        public async Task<bool> HideArticleAsync(int articleId)
+        {
+            var article = await _articleRepository.GetArticleByIdAsync(articleId);
+            if (article == null) return false;
+            article.IsHidden = true;
+            article.HideReason = HideReasonEnum.HideByAdmin;
+            await _articleRepository.UpdateArticle(article);
+            await _curdbaseRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task HideArticlesByCategoryAsync(ArticleQueryDto query)
+        {
+            IEnumerable<Article> articles = await _articleRepository.GetAllAsync(query);
+
+            foreach (var article in articles)
+            {
+                article.IsHidden = true;
+                article.HideReason = HideReasonEnum.AdminHiddenCategory;
+                await _curdbaseRepository.UpdateAsync(article);
+            }
+            await _curdbaseRepository.SaveChangesAsync();
+        }
+
+        public async Task UnhideArticlesByCategoryAsync(ArticleQueryDto query)
+        {
+            IEnumerable<Article> articles = await _articleRepository.GetAllAsync(query);
+
+            foreach (var article in articles)
+            {
+                if (await _userArticleActionService.GetReportCountForArticleAsync(article.ArticleId) == 0)
+                {
+                    article.IsHidden = false;
+                    article.HideReason = HideReasonEnum.NotHidden;
+                }
+                else
+                {
+                    article.HideReason = HideReasonEnum.ReportLimitExceeded;
+                }
+                await _curdbaseRepository.UpdateAsync(article);
+            }
+            await _curdbaseRepository.SaveChangesAsync();
+        }
+
+        public async Task HideArticlesByKeywordAsync(int keywordId)
+        {
+            var keyword = await _keywordsRepository.GetByIdAsync(keywordId);
+            if (keyword == null)
+                throw new ArgumentException("Keyword not found", nameof(keywordId));
+
+            var query = new ArticleQueryDto
+            {
+                CategoryId = keyword.CategoryId
+            };
+            IEnumerable<Article> articles = await _articleRepository.GetAllAsync(query);
+
+            foreach (var article in articles)
+            {
+                bool containsKeyword = false;
+                if (!string.IsNullOrEmpty(article.Title) && article.Title.IndexOf(keyword.Keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+                    containsKeyword = true;
+                else if (!string.IsNullOrEmpty(article.Content) && article.Content.IndexOf(keyword.Keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+                    containsKeyword = true;
+
+                if (containsKeyword && !article.IsHidden)
+                {
+                    article.IsHidden = true;
+                    article.HideReason = HideReasonEnum.AdminHiddenKeyword;
+                    await _curdbaseRepository.UpdateAsync(article);
+                }
+            }
+            await _curdbaseRepository.SaveChangesAsync();
+        }
+
+        public async Task UnhideArticlesByKeywordAsync(int keywordId)
+        {
+            var keyword = await _keywordsRepository.GetByIdAsync(keywordId);
+            if (keyword == null)
+                throw new ArgumentException("Keyword not found", nameof(keywordId));
+
+            var query = new ArticleQueryDto
+            {
+                CategoryId = keyword.CategoryId,
+                IsHidden = true,
+                HideReason = HideReasonEnum.AdminHiddenKeyword
+            };
+            IEnumerable<Article> articles = await _articleRepository.GetAllAsync(query);
+
+            foreach (var article in articles)
+            {
+                int reportCount = await _userArticleActionService.GetReportCountForArticleAsync(article.ArticleId);
+                if (reportCount == 0)
+                {
+                    article.IsHidden = false;
+                    article.HideReason = HideReasonEnum.NotHidden;
+                }
+                else
+                {
+                    article.HideReason = HideReasonEnum.ReportLimitExceeded;
+                }
+                await _curdbaseRepository.UpdateAsync(article);
+            }
+            await _curdbaseRepository.SaveChangesAsync();
+        }
+
     }
 }
