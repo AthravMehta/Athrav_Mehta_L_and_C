@@ -59,6 +59,21 @@ namespace NewsAggregation.Services
             }
         }
 
+        public virtual async Task AddRangeAsync(List<TEntity> entities)
+        {
+            try
+            {
+                await _repository.AddRangeAsync(entities);
+                await SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error adding range of {EntityName} entities");
+                throw new ApiException($"Failed to add range of {EntityName} entities.", ex, _logger);
+            }
+        }
+
+
         public virtual async Task UpdateAsync(TEntity entity)
         {
             try

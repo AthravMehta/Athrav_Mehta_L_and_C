@@ -9,12 +9,12 @@ namespace NewsAggregation.Services
     public class UserNotificationConfigurationService : IUserNotificationConfigurationService
     {
         private readonly IMapper _mapper;
-        private readonly ICrudBaseRepository<User> _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ICrudBaseRepository<Category> _categoryRepository;
         private readonly ICrudBaseRepository<UserNotificationConfiguration> _crudBaseRepository;
         private readonly IUserNotificationConfigurationRepository _userNotificationConfigurationRepository;
 
-        public UserNotificationConfigurationService(IMapper mapper, ICrudBaseRepository<User> userRepository, ICrudBaseRepository<Category> categoryRepository,
+        public UserNotificationConfigurationService(IMapper mapper, IUserRepository userRepository, ICrudBaseRepository<Category> categoryRepository,
             ICrudBaseRepository<UserNotificationConfiguration> crudBaseRepository, IUserNotificationConfigurationRepository userNotificationConfigurationRepository)
         {
             _mapper = mapper;
@@ -29,6 +29,7 @@ namespace NewsAggregation.Services
             var entity = new UserNotificationConfiguration
             {
                 UserId = dto.UserId,
+                CategoryId = dto.CategoryId,
                 IsEnabled = dto.IsEnabled
             };
 
@@ -110,7 +111,7 @@ namespace NewsAggregation.Services
             }
             else if (categoryId != null)
             {
-                var users = await _userRepository.GetAllAsync();
+                var users = await _userRepository.GetAllUsersAsync();
 
                 foreach (var user in users)
                 {
@@ -138,7 +139,7 @@ namespace NewsAggregation.Services
         /// </summary>
         public async Task InitializeNotificationConfigurationsAsync()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllUsersAsync();
             var categories = await _categoryRepository.GetAllAsync();
 
             foreach (var user in users)

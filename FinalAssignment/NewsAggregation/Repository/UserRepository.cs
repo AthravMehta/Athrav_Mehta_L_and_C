@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
-using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Enums;
 using Polly;

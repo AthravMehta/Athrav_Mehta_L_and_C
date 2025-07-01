@@ -1,4 +1,5 @@
-﻿using NewsAggregation.Entities;
+﻿using AutoMapper;
+using NewsAggregation.Entities;
 using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
@@ -8,6 +9,7 @@ namespace NewsAggregation.Services
 {
     public class CategoryService : ICategoryService
     {
+        private readonly IMapper _mapper;
         private readonly IArticleService _articleService;
         private readonly IKeywordService _keywordService;
         private readonly ICrudBaseRepository<User> _userRepository;
@@ -15,11 +17,13 @@ namespace NewsAggregation.Services
         private readonly IUserNotificationConfigurationService _userNotificationConfigurationService;
 
         public CategoryService(
+            IMapper mapper,
             IArticleService articleService,
             ICrudBaseRepository<Category> categoryRepo,
             IKeywordService keywordService,
             IUserNotificationConfigurationService userNotificationConfigurationService)
         {
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _articleService = articleService ?? throw new ArgumentNullException(nameof(articleService));
             _categoryRepository = categoryRepo;
             _keywordService = keywordService;
@@ -45,13 +49,15 @@ namespace NewsAggregation.Services
             category.Name = categoryDto.Name;
             await _categoryRepository.UpdateAsync(category);
             await _categoryRepository.SaveChangesAsync();
-            return new CategoryDto { CategoryId = category.CategoryId, Name = category.Name };
+            return _mapper.Map<CategoryDto>(category);
         }
 
         public async Task<IEnumerable<CategoryDto>> GetAllAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
-            return categories.Select(c => new CategoryDto { CategoryId = c.CategoryId, Name = c.Name });
+            if (categories == null || !categories.Any())
+                return Enumerable.Empty<CategoryDto>();
+            return _mapper.Map<IEnumerable<CategoryDto>>(categories);
         }
 
         public async Task<int> GetCategoryIdAsync(Article article, List<Keywords>? keywords, List<CategoryDto>? categories)

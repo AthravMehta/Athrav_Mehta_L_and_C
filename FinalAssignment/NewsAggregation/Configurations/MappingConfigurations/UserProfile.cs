@@ -11,5 +11,6 @@ public class UserProfile : Profile
 
         CreateMap<UserSavedArticle, UserSavedArticleDto>().ReverseMap();
         CreateMap<UserKeyword, UserKeywordDto>().ReverseMap();
+        CreateMap<Keywords, KeywordDto>().ReverseMap();
     }
 }

@@ -4,6 +4,8 @@
     {
         public int? CategoryId { get; set; }
         public string Name { get; set; }
+        public bool? IsHidden { get; set; }
+        public string? HideReason { get; set; }
 
         public DateTime? CreatedDateTime { get; set; }
         public DateTime? ModifiedDateTime { get; set; }

@@ -26,8 +26,8 @@ namespace NewsAggregation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _categoryService.AddAsync(categoryDto);
-            return CreatedAtAction(nameof(Add), new { id = result.CategoryId }, result);
+            CategoryDto result = await _categoryService.AddAsync(categoryDto);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
@@ -53,9 +53,9 @@ namespace NewsAggregation.Controllers
         }
 
 
-        [HttpPost("hide")]
+        [HttpPost("hide/{categoryId}")]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
-        public async Task<IActionResult> HideCategory([FromQuery] int categoryId, [FromBody] string reason)
+        public async Task<IActionResult> HideCategory([FromRoute] int categoryId, [FromBody] string reason)
         {
             var result = await _categoryService.HideCategoryAsync(categoryId, reason);
             if (!result)
@@ -63,9 +63,9 @@ namespace NewsAggregation.Controllers
             return Ok(new { message = "Category hidden successfully." });
         }
 
-        [HttpPost("unhide")]
+        [HttpPost("unhide/{categoryId}")]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
-        public async Task<IActionResult> UnhideCategory([FromQuery] int categoryId)
+        public async Task<IActionResult> UnhideCategory([FromRoute] int categoryId)
         {
             var result = await _categoryService.UnhideCategoryAsync(categoryId);
             if (!result)
