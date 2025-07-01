@@ -1,4 +1,5 @@
 ﻿using NewsAggregationConsole.Models;
+using NewsAggregationConsole.Services;
 
 namespace NewsAggregationConsole.Helpers
 {
@@ -25,6 +26,86 @@ namespace NewsAggregationConsole.Helpers
             }
             Console.ReadKey();
         }
+
+        public static void DisplayAllCategoriesWithKeywords(List<CategoryWithKeywordsDto> categories)
+        {
+            Console.Clear();
+            Console.WriteLine("All News Categories and Keywords:");
+            Console.WriteLine("-----------------------------------------------------------------------------------------------");
+            Console.WriteLine("{0,-5} | {1,-20} | {2,-7} | {3,-20} || {4,-5} | {5,-20} | {6,-7} | {7,-20}",
+                "CatID", "Category", "Hidden", "Hide Reason", "KeyID", "Keyword", "Hidden", "Hide Reason");
+            Console.WriteLine("-----------------------------------------------------------------------------------------------");
+
+            foreach (var cat in categories)
+            {
+                if (cat.Keywords != null && cat.Keywords.Count > 0)
+                {
+                    var firstKey = cat.Keywords[0];
+                    Console.WriteLine("{0,-5} | {1,-20} | {2,-7} | {3,-20} || {4,-5} | {5,-20} | {6,-7} | {7,-20}",
+                        cat.CategoryId, cat.Name, cat.IsHidden ? "Yes" : "No", cat.HideReason ?? "N/A",
+                        firstKey.KeywordId, firstKey.Keyword, firstKey.IsHidden!.Value ? "Yes" : "No", firstKey.HideReason ?? "N/A");
+                    for (int i = 1; i < cat.Keywords.Count; i++)
+                    {
+                        var k = cat.Keywords[i];
+                        Console.WriteLine("{0,-5} | {1,-20} | {2,-7} | {3,-20} || {4,-5} | {5,-20} | {6,-7} | {7,-20}",
+                            "", "", "", "",
+                            k.KeywordId, k.Keyword, k.IsHidden!.Value ? "Yes" : "No", k.HideReason ?? "N/A");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("{0,-5} | {1,-20} | {2,-7} | {3,-20} || {4,-5} | {5,-20} | {6,-7} | {7,-20}",
+                        cat.CategoryId, cat.Name, cat.IsHidden ? "Yes" : "No", cat.HideReason ?? "N/A",
+                        "", "", "", "");
+                }
+                Console.WriteLine("-----------------------------------------------------------------------------------------------");
+            }
+        }
+
+        public static async Task HandleCategoryHideUnhideAsync(CategoryService categoryService, List<CategoryWithKeywordsDto> categories)
+        {
+            int categoryId = InputHelper.GetInt("Enter Category ID to toggle hide/unhide: ");
+            var category = categories.FirstOrDefault(c => c.CategoryId == categoryId);
+            if (category == null)
+            {
+                InputHelper.ShowError("Category not found!");
+                return;
+            }
+            if (category.IsHidden)
+            {
+                await categoryService.UnhideCategoryAsync(categoryId);
+                InputHelper.ShowSuccess("Category unhidden successfully!");
+            }
+            else
+            {
+                string reason = InputHelper.GetString("Enter hide reason: ");
+                await categoryService.HideCategoryAsync(categoryId, reason);
+                InputHelper.ShowSuccess("Category hidden successfully!");
+            }
+        }
+
+        public static async Task HandleKeywordHideUnhideAsync(KeywordService keywordService, List<CategoryWithKeywordsDto> categories)
+        {
+            int keywordId = InputHelper.GetInt("Enter Keyword ID to toggle hide/unhide: ");
+            var keyword = categories.SelectMany(c => c.Keywords).FirstOrDefault(k => k.KeywordId == keywordId);
+            if (keyword == null)
+            {
+                InputHelper.ShowError("Keyword not found!");
+                return;
+            }
+            if (keyword.IsHidden!.Value)
+            {
+                await keywordService.UnhideKeywordAsync(keywordId);
+                InputHelper.ShowSuccess("Keyword unhidden successfully!");
+            }
+            else
+            {
+                string reason = InputHelper.GetString("Enter hide reason: ");
+                await keywordService.HideKeywordAsync(keywordId, reason);
+                InputHelper.ShowSuccess("Keyword hidden successfully!");
+            }
+        }
+
 
         public static void ShowExternalServers(List<ExternalServerDto> servers)
         {

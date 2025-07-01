@@ -9,6 +9,7 @@ namespace NewsAggregationConsole.Flows
         public static async Task Run(UserReadDto currentUser, ApiService apiService)
         {
             var categoryService = new CategoryService(apiService);
+            var keywordService = new KeywordService(apiService);
             var externalServerService = new ExternalServerService(apiService);
 
             while (true)
@@ -36,10 +37,10 @@ namespace NewsAggregationConsole.Flows
                         await UpdateServer(externalServerService);
                         break;
                     case 4:
-                        await AddCategory(categoryService, currentUser);
+                        await AddCategory(categoryService, keywordService, currentUser);
                         break;
                     case 5:
-                        await ListCategory(categoryService, currentUser);
+                        await ListCategory(categoryService, keywordService, currentUser);
                         break;
                     case 6:
                         return;
@@ -108,39 +109,98 @@ namespace NewsAggregationConsole.Flows
             await service.UpdateExternalServerAsync(server.ExternalServerId!.Value, server);
             InputHelper.ShowSuccess("External server updated successfully!");
         }
-    
-        private static async Task AddCategory(CategoryService categoryService, UserReadDto currentUser)
+
+        private static async Task AddCategory(CategoryService categoryService, KeywordService keywordService, UserReadDto currentUser)
         {
             DisplayHelper.ShowHeader(currentUser, true);
             Console.WriteLine("Add New News Category");
             Console.WriteLine("---------------------");
+
             var name = InputHelper.GetString("Enter category name: ");
+
+            var keywordsInput = InputHelper.GetString("Enter keywords for this category (comma separated): ");
+            var keywordsList = keywordsInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(k => k.Trim())
+                                           .Where(k => !string.IsNullOrWhiteSpace(k))
+                                           .ToList();
+
             try
             {
-                await categoryService.AddCategoryAsync(name);
-                InputHelper.ShowSuccess("Category added successfully!");
+                var addedCategory = await categoryService.AddCategoryAsync(name);
+
+                InputHelper.ShowSuccess($"Category '{addedCategory.Name}' added successfully with ID {addedCategory.CategoryId}!", true);
+
+                if (keywordsList.Any())
+                {
+                    var keywordsToAdd = keywordsList.Select(keyword => new KeywordDto
+                    {
+                        Keyword = keyword,
+                        CategoryId = addedCategory.CategoryId!.Value,
+                    }).ToList();
+
+                    var keywordsResult = await keywordService.AddKeywordsAsync(keywordsToAdd);
+
+                    if (keywordsResult.IsSuccess)
+                    {
+                        InputHelper.ShowSuccess(keywordsResult.Message);
+                    }
+                    else
+                    {
+                        InputHelper.ShowError($"Failed to add keywords: {keywordsResult.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No keywords entered. Category added without keywords.");
+                }
             }
             catch (Exception ex)
             {
-                InputHelper.ShowError($"Failed to add category: {ex.Message}");
+                InputHelper.ShowError($"Failed to add category or keywords: {ex.Message}");
             }
         }
 
-        private static async Task ListCategory(CategoryService categoryService, UserReadDto currentUser)
+        private static async Task ListCategory(CategoryService categoryService, KeywordService keywordService, UserReadDto currentUser)
         {
-            DisplayHelper.ShowHeader(currentUser, true);
-            Console.WriteLine("All News Category");
-            Console.WriteLine("---------------------");
-            try
+            while (true)
             {
-                var categoryDtos = await categoryService.GetAllCategoryAsync();
-                DisplayHelper.DisplayAllCategoryAdmin(categoryDtos);
-            }
-            catch (Exception ex)
-            {
-                InputHelper.ShowError($"Failed to List category: {ex.Message}");
+                var categories = await categoryService.GetAllCategoryAsync();
+                var keywords = await keywordService.GetAllKeywordsAsync();
+
+                var categoriesWithKeywords = categories
+                    .Where(cat => cat.CategoryId.HasValue && cat.IsHidden.HasValue)
+                    .Select(cat => new CategoryWithKeywordsDto
+                    {
+                        CategoryId = cat.CategoryId.Value,
+                        Name = cat.Name ?? string.Empty,
+                        IsHidden = cat.IsHidden.Value,
+                        HideReason = cat.HideReason ?? string.Empty,
+                        Keywords = keywords.Where(k => k.CategoryId == cat.CategoryId).ToList()
+                    })
+                    .ToList();
+
+
+                DisplayHelper.DisplayAllCategoriesWithKeywords(categoriesWithKeywords);
+
+                Console.WriteLine("\nOptions:");
+                Console.WriteLine("1. Toggle Hide/Unhide Category");
+                Console.WriteLine("2. Toggle Hide/Unhide Keyword");
+                Console.WriteLine("3. Back");
+
+                int choice = InputHelper.GetInt("Choose option: ", 1, 3);
+
+                switch (choice)
+                {
+                    case 1:
+                        await DisplayHelper.HandleCategoryHideUnhideAsync(categoryService, categoriesWithKeywords);
+                        break;
+                    case 2:
+                        await DisplayHelper.HandleKeywordHideUnhideAsync(keywordService, categoriesWithKeywords);
+                        break;
+                    case 3:
+                        return;
+                }
             }
         }
-
     }
 }

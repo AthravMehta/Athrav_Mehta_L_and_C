@@ -62,12 +62,12 @@
             Console.ReadKey();
         }
 
-        public static void ShowSuccess(string message)
+        public static void ShowSuccess(string message, bool stop = false)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(message);
             Console.ResetColor();
-            Console.ReadKey();
+            if(!stop) Console.ReadKey();
         }
     }
 }
