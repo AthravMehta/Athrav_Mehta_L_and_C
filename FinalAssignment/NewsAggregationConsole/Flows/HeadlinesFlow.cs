@@ -1,5 +1,4 @@
-﻿using NewsAggregationConsole.Enums;
-using NewsAggregationConsole.Helpers;
+﻿using NewsAggregationConsole.Helpers;
 using NewsAggregationConsole.Models;
 using NewsAggregationConsole.Services;
 
@@ -47,8 +46,9 @@ namespace NewsAggregationConsole.Flows
                 EndDate = today,
                 CategoryId = null
             };
+            var recommendedArticles = await articleService.GetRecommendedArticlesAsync();
             var articles = await articleService.GetFilteredArticlesAsync(query);
-            await ArticleFlowHelper.ShowArticlesPage(articles, user, articleService, allowSave: true);
+            await ArticleFlowHelper.ShowArticlesPage(recommendedArticles, articles, user, articleService, allowSave: true);
         }
 
         private static async Task ShowArticlesForDateRange(ArticleService articleService, CategoryService categoryService, UserReadDto user)
@@ -82,8 +82,10 @@ namespace NewsAggregationConsole.Flows
             {
                 query.CategoryId = null;
             }
+
+            var recommendedArticles = await articleService.GetRecommendedArticlesAsync();
             articles = await articleService.GetFilteredArticlesAsync(query);
-            await ArticleFlowHelper.ShowArticlesPage(articles, user, articleService, allowSave: true);
+            await ArticleFlowHelper.ShowArticlesPage(recommendedArticles, articles, user, articleService, allowSave: true);
         }
     }
 }

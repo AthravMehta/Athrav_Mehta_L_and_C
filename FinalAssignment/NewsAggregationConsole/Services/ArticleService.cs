@@ -16,6 +16,12 @@ public class ArticleService
         return await _apiService.GetAsync<ArticleDetailsDto>($"/api/article/{articleId}");
     }
 
+    public async Task<List<ArticleDto>> GetRecommendedArticlesAsync(int count = 20)
+    {
+        string url = $"/api/article/recommendation?count={count}";
+        return await _apiService.GetAsync<List<ArticleDto>>(url);
+    }
+
     public async Task<List<ArticleDto>> GetFilteredArticlesAsync(ArticleQueryDto query)
     {
         string queryString = QueryStringHelper.ToQueryString(query);

@@ -6,30 +6,50 @@ namespace NewsAggregationConsole.Helpers
     public static class ArticleFlowHelper
     {
         public static async Task ShowArticlesPage(
-            List<ArticleDto> articles,
-            UserReadDto user,
-            ArticleService articleService,
-            bool allowSave = true
-        )
+    List<ArticleDto> recommendedArticles,
+    List<ArticleDto> articles,
+    UserReadDto user,
+    ArticleService articleService,
+    bool allowSave = true
+)
         {
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine($"Articles Found: {articles.Count}\n");
-                Console.WriteLine("ID | Headline");
-                Console.WriteLine("------------------------------");
 
-                if (!articles.Any())
+                // Recommended Articles Section
+                Console.WriteLine("=== Recommended Articles ===");
+                if (recommendedArticles.Any())
+                {
+                    Console.WriteLine("ID | Headline");
+                    Console.WriteLine("------------------------------");
+                    foreach (var article in recommendedArticles)
+                    {
+                        Console.WriteLine($"{article.ArticleId} | {article.Title}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No recommended articles found.");
+                }
+
+                // All Articles Section
+                Console.WriteLine("\n=== All Articles ===");
+                if (articles.Any())
+                {
+                    Console.WriteLine("ID | Headline");
+                    Console.WriteLine("------------------------------");
+                    foreach (var article in articles)
+                    {
+                        Console.WriteLine($"{article.ArticleId} | {article.Title}");
+                    }
+                }
+                else
                 {
                     Console.WriteLine("No Articles Found!!");
                     Console.WriteLine("Press Enter to go back...");
                     Console.ReadLine();
                     return;
-                }
-
-                foreach (var article in articles)
-                {
-                    Console.WriteLine($"{article.ArticleId} | {article.Title}");
                 }
 
                 Console.WriteLine("\nOptions:");
@@ -65,10 +85,10 @@ namespace NewsAggregationConsole.Helpers
         }
 
         public static async Task ShowArticleDetails(
-    ArticleDetailsDto article,
-    UserReadDto user,
-    ArticleService articleService,
-    bool allowSave = true
+            ArticleDetailsDto article,
+            UserReadDto user,
+            ArticleService articleService,
+            bool allowSave = true
 )
         {
             while (true)
@@ -106,6 +126,7 @@ namespace NewsAggregationConsole.Helpers
                         else
                         {
                             ToggleSaveResponseDto saved = await articleService.SaveArticleForUserAsync(article.ArticleId);
+                            article.IsSavedByUser = saved.IsSaved;
                             Console.WriteLine(saved.Message);
                         }
                         break;
@@ -116,6 +137,7 @@ namespace NewsAggregationConsole.Helpers
                             ArticleId = article.ArticleId,
                             ArticleReaction = ReactionEnum.Like
                         });
+                        article.UserReaction = ReactionEnum.Like;
                         Console.WriteLine("You liked the article!");
                         break;
 
@@ -125,6 +147,7 @@ namespace NewsAggregationConsole.Helpers
                             ArticleId = article.ArticleId,
                             ArticleReaction = ReactionEnum.Dislike
                         });
+                        article.UserReaction = ReactionEnum.Dislike;
                         Console.WriteLine("You disliked the article!");
                         break;
 
@@ -134,6 +157,7 @@ namespace NewsAggregationConsole.Helpers
                             article.ArticleId,
                             reportReason
                         );
+                        article.IsReportedByUser = true;
                         Console.WriteLine(result.Message);
                         break;
 
@@ -148,8 +172,6 @@ namespace NewsAggregationConsole.Helpers
                         Console.WriteLine("Invalid choice. Press Enter to continue...");
                         break;
                 }
-
-                article = await articleService.GetArticleByIdAsync(article.ArticleId);
 
                 Console.WriteLine("Press Enter to continue...");
                 Console.ReadLine();
