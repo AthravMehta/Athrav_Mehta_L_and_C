@@ -7,6 +7,8 @@ namespace NewsAggregation.Repository.Contracts
         Task AddRangeAsync(IEnumerable<UserNotification> notifications);
         Task<IEnumerable<UserNotification>> GetAllUserNotificationAsync(int? UserId = null);
         Task MarkAllUserNotificationsAsRead(int? UserId = null);
+        Task<List<int>> GetCategoriesByUserNotificationsAsync(int userId);
+        Task<List<UserKeyword>> GetKeywordsByUserNotificationsAsync(int userId);
     }
 
 }

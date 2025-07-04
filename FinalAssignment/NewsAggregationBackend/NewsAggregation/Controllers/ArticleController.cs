@@ -65,6 +65,13 @@ namespace NewsAggregation.Controllers
             return Ok(articles);
         }
 
+        [HttpGet("recommendation")]
+        public async Task<IActionResult> GetRecommendations(int count = 20)
+        {
+            var recommendedArticles = await _service.GetRecommendedArticlesAsync(count);
+            return Ok(recommendedArticles);
+        }
+
         [HttpGet("saved")]
         public async Task<IActionResult> GetAllSavedArticles()
         {

@@ -19,11 +19,6 @@ namespace NewsAggregation.Repository
             await _dbContext.UserNotifications.AddRangeAsync(notifications);
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await _dbContext.SaveChangesAsync();
-        }
-
         public async Task<IEnumerable<UserNotification>> GetAllUserNotificationAsync(int? userId = null)
         {
             if (userId == null)
@@ -48,6 +43,27 @@ namespace NewsAggregation.Repository
                     notification.IsRead = true;
                 }
             }
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<int>> GetCategoriesByUserNotificationsAsync(int userId)
+        {
+            return await _dbContext.UserNotificationConfigurations
+                .Where(n => n.UserId == userId && n.IsEnabled)
+                .Select(n => n.CategoryId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<UserKeyword>> GetKeywordsByUserNotificationsAsync(int userId)
+        {
+            return await _dbContext.UserKeywords
+                .Where(k => k.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
             await _dbContext.SaveChangesAsync();
         }
     }

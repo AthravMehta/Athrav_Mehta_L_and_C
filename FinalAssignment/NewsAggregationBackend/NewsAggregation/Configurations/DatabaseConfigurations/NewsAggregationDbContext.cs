@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.FluentApiConfigurations;
 using NewsAggregation.Entities;
+using NewsAggregation.NewsAggregation.Configurations.FluentApiConfigurations;
+using NewsAggregation.NewsAggregation.Entities;
 
 namespace NewsAggregation.Configurations.DatabaseConfigurations
 {
@@ -21,12 +23,14 @@ namespace NewsAggregation.Configurations.DatabaseConfigurations
         public DbSet<UserSavedArticle> UserSavedArticles { get; set; }
         public DbSet<UserArticleReport> UserArticleReports { get; set; }
         public DbSet<UserNotificationConfiguration> UserNotificationConfigurations { get; set; }
+        public DbSet<UserArticleReadTracking> UserArticleReadTrackings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserFluentConfiguration());
             modelBuilder.ApplyConfiguration(new ArticleFluentConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryFluentConfiguration());
+            modelBuilder.ApplyConfiguration(new UserArticleReadTrackingConfiguration());
 
             modelBuilder.Entity<Keywords>()
                 .HasOne(k => k.Category)

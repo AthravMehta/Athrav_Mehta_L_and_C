@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
+using NewsAggregation.Enums;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 
@@ -110,6 +111,33 @@ namespace NewsAggregation.Repository
         public async Task<int> GetReportCountForArticleAsync(int articleId) {
             return await _context.UserArticleReports
                 .CountAsync(r => r.ArticleId == articleId);
+        }
+
+        public async Task<List<int>> GetCategoriesByUserReactionAsync(int userId, ReactionEnum reaction)
+        {
+            return await _context.UserArticleReactions
+                .Where(r => r.UserId == userId && r.Reaction == reaction)
+                .Select(r => r.Article.CategoryId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<int>> GetCategoriesBySavedUserArticleAsync(int userId)
+        {
+            return await _context.UserSavedArticles
+                .Where(s => s.UserId == userId)
+                .Select(s => s.Article.CategoryId)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<int>> GetReportedArticleCategoriesByUserAsync(int userId)
+        {
+            return await _context.UserArticleReports
+                .Where(r => r.UserId == userId)
+                .Select(r => r.Article.CategoryId)
+                .Distinct()
+                .ToListAsync();
         }
 
         public async Task SaveChangesAsync()

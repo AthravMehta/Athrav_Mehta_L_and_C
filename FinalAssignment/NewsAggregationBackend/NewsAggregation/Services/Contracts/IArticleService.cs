@@ -9,6 +9,7 @@ namespace NewsAggregation.Services.Contracts
         Task<IEnumerable<Article>> AddAllArticlesAsync(IEnumerable<Article> articles);
         Task<ArticleDetailsDto> GetByIdWithUserDetailsAsync(int id);
         Task<IEnumerable<ArticleDto>> GetAllAsync(ArticleQueryDto articleQueryDto);
+        Task<List<ArticleDto>> GetRecommendedArticlesAsync(int maxResults = 20);
         Task<IEnumerable<ArticleDto>> GetSavedArticlesForCurrentUserAsync();
         Task<bool> HideArticleAsync(int articleId);
 

@@ -2,6 +2,7 @@
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
 using NewsAggregation.Models;
+using NewsAggregation.NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 
@@ -10,9 +11,15 @@ namespace NewsAggregation.Services
     public class ArticleService : IArticleService
     {
         private readonly IUserArticleActionService _userArticleActionService;
+
         private readonly ICrudBaseRepository<Article> _curdbaseRepository;
         private readonly ICrudBaseRepository<Keywords> _keywordsRepository;
+        private readonly ICrudBaseRepository<UserArticleReadTracking> _userArticleReadTrackingRepository;
         private readonly IArticleRepository _articleRepository;
+        private readonly IUserArticleActionRepository _userArticleActionRepository;
+        private readonly IUserArticleReadTrackingRepository _customUserArticleReadTrackingRepository;
+        private readonly IUserNotificationRepository _userNotificationRepository;
+
         private readonly ILogger<ArticleService> _logger;
         private readonly RequestContext _requestContext;
         private readonly IMapper _mapper;
@@ -20,18 +27,29 @@ namespace NewsAggregation.Services
         public ArticleService(
             IUserArticleActionService userArticleActionService,
             ICrudBaseRepository<Article> crudBaseRepository,
+            ICrudBaseRepository<Keywords> keywordsRepository,
+            ICrudBaseRepository<UserArticleReadTracking> userArticleReadTrackingRepository,
+            IUserArticleReadTrackingRepository customUserArticleReadTrackingRepository,
             IArticleRepository articleRepository,
+            IUserArticleActionRepository userArticleActionRepository,
+            IUserNotificationRepository userNotificationRepository,
             ILogger<ArticleService> logger,
             RequestContext requestContext,
             IMapper mapper)
         {
             _userArticleActionService = userArticleActionService;
             _curdbaseRepository = crudBaseRepository;
+            _keywordsRepository = keywordsRepository;
+            _userArticleReadTrackingRepository = userArticleReadTrackingRepository;
             _articleRepository = articleRepository;
+            _userArticleActionRepository = userArticleActionRepository;
+            _customUserArticleReadTrackingRepository = customUserArticleReadTrackingRepository;
+            _userNotificationRepository = userNotificationRepository;
             _requestContext = requestContext;
             _logger = logger;
             _mapper = mapper;
         }
+        private int userId => _requestContext.UserId!.Value;
 
         public async Task<ArticleDto> AddAsync(ArticleDto dto)
         {
@@ -66,7 +84,21 @@ namespace NewsAggregation.Services
         public async Task<ArticleDetailsDto> GetByIdWithUserDetailsAsync(int id)
         {
             var articleWithUserDetail = await _articleRepository.GetArticleWithUserStatusAsync(id);
+            await LogUserArticleReadAsync(articleWithUserDetail);
             return articleWithUserDetail;
+        }
+
+        private async Task LogUserArticleReadAsync(ArticleDetailsDto article)
+        {
+            var readTrack = new UserArticleReadTracking
+            {
+                UserId = _requestContext.UserId!.Value,
+                ArticleId = article.ArticleId,
+                CategoryId = article.CategoryId
+            };
+
+            await _userArticleReadTrackingRepository.AddAsync(readTrack);
+            await _curdbaseRepository.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<ArticleDto>> GetAllAsync(ArticleQueryDto query)
@@ -74,6 +106,84 @@ namespace NewsAggregation.Services
             var articles = await _articleRepository.GetAllAsync(query);
             return _mapper.Map<IEnumerable<ArticleDto>>(articles);
         }
+
+        public async Task<List<ArticleDto>> GetRecommendedArticlesAsync(int maxResults = 20)
+        {
+            var likedCategories = await _userArticleActionRepository.GetCategoriesByUserReactionAsync(userId, ReactionEnum.Like);
+            var dislikedCategories = await _userArticleActionRepository.GetCategoriesByUserReactionAsync(userId, ReactionEnum.Dislike);
+            var savedCategories = await _userArticleActionRepository.GetCategoriesBySavedUserArticleAsync(userId);
+            var readCategories = await _customUserArticleReadTrackingRepository.GetCategoriesByUserReadSequenceAsync(userId);
+            var userNotificationConfigurationCategories = await _userNotificationRepository.GetCategoriesByUserNotificationsAsync(userId);
+            var userNotificationKeywordsByCategory = await _userNotificationRepository.GetKeywordsByUserNotificationsAsync(userId);
+            var reportedArticleCategoryIds = await _userArticleActionRepository.GetReportedArticleCategoriesByUserAsync(userId);
+
+            var categoryScores = new Dictionary<int, double>();
+
+            void AddScore(IEnumerable<int> categories, double weight)
+            {
+                foreach (var catId in categories)
+                    categoryScores[catId] = categoryScores.GetValueOrDefault(catId) + weight;
+            }
+
+            AddScore(likedCategories, 5.0);
+            AddScore(savedCategories, 4.0);
+            AddScore(readCategories, 3.0);
+            AddScore(userNotificationConfigurationCategories, 2.0);
+            AddScore(reportedArticleCategoryIds, -1.0);
+            AddScore(dislikedCategories, -10.0);
+
+            var topCategoryEntry = categoryScores
+                .Where(kv => kv.Value > 0)
+                .OrderByDescending(kv => kv.Value)
+                .FirstOrDefault();
+
+            if (topCategoryEntry.Equals(default(KeyValuePair<int, double>)))
+                return new List<ArticleDto>();
+
+            int topCategoryId = topCategoryEntry.Key;
+
+            ArticleQueryDto query = new ArticleQueryDto
+            {
+                CategoryId = topCategoryId,
+                IsHidden = false
+            };
+
+            var candidateArticles = await this.GetAllAsync(query);
+
+            var userKeywords = userNotificationKeywordsByCategory
+            .Where(k => k.CategoryId == topCategoryId)
+            .Select(k => k.Keyword)
+            .ToList();
+
+            var scoredArticles = candidateArticles
+                .Select(article =>
+                {
+                    int matchedKeywordCount = userKeywords.Count(keyword => ArticleContainsKeyword(article, keyword));
+                    return new { Article = article, Score = matchedKeywordCount };
+                });
+
+            var sortedArticles = scoredArticles
+                .OrderByDescending(x => x.Score)
+                .Take(maxResults)
+                .Select(x => x.Article)
+                .ToList();
+
+            return sortedArticles;
+
+
+        }
+
+        private bool ArticleContainsKeyword(ArticleDto article, string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword) || article == null)
+                return false;
+
+            var comparison = StringComparison.OrdinalIgnoreCase;
+
+            return (article.Title?.IndexOf(keyword, comparison) >= 0)
+                || (article.Content?.IndexOf(keyword, comparison) >= 0);
+        }
+
 
         public async Task<IEnumerable<ArticleDto>> GetSavedArticlesForCurrentUserAsync()
         {

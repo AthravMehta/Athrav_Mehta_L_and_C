@@ -115,6 +115,8 @@ builder.Services.AddScoped<IUserNotificationRepository, UserNotificationReposito
 builder.Services.AddScoped<IUserArticleActionService, UserArticleActionService>();
 builder.Services.AddScoped<IUserArticleActionRepository, UserArticleActionRepository>();
 
+builder.Services.AddScoped<IUserArticleReadTrackingRepository, UserArticleReadTrackingRepository>();
+
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<EmailNotificationSender>();
 builder.Services.AddSingleton<NotificationSenderFactory>();
