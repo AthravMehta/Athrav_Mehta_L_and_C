@@ -1,6 +1,8 @@
-﻿using NewsAggregation.Exceptions;
+﻿using NewsAggregation.Constants;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Services
 {
@@ -13,8 +15,8 @@ namespace NewsAggregation.Services
             ICrudBaseRepository<TEntity> repository,
             ILogger<CrudBaseService<TEntity>> logger)
         {
-            _repository = repository;
-            _logger = logger;
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         protected virtual string EntityName => typeof(TEntity).Name;
@@ -27,8 +29,9 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving all {EntityName} entities");
-                throw new ApiException($"Failed to get all {EntityName} entities.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityGetAllFailed, EntityName);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
@@ -40,13 +43,21 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error retrieving {EntityName} with ID {id}");
-                throw new ApiException($"Failed to get {EntityName} with ID {id}.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityGetByIdFailed, EntityName, id);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
         public virtual async Task AddAsync(TEntity entity)
         {
+            if (entity == null)
+            {
+                var message = ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject);
+                _logger.LogWarning(message);
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, message);
+            }
+
             try
             {
                 await _repository.AddAsync(entity);
@@ -54,13 +65,21 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error adding new {EntityName}");
-                throw new ApiException($"Failed to add new {EntityName}.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityAddFailed, EntityName);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
         public virtual async Task AddRangeAsync(List<TEntity> entities)
         {
+            if (entities == null)
+            {
+                var message = ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject);
+                _logger.LogWarning(message);
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, message);
+            }
+
             try
             {
                 await _repository.AddRangeAsync(entities);
@@ -68,14 +87,21 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error adding range of {EntityName} entities");
-                throw new ApiException($"Failed to add range of {EntityName} entities.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityAddRangeFailed, EntityName);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
-
         public virtual async Task UpdateAsync(TEntity entity)
         {
+            if (entity == null)
+            {
+                var message = ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject);
+                _logger.LogWarning(message);
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, message);
+            }
+
             try
             {
                 await _repository.UpdateAsync(entity);
@@ -83,8 +109,9 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating {EntityName}");
-                throw new ApiException($"Failed to update {EntityName}.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityUpdateFailed, EntityName);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
@@ -97,8 +124,9 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error deleting {EntityName} with ID {id}");
-                throw new ApiException($"Failed to delete {EntityName} with ID {id}.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntityDeleteFailed, EntityName, id);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
 
@@ -110,8 +138,9 @@ namespace NewsAggregation.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error saving changes for {EntityName}");
-                throw new ApiException($"Failed to save changes for {EntityName}.", ex, _logger);
+                var message = string.Format(ErrorMessages.EntitySaveChangesFailed, EntityName);
+                _logger.LogError(ex, message);
+                throw new ApiException(ErrorResponse.ErrorEnum.DatabaseError, message);
             }
         }
     }

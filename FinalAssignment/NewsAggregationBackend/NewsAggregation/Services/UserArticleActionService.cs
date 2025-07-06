@@ -1,61 +1,72 @@
 ﻿using Hangfire;
+using Microsoft.Extensions.FileProviders;
 using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Notifications;
+using NewsAggregation.Notifications.Contracts;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Services
 {
     public class UserArticleActionService : IUserArticleActionService
     {
+        private readonly IFileProvider _fileProvider;
         private readonly IUserRepository _userRepository;
         private readonly IArticleRepository _articleRepository;
         private readonly IUserArticleActionRepository _userArticleActionRepository;
-        private readonly NotificationSenderFactory _notificationSenderFactory;
+        private readonly INotificationSenderFactory _notificationSenderFactory;
         private readonly RequestContext _requestContext;
 
-       public UserArticleActionService(
-           IUserRepository userRepository,
-           IArticleRepository articleRepository, 
-           IUserArticleActionRepository userArticleActionRepository, 
-           NotificationSenderFactory notificationSenderFactory,
-           RequestContext requestContext)
+        public UserArticleActionService(
+            IFileProvider fileProvider,
+            IUserRepository userRepository,
+            IArticleRepository articleRepository,
+            IUserArticleActionRepository userArticleActionRepository,
+            INotificationSenderFactory notificationSenderFactory,
+            RequestContext requestContext)
         {
-            _userRepository = userRepository;
-            _articleRepository = articleRepository;
-            _userArticleActionRepository = userArticleActionRepository;
-            _notificationSenderFactory = notificationSenderFactory;
-            _requestContext = requestContext;
+            _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _articleRepository = articleRepository ?? throw new ArgumentNullException(nameof(articleRepository));
+            _userArticleActionRepository = userArticleActionRepository ?? throw new ArgumentNullException(nameof(userArticleActionRepository));
+            _notificationSenderFactory = notificationSenderFactory ?? throw new ArgumentNullException(nameof(notificationSenderFactory));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
-        protected virtual int userId => _requestContext.UserId!.Value;
+        protected virtual int UserId => _requestContext.UserId!.Value;
 
         public async Task<ToggleSaveResponseDto> ToggleSaveAsync(int articleId)
         {
-            var result = await _userArticleActionRepository.ToggleSaveAsync(userId, articleId);
+            var result = await _userArticleActionRepository.ToggleSaveAsync(UserId, articleId);
             await _userArticleActionRepository.SaveChangesAsync();
             return result;
         }
 
         public async Task<bool> AddArticleReaction(ArticleReactionRequestDto articleReactionRequestDto)
         {
-            var result = await _userArticleActionRepository.AddArticleReaction(userId, articleReactionRequestDto);
+            if (articleReactionRequestDto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
+            var result = await _userArticleActionRepository.AddArticleReaction(UserId, articleReactionRequestDto);
             await _userArticleActionRepository.SaveChangesAsync();
             return result;
         }
+
         public async Task<bool> DeleteArticleReaction(int articleId)
         {
-            var result =  await _userArticleActionRepository.DeleteArticleReaction(userId, articleId);
+            var result = await _userArticleActionRepository.DeleteArticleReaction(UserId, articleId);
             await _userArticleActionRepository.SaveChangesAsync();
             return result;
         }
 
         public async Task<IEnumerable<int>> GetSavedArticleIdsByUserIdAsync()
         {
-            return await _userArticleActionRepository.GetSavedArticleIdsByUserIdAsync(userId);
+            return await _userArticleActionRepository.GetSavedArticleIdsByUserIdAsync(UserId);
         }
 
         public async Task<int> GetReportCountForArticleAsync(int articleId)
@@ -65,24 +76,24 @@ namespace NewsAggregation.Services
 
         public async Task<UserArticleReportResponseDto> ReportArticleAsync(UserArticleReportDto userArticleReportDto)
         {
-            UserArticleReportResponseDto responseDto = new UserArticleReportResponseDto
-            {
-                Success = false,
-                Message = string.Empty
-            };
+            if (userArticleReportDto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             int articleId = userArticleReportDto.ArticleId;
-            if (await _userArticleActionRepository.HasUserReportedArticleAsync(articleId, userId))
+            if (await _userArticleActionRepository.HasUserReportedArticleAsync(articleId, UserId))
             {
-                responseDto.Success = true;
-                responseDto.Message = "You have already reported this article.";
-                return responseDto;
+                return new UserArticleReportResponseDto
+                {
+                    Success = true,
+                    Message = SuccessConstants.ArticleAlreadyReported
+                };
             }
 
             await _userArticleActionRepository.AddReportAsync(new UserArticleReport
             {
                 ArticleId = articleId,
                 ReportReason = userArticleReportDto.ReportReason,
-                UserId = userId,
+                UserId = UserId,
                 ActionCreatedTime = DateTime.UtcNow
             });
 
@@ -99,17 +110,18 @@ namespace NewsAggregation.Services
                 }
             }
 
-            // TODO: Figure out a way to less the params, since sending whole article object is causing error
             BackgroundJob.Enqueue(() => NotifyAdminArticleReportedWrapper(
                 articleId,
-                article.Title,
-                article.Content,
-                article.PublishedDate
+                article!.Title,
+                article!.Content,
+                article!.PublishedDate
             ));
 
-            responseDto.Success = true;
-            responseDto.Message = "Article reported successfully. Thank you for your feedback!";
-            return responseDto;
+            return new UserArticleReportResponseDto
+            {
+                Success = true,
+                Message = SuccessConstants.ArticleReported
+            };
         }
 
         public void NotifyAdminArticleReportedWrapper(int articleId, string title, string content, DateTime publishedDate)
@@ -117,42 +129,41 @@ namespace NewsAggregation.Services
             NotifyAdminArticleReported(articleId, title, content, publishedDate).Wait();
         }
 
-        private async Task<bool> NotifyAdminArticleReported(int articleId,
-            string title,
-            string content,
-            DateTime publishedDate)
+        private async Task<bool> NotifyAdminArticleReported(int articleId, string title, string content, DateTime publishedDate)
         {
             var admins = await _userRepository.GetAllUsersAsync(RoleEnum.Admin);
 
             if (admins == null || !admins.Any())
                 return false;
 
-            string messageBody = this.CreateReportMessageBody(articleId, title, content, publishedDate);
+            string messageBody = CreateReportMessageBody(articleId, title, content, publishedDate);
 
             var sender = _notificationSenderFactory.GetSender(NotificationType.Email);
 
             var tasks = admins.Select(admin =>
-                sender.SendAsync(admin.Email, "Article Reported Notification", messageBody));
+                sender.SendAsync(admin.Email, AppConstants.ArticleReportEmailSubject, messageBody));
 
             await Task.WhenAll(tasks);
 
             return true;
         }
 
-        private string CreateReportMessageBody(int articleId,
-            string title,
-            string content,
-            DateTime publishedDate)
+        private string CreateReportMessageBody(int articleId, string title, string content, DateTime publishedDate)
         {
-            return $@"
-                <h3>Article Reported</h3>
-                <p>The article with ID <strong>{articleId}</strong> has been reported by users.</p>
-                <p><strong>Title:</strong> {title}</p>
-                <p><strong>Published Date:</strong> {publishedDate:yyyy-MM-dd HH:mm}</p>
-                <p><strong>Description:</strong> {content}</p>
-                <p>Please review the article and take necessary action.</p>
-            ";
+            var templateFile = _fileProvider.GetFileInfo("Templates/Email/ArticleReportedTemplate.html");
+            string template;
+            using (var stream = templateFile.CreateReadStream())
+            using (var reader = new StreamReader(stream))
+            {
+                template = reader.ReadToEnd();
+            }
+
+            template = template.Replace("{{ArticleId}}", articleId.ToString())
+                               .Replace("{{Title}}", title)
+                               .Replace("{{PublishedDate}}", publishedDate.ToString("yyyy-MM-dd HH:mm"))
+                               .Replace("{{Content}}", content);
+
+            return template;
         }
     }
-
 }

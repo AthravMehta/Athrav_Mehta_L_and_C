@@ -23,6 +23,19 @@
         public const string NewsApi = "NewsAPI";
         public const string NewsApiBase = "newsapi.org";
         public const string TheNewsApiBase = "thenewsapi.com";
-        public const string UnsupportedApi = "Unsupported API";
+
+        // Encryption
+        public const string KeyProtector = "KeyProtector";
+
+        // Email
+        public const string UserArticleEmailSubject = "Your Personalized News Digest";
+        public const string ArticleReportEmailSubject = "Article Reported Notification";
+
+        // Validation
+        public const string PasswordValidationRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$";
+        public const string EmailValidationRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+        public const string NewsAggregationAppVersion = "NewsAggregationApp/1.0";
+
     }
 }

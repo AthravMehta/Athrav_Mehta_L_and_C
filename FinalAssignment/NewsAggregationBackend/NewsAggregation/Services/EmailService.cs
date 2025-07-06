@@ -2,10 +2,10 @@
 using MimeKit;
 using Microsoft.Extensions.Options;
 using NewsAggregation.Models;
-using NewsAggregation.Notifications.Contracts;
 using MailKit.Security;
+using NewsAggregation.Services.Contracts;
 
-namespace NewsAggregation.Notifications
+namespace NewsAggregation.Services
 {
     public class EmailService : IEmailService
     {

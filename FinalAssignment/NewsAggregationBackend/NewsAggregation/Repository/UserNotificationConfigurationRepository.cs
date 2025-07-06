@@ -12,29 +12,31 @@ namespace NewsAggregation.Repository
 
         public UserNotificationConfigurationRepository(NewsAggregationDbContext context, RequestContext requestContext)
         {
-            _context = context;
-            _requestContext = requestContext;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
         public async Task<IEnumerable<UserNotificationConfiguration>> GetAllUserConfigurationAsync()
         {
             var userId = _requestContext.UserId;
 
-            if (userId == null)
+            if (!userId.HasValue)
             {
                 return Enumerable.Empty<UserNotificationConfiguration>();
             }
 
-            return await _context.UserNotificationConfigurations
-                .Where(config => config.UserId == userId)
+            var configs = await _context.UserNotificationConfigurations
+                .Where(config => config.UserId == userId.Value)
                 .Include(config => config.Category)
                 .ToListAsync();
+
+            return configs ?? Enumerable.Empty<UserNotificationConfiguration>();
         }
+
         public async Task<bool> ExistsAsync(int userId, int categoryId)
         {
             return await _context.UserNotificationConfigurations
                 .AnyAsync(x => x.UserId == userId && x.CategoryId == categoryId);
         }
-
     }
 }

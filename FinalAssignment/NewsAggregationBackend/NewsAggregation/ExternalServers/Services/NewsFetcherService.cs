@@ -1,10 +1,11 @@
 ﻿using Hangfire;
+using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.ExternalServers.Factory.Contracts;
 using NewsAggregation.ExternalServers.Services.Contracts;
 using NewsAggregation.Models;
 using NewsAggregation.Notifications;
-using NewsAggregation.Services;
+using NewsAggregation.Notifications.Contracts;
 using NewsAggregation.Services.Contracts;
 using System.Text;
 
@@ -15,8 +16,8 @@ namespace NewsAggregation.ExternalServers.Services
         private readonly IHttpClientFactory _clientFactory;
         private readonly INewsApiFactory _apiFactory;
         private readonly ILogger<NewsFetcherService> _logger;
-        private readonly NotificationSenderFactory _notificationSenderFactory;
-        private readonly EncryptionService _encryptionService;
+        private readonly INotificationSenderFactory _notificationSenderFactory;
+        private readonly IEncryptionService _encryptionService;
         private readonly ICategoryService _categoryService;
         private readonly IArticleService _articleSerivce;
         private readonly IUserService _userService;
@@ -28,8 +29,8 @@ namespace NewsAggregation.ExternalServers.Services
             IHttpClientFactory clientFactory,
             INewsApiFactory apiFactory,
             ILogger<NewsFetcherService> logger,
-            NotificationSenderFactory notificationSenderFactory,
-            EncryptionService encryptionService,
+            INotificationSenderFactory notificationSenderFactory,
+            IEncryptionService encryptionService,
             ICategoryService categoryService,
             IArticleService articleService,
             IUserService userService,
@@ -60,7 +61,7 @@ namespace NewsAggregation.ExternalServers.Services
                 {
                     var adapter = _apiFactory.CreateAdapter(server.BaseUrl);
                     var client = _clientFactory.CreateClient();
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd("NewsAggregationApp/1.0");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd(AppConstants.NewsAggregationAppVersion);
                     var response = await client.GetAsync(GetApiUrl(server));
                     if (!response.IsSuccessStatusCode)
                     {
@@ -93,9 +94,9 @@ namespace NewsAggregation.ExternalServers.Services
                var apiKey = GetDecryptedApiKey(server.ApiKeyHash);
                 return server.BaseUrl switch
                 {
-                    string s when s.Contains("newsapi.org") => $"{server.BaseUrl}{apiKey}",
-                    string s when s.Contains("thenewsapi.com") => $"{server.BaseUrl}{apiKey}",
-                    _ => throw new NotSupportedException("Unsupported API")
+                    string s when s.Contains(AppConstants.NewsApiBase) => $"{server.BaseUrl}{apiKey}",
+                    string s when s.Contains(AppConstants.TheNewsApiBase) => $"{server.BaseUrl}{apiKey}",
+                    _ => throw new NotSupportedException(ErrorMessages.UnsupportedApi)
                 };
             }
             return String.Empty;
@@ -153,10 +154,10 @@ namespace NewsAggregation.ExternalServers.Services
                 if (!userArticles.Any())
                     continue;
 
-                var subject = "Your Personalized News Digest";
+                var subject = AppConstants.UserArticleEmailSubject;
                 var body = BuildEmailBody(user, userArticles);
 
-                var sender = _notificationSenderFactory.GetSender("Email");
+                var sender = _notificationSenderFactory.GetSender(NotificationType.Email);
                 BackgroundJob.Enqueue(() => sender.SendAsync(user.Email, subject, body));
 
                 await SaveNotifications(user.UserId, userArticles);

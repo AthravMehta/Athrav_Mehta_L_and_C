@@ -1,4 +1,5 @@
 ﻿using NewsAggregation.Notifications.Contracts;
+using NewsAggregation.Services.Contracts;
 
 namespace NewsAggregation.Notifications
 {

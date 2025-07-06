@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
+using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
 using NewsAggregation.Models;
@@ -69,7 +70,7 @@ namespace NewsAggregation.Repository
                 return new ToggleSaveResponseDto
                 {
                     IsSaved = false,
-                    Message = "Article Unsaved Successfully"
+                    Message = SuccessConstants.ArticleUnsaved
                 };
             }
             else
@@ -85,7 +86,7 @@ namespace NewsAggregation.Repository
                 return new ToggleSaveResponseDto
                 {
                     IsSaved = true,
-                    Message = "Article Saved Successfully"
+                    Message = SuccessConstants.ArticleSaved
                 };
             }
         }

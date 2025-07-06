@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
-using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Enums;
-using Polly;
+using NewsAggregation.Repository.Contracts;
 
 namespace NewsAggregation.Repository
 {
@@ -12,12 +10,16 @@ namespace NewsAggregation.Repository
     {
         private readonly NewsAggregationDbContext _dbContext;
 
-        public UserRepository(NewsAggregationDbContext dbContext, IMapper mapper)
+        public UserRepository(NewsAggregationDbContext dbContext)
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(DbContext));
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
+
         public async Task<User> GetUserByName(string username)
         {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ArgumentNullException(nameof(username));
+
             return await _dbContext.Set<User>()
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
@@ -32,7 +34,7 @@ namespace NewsAggregation.Repository
                 .Where(user => user.RoleId == role)
                 .ToListAsync();
 
-            return users == null ? new List<User>(): users;
+            return users ?? new List<User>();
         }
     }
 }

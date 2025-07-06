@@ -1,10 +1,8 @@
 ﻿using NewsAggregation.Notifications.Contracts;
-using NewsAggregation.Notifications;
-using NewsAggregation.Constants;
 
 namespace NewsAggregation.Notifications
 {
-    public class NotificationSenderFactory
+    public class NotificationSenderFactory : INotificationSenderFactory
     {
         private readonly IServiceProvider _provider;
 

@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Services
 {
@@ -19,20 +22,22 @@ namespace NewsAggregation.Services
         public CategoryService(
             IMapper mapper,
             IArticleService articleService,
-            ICrudBaseRepository<Category> categoryRepo,
+            ICrudBaseRepository<Category> categoryRepository,
             IKeywordService keywordService,
             IUserNotificationConfigurationService userNotificationConfigurationService)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _articleService = articleService ?? throw new ArgumentNullException(nameof(articleService));
-            _categoryRepository = categoryRepo;
-            _keywordService = keywordService;
-            _userNotificationConfigurationService = userNotificationConfigurationService;
+            _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+            _keywordService = keywordService ?? throw new ArgumentNullException(nameof(keywordService));
+            _userNotificationConfigurationService = userNotificationConfigurationService ?? throw new ArgumentNullException(nameof(userNotificationConfigurationService));
         }
 
         public async Task<CategoryDto> AddAsync(CategoryDto categoryDto)
         {
-            if (categoryDto == null) throw new ArgumentNullException(nameof(categoryDto));
+            if (categoryDto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             var category = new Category { Name = categoryDto.Name };
             await _categoryRepository.AddAsync(category);
             await _categoryRepository.SaveChangesAsync();
@@ -44,8 +49,13 @@ namespace NewsAggregation.Services
 
         public async Task<CategoryDto> UpdateAsync(int id, CategoryDto categoryDto)
         {
+            if (categoryDto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             var category = await _categoryRepository.GetByIdAsync(id);
-            if (category == null) return null;
+            if (category == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
             category.Name = categoryDto.Name;
             await _categoryRepository.UpdateAsync(category);
             await _categoryRepository.SaveChangesAsync();
@@ -62,24 +72,33 @@ namespace NewsAggregation.Services
 
         public async Task<int> GetCategoryIdAsync(Article article, List<Keywords>? keywords, List<CategoryDto>? categories)
         {
+            if (article == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             var title = article.Title?.ToLower() ?? "";
             var content = article.Content?.ToLower() ?? "";
 
-            foreach (var keyword in keywords)
+            if (keywords != null)
             {
-                var keywordText = keyword.Keyword.ToLower();
-                if (title.Contains(keywordText) || content.Contains(keywordText))
+                foreach (var keyword in keywords)
                 {
-                    article.CategoryId = keyword.CategoryId;
-                    return keyword.CategoryId;
+                    var keywordText = keyword.Keyword.ToLower();
+                    if (title.Contains(keywordText) || content.Contains(keywordText))
+                    {
+                        article.CategoryId = keyword.CategoryId;
+                        return keyword.CategoryId;
+                    }
                 }
             }
 
-            var allCategory = categories!.FirstOrDefault(c => c.Name.Equals("All", StringComparison.OrdinalIgnoreCase));
-            if (allCategory != null)
+            if (categories != null)
             {
-                article.CategoryId = allCategory.CategoryId!.Value;
-                return allCategory.CategoryId!.Value;
+                var allCategory = categories.FirstOrDefault(c => c.Name.Equals("All", StringComparison.OrdinalIgnoreCase));
+                if (allCategory != null && allCategory.CategoryId.HasValue)
+                {
+                    article.CategoryId = allCategory.CategoryId.Value;
+                    return allCategory.CategoryId.Value;
+                }
             }
             return 0;
         }
@@ -87,13 +106,15 @@ namespace NewsAggregation.Services
         public async Task<bool> HideCategoryAsync(int categoryId, string reason)
         {
             var category = await _categoryRepository.GetByIdAsync(categoryId);
-            if (category == null) return false;
+            if (category == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
             category.IsHidden = true;
             category.HideReason = reason;
             await _categoryRepository.UpdateAsync(category);
             await _categoryRepository.SaveChangesAsync();
 
-            ArticleQueryDto articleQueryDto = new ArticleQueryDto
+            var articleQueryDto = new ArticleQueryDto
             {
                 CategoryId = categoryId,
                 IsHidden = false
@@ -105,13 +126,15 @@ namespace NewsAggregation.Services
         public async Task<bool> UnhideCategoryAsync(int categoryId)
         {
             var category = await _categoryRepository.GetByIdAsync(categoryId);
-            if (category == null) return false;
+            if (category == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
             category.IsHidden = false;
             category.HideReason = null;
             await _categoryRepository.UpdateAsync(category);
             await _categoryRepository.SaveChangesAsync();
 
-            ArticleQueryDto articleQueryDto = new ArticleQueryDto
+            var articleQueryDto = new ArticleQueryDto
             {
                 CategoryId = categoryId,
                 IsHidden = true,

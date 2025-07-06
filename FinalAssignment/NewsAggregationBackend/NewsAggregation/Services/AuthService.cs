@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using NewsAggregation.Entities;
+using NewsAggregation.Constants;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
@@ -13,30 +13,48 @@ namespace NewsAggregation.Services
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IMapper _mapper;
 
-
-        public AuthService(IUserService userService, IJwtTokenService jwtTokenService, IMapper mapper)
+        public AuthService(
+            IUserService userService,
+            IJwtTokenService jwtTokenService,
+            IMapper mapper)
         {
             _userService = userService;
             _jwtTokenService = jwtTokenService;
             _mapper = mapper;
         }
 
-        public async Task<UserDataWithTokenDto> LoginAsync(LoginDto userDto)
+        public async Task<UserDataWithTokenDto> LoginAsync(LoginDto loginDto)
         {
-            User user = await _userService.GetUserByName(userDto.Username);
-            if (user == null)
-                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid Username. User Don't Exist!");
+            if (loginDto == null)
+            {
+                throw new ApiException(
+                    ErrorResponse.ErrorEnum.NullObject,
+                    ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+            }
 
-            if (!_userService.VerifyPassword(user, userDto.Password))
-                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid username or password.");
+            var user = await _userService.GetUserByName(loginDto.Username);
+
+            if (user == null)
+            {
+                throw new ApiException(
+                    ErrorResponse.ErrorEnum.NotFound,
+                    ErrorMessages.ResourceNotFound);
+            }
+
+            if (!_userService.VerifyPassword(user, loginDto.Password))
+            {
+                throw new ApiException(
+                    ErrorResponse.ErrorEnum.Validation,
+                    ErrorMessages.InvalidPassword);
+            }
 
             var roles = new List<string> { user.RoleId.ToString() };
-            var userDataWithToken = new UserDataWithTokenDto
+
+            return new UserDataWithTokenDto
             {
                 User = _mapper.Map<UserReadDto>(user),
                 token = _jwtTokenService.GenerateToken(user.UserId.ToString(), user.Username, user.Email, roles)
             };
-            return userDataWithToken;
         }
     }
 }

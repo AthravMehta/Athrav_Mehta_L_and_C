@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Constants;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 using NewsAggregation.Enums;
 using NewsAggregation.Configurations;
-using NewsAggregation.Services;
 
 namespace NewsAggregation.Controllers
 {
@@ -22,32 +24,51 @@ namespace NewsAggregation.Controllers
 
         [HttpPut("{id}")]
         [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
-        public async Task<IActionResult> Update(int id, [FromBody] UserNotificationConfigurationDto dto)
+        public async Task<IActionResult> UpdateNotificationConfiguration(int id, [FromBody] UserNotificationConfigurationDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.Validation;
+                    var errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            var result = await _service.UpdateAsync(id, dto);
-            if (result == null)
-                return NotFound();
+                var result = await _service.UpdateAsync(id, dto);
+                if (result == null)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.NotFound;
+                    var errorMessage = ErrorMessages.ResourceNotFound;
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            return Ok(result);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpGet]
         [AuthorizeRoles(nameof(RoleEnum.Admin), nameof(RoleEnum.User))]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllNotificationConfigurations()
         {
-            var result = await _service.GetAllUserConfigurationAsync();
-            return Ok(result);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _service.GetAllUserConfigurationAsync();
+                return Ok(result);
+            }, _logger);
         }
 
+        [HttpPost("initialize")]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
-        [HttpPost("Initialize")]
         public async Task<IActionResult> InitializeNotificationConfigurations()
         {
-            await _service.InitializeNotificationConfigurationsAsync();
-            return Ok(new { Message = "User notification configurations initialized successfully." });
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                await _service.InitializeNotificationConfigurationsAsync();
+                return Ok(new { Message = SuccessConstants.UNCInitialize});
+            }, _logger);
         }
     }
 }

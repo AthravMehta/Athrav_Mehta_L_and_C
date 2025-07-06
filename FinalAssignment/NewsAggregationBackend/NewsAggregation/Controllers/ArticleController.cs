@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Configurations;
+using NewsAggregation.Constants;
+using NewsAggregation.Enums;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
-using NewsAggregation.Enums;
-using NewsAggregation.Configurations;
-using NewsAggregation.Exceptions;
-using NewsAggregation.Services;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Controllers
 {
@@ -14,94 +15,142 @@ namespace NewsAggregation.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ILogger<ArticleController> _logger;
-        private readonly IArticleService _service;
+        private readonly IArticleService _articleService;
         private readonly IUserArticleActionService _userArticleActionService;
 
         public ArticleController(
             ILogger<ArticleController> logger,
-            IArticleService service,
+            IArticleService articleService,
             IUserArticleActionService userArticleActionService)
         {
             _logger = logger;
-            _service = service;
+            _articleService = articleService;
             _userArticleActionService = userArticleActionService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ArticleDto dto)
+        public async Task<IActionResult> AddArticle([FromBody] ArticleDto articleDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.Validation;
+                    var errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            var result = await _service.AddAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.ArticleId }, result);
+                var result = await _articleService.AddAsync(articleDto);
+                return CreatedAtAction(nameof(GetArticleById), new { id = result.ArticleId }, result);
+            }, _logger);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetArticleById(int id)
+        {
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _articleService.GetByIdWithUserDetailsAsync(id);
+                if (result == null)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.NotFound;
+                    var errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
+
+                return Ok(result);
+            }, _logger);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllArticles([FromQuery] ArticleQueryDto query)
+        {
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var articles = await _articleService.GetAllAsync(query);
+                return Ok(articles);
+            }, _logger);
         }
 
         [HttpPost("toggle-save")]
-        public async Task<IActionResult> ToggleSave([FromBody] ToggleSaveRequestDto request)
+        public async Task<IActionResult> ToggleSaveArticle([FromBody] ToggleSaveRequestDto request)
         {
-            var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
-            return Ok(result);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _userArticleActionService.ToggleSaveAsync(request.ArticleId);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpPost("reaction")]
         public async Task<IActionResult> AddArticleReaction([FromBody] ArticleReactionRequestDto request)
         {
-            var result = await _userArticleActionService.AddArticleReaction(request);
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var result = await _service.GetByIdWithUserDetailsAsync(id);
-            return result == null ? NotFound() : Ok(result);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] ArticleQueryDto query)
-        {
-            var articles = await _service.GetAllAsync(query);
-            return Ok(articles);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _userArticleActionService.AddArticleReaction(request);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpGet("recommendation")]
-        public async Task<IActionResult> GetRecommendations(int count = 20)
+        public async Task<IActionResult> GetRecommendedArticles(int count = 20)
         {
-            var recommendedArticles = await _service.GetRecommendedArticlesAsync(count);
-            return Ok(recommendedArticles);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var recommendedArticles = await _articleService.GetRecommendedArticlesAsync(count);
+                return Ok(recommendedArticles);
+            }, _logger);
         }
 
         [HttpGet("saved")]
-        public async Task<IActionResult> GetAllSavedArticles()
+        public async Task<IActionResult> GetSavedArticles()
         {
-            var savedArticles = await _service.GetSavedArticlesForCurrentUserAsync();
-            return Ok(savedArticles);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var savedArticles = await _articleService.GetSavedArticlesForCurrentUserAsync();
+                return Ok(savedArticles);
+            }, _logger);
         }
 
         [HttpDelete("reaction")]
         public async Task<IActionResult> DeleteArticleReaction([FromBody] int articleId)
         {
-            var result = await _userArticleActionService.DeleteArticleReaction(articleId);
-            return Ok(result);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _userArticleActionService.DeleteArticleReaction(articleId);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpPost("{articleId}/report")]
         public async Task<IActionResult> ReportArticle(UserArticleReportDto userArticleReportDto)
         {
-            UserArticleReportResponseDto result = await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
-            return Ok(result);
-
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _userArticleActionService.ReportArticleAsync(userArticleReportDto);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpPost("hide")]
         [AuthorizeRoles(nameof(RoleEnum.Admin))]
         public async Task<IActionResult> HideArticle([FromQuery] int articleId)
         {
-            var result = await _service.HideArticleAsync(articleId);
-            if (!result)
-                return NotFound(new { message = "Article not found for the given ID." });
-            return Ok(new { message = "Article hidden successfully." });
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _articleService.HideArticleAsync(articleId);
+                if (!result)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.NotFound;
+                    var errorMessage = ErrorMessages.ResourceNotFound;
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
+
+                return Ok(new { message = SuccessConstants.ArticleHidden});
+            }, _logger);
         }
     }
 }

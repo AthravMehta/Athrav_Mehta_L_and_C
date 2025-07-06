@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsAggregation.Configurations;
+using NewsAggregation.Constants;
 using NewsAggregation.Enums;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Controllers
 {
@@ -12,52 +15,84 @@ namespace NewsAggregation.Controllers
     public class ExternalServerController : ControllerBase
     {
         private readonly ILogger<ExternalServerController> _logger;
-        private readonly IExternalServerService _service;
+        private readonly IExternalServerService _externalServerService;
 
-        public ExternalServerController(ILogger<ExternalServerController> logger, IExternalServerService service)
+        public ExternalServerController(ILogger<ExternalServerController> logger, IExternalServerService externalServerService)
         {
             _logger = logger;
-            _service = service;
+            _externalServerService = externalServerService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ExternalServerDto dto)
+        public async Task<IActionResult> AddExternalServer([FromBody] ExternalServerDto externalServerDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.Validation;
+                    var errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            var result = await _service.AddAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.ExternalServerId}, result);
+                var result = await _externalServerService.AddAsync(externalServerDto);
+                return CreatedAtAction(nameof(GetExternalServerById), new { id = result.ExternalServerId }, result);
+            }, _logger);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ExternalServerDto dto)
+        public async Task<IActionResult> UpdateExternalServer(int id, [FromBody] ExternalServerDto externalServerDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.Validation;
+                    var errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            var result = await _service.UpdateAsync(id, dto);
-            if (result == null)
-                return NotFound();
+                var result = await _externalServerService.UpdateAsync(id, externalServerDto);
+                if (result == null)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.NotFound;
+                    var errorMessage = ErrorMessages.ResourceNotFound;
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            return Ok(result);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetExternalServerById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound();
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _externalServerService.GetByIdAsync(id);
+                if (result == null)
+                {
+                    var errorCode = ErrorResponse.ErrorEnum.NotFound;
+                    var errorMessage = ErrorMessages.ResourceNotFound;
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            return Ok(result);
+                return Ok(result);
+            }, _logger);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllExternalServers()
         {
-            var result = await _service.GetAllAsync();
-            return Ok(result);
+            return await RequestHandler.HandleRequestAsync(async () =>
+            {
+                var result = await _externalServerService.GetAllAsync();
+                return Ok(result);
+            }, _logger);
         }
     }
 }

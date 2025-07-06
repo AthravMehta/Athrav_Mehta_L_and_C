@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using NewsAggregation.Constants;
 using NewsAggregation.Entities;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
-using System.Collections.Generic;
+using NewsAggregation.Utilities;
 
 namespace NewsAggregation.Services
 {
@@ -26,98 +28,68 @@ namespace NewsAggregation.Services
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+        protected virtual int UserId => _requestContext.UserId!.Value;
+
         public async Task<UserNotificationDto> AddAsync(UserNotificationDto userNotificationDto)
         {
             if (userNotificationDto == null)
-                throw new ArgumentNullException(nameof(userNotificationDto));
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
 
-            try
-            {
-                var entity = _mapper.Map<UserNotification>(userNotificationDto);
+            var entity = _mapper.Map<UserNotification>(userNotificationDto);
 
-                await _crudBaseRepository.AddAsync(entity);
-                await _crudBaseRepository.SaveChangesAsync();
+            await _crudBaseRepository.AddAsync(entity);
+            await _crudBaseRepository.SaveChangesAsync();
 
-                userNotificationDto.UserNotificationId = entity.UserNotificationId;
-                return userNotificationDto;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error adding user notification.", ex);
-            }
+            userNotificationDto.UserNotificationId = entity.UserNotificationId;
+            return userNotificationDto;
         }
 
         public async Task AddRangeAsync(IEnumerable<UserNotification> notifications)
         {
             if (notifications == null)
-                throw new ArgumentNullException(nameof(notifications));
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
 
-            try
-            {
-                await _userNotificationRepository.AddRangeAsync(notifications);
-                await _crudBaseRepository.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error adding range of user notifications.", ex);
-            }
+            await _userNotificationRepository.AddRangeAsync(notifications);
+            await _crudBaseRepository.SaveChangesAsync();
         }
 
         public async Task<UserNotificationDto> UpdateAsync(int id, UserNotificationDto userNotificationDto)
         {
             if (userNotificationDto == null)
-                throw new ArgumentNullException(nameof(userNotificationDto));
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
 
-            try
-            {
-                var entity = await _crudBaseRepository.GetByIdAsync(id);
-                if (entity == null)
-                    throw new KeyNotFoundException($"UserNotification with id {id} not found.");
+            var entity = await _crudBaseRepository.GetByIdAsync(id);
+            if (entity == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
-                _mapper.Map(userNotificationDto, entity);
+            _mapper.Map(userNotificationDto, entity);
 
-                await _crudBaseRepository.UpdateAsync(entity);
-                await _crudBaseRepository.SaveChangesAsync();
+            await _crudBaseRepository.UpdateAsync(entity);
+            await _crudBaseRepository.SaveChangesAsync();
 
-                userNotificationDto.UserNotificationId = entity.UserNotificationId;
-                return userNotificationDto;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error updating user notification with id {id}.", ex);
-            }
+            userNotificationDto.UserNotificationId = entity.UserNotificationId;
+            return userNotificationDto;
         }
 
         public async Task DeleteAsync(int id)
         {
-            try
-            {
-                var entity = await _crudBaseRepository.GetByIdAsync(id);
-                if (entity == null)
-                    throw new KeyNotFoundException($"UserNotification with id {id} not found.");
+            var entity = await _crudBaseRepository.GetByIdAsync(id);
+            if (entity == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
-                await _crudBaseRepository.DeleteAsync(id);
-                await _crudBaseRepository.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Error deleting user notification with id {id}.", ex);
-            }
+            await _crudBaseRepository.DeleteAsync(id);
+            await _crudBaseRepository.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserNotificationDto>> GetAllUserNotificationAsync()
         {
-            try
-            {
-                var entities = await _userNotificationRepository.GetAllUserNotificationAsync(_requestContext.UserId);
-                IEnumerable < UserNotificationDto > notifications = _mapper.Map<IEnumerable<UserNotificationDto>>(entities);
-                await _userNotificationRepository.MarkAllUserNotificationsAsRead(_requestContext.UserId);
-                return notifications;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error retrieving user notifications.", ex);
-            }
+            var entities = await _userNotificationRepository.GetAllUserNotificationAsync(UserId);
+            if (entities == null || !entities.Any())
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
+            IEnumerable<UserNotificationDto> notifications = _mapper.Map<IEnumerable<UserNotificationDto>>(entities);
+            await _userNotificationRepository.MarkAllUserNotificationsAsRead(UserId);
+            return notifications;
         }
     }
 }

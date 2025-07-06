@@ -20,15 +20,23 @@ namespace NewsAggregation.Controllers
             _authService = authService;
             _logger = logger;
         }
-        
+
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginDto userDto)
         {
-            if (!ModelState.IsValid)
-                throw new ApiException(ErrorResponse.ErrorEnum.Validation, "Invalid Auth Object");
+            return (ActionResult)await RequestHandler.HandleRequestAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    ErrorResponse.ErrorEnum errorCode = ErrorResponse.ErrorEnum.Validation;
+                    string errorMessage = ErrorResponse.GetErrorMessage(errorCode);
+                    _logger.LogWarning(errorMessage);
+                    throw new ApiException(errorCode, errorMessage);
+                }
 
-            UserDataWithTokenDto userDataWithToken = await _authService.LoginAsync(userDto);
-            return Ok(userDataWithToken);
+                UserDataWithTokenDto userDataWithToken = await _authService.LoginAsync(userDto);
+                return Ok(userDataWithToken);
+            }, _logger);
         }
     }
 }

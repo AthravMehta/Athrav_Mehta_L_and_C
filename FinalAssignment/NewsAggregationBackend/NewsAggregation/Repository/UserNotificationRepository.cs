@@ -16,24 +16,32 @@ namespace NewsAggregation.Repository
 
         public async Task AddRangeAsync(IEnumerable<UserNotification> notifications)
         {
+            if (notifications == null)
+                throw new ArgumentNullException(nameof(notifications));
+
             await _dbContext.UserNotifications.AddRangeAsync(notifications);
         }
 
         public async Task<IEnumerable<UserNotification>> GetAllUserNotificationAsync(int? userId = null)
         {
-            if (userId == null)
+            if (!userId.HasValue)
                 return Enumerable.Empty<UserNotification>();
 
-            return await _dbContext.UserNotifications
-                .Where(un => un.UserId == userId && !un.IsRead)
+            var notifications = await _dbContext.UserNotifications
+                .Where(un => un.UserId == userId.Value && !un.IsRead)
                 .Include(un => un.Article)
                 .ToListAsync();
+
+            return notifications ?? Enumerable.Empty<UserNotification>();
         }
 
-        public async Task MarkAllUserNotificationsAsRead(int? UserId = null)
+        public async Task MarkAllUserNotificationsAsRead(int? userId = null)
         {
+            if (!userId.HasValue)
+                return;
+
             var notifications = await _dbContext.UserNotifications
-                .Where(n => n.UserId == UserId && !n.IsRead)
+                .Where(n => n.UserId == userId.Value && !n.IsRead)
                 .ToListAsync();
 
             if (notifications.Any())
@@ -42,8 +50,8 @@ namespace NewsAggregation.Repository
                 {
                     notification.IsRead = true;
                 }
+                await _dbContext.SaveChangesAsync();
             }
-            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<List<int>> GetCategoriesByUserNotificationsAsync(int userId)

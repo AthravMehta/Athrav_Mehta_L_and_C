@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
@@ -21,9 +20,9 @@ namespace NewsAggregation.Repository
             IMapper mapper,
             RequestContext requestContext)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(ArticleRepository));
-            _mapper = mapper;
-            _requestContext = requestContext;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
         public async Task<IEnumerable<Article>> GetAllAsync(ArticleQueryDto articleQueryDto)
@@ -38,8 +37,8 @@ namespace NewsAggregation.Repository
             }
 
             if (!string.IsNullOrWhiteSpace(articleQueryDto.StartDate) &&
-        DateTime.TryParseExact(articleQueryDto.StartDate, "yyyy-MM-dd",
-            CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime startDate))
+                DateTime.TryParseExact(articleQueryDto.StartDate, "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime startDate))
             {
                 articleQuery = articleQuery.Where(a => a.PublishedDate >= startDate);
             }
@@ -60,7 +59,7 @@ namespace NewsAggregation.Repository
             {
                 articleQuery = articleQuery.Where(a => a.IsHidden);
 
-                if (articleQueryDto.HideReason  == null || articleQueryDto.HideReason != HideReasonEnum.NotHidden)
+                if (articleQueryDto.HideReason != null && articleQueryDto.HideReason != HideReasonEnum.NotHidden)
                 {
                     articleQuery = articleQuery.Where(a => a.HideReason == articleQueryDto.HideReason);
                 }
@@ -83,9 +82,11 @@ namespace NewsAggregation.Repository
                 articleQuery = articleQuery.OrderByDescending(a => a.PublishedDate);
             }
 
-            return await articleQuery
+            var result = await articleQuery
                 .Include(a => a.UserArticleReactions)
                 .ToListAsync();
+
+            return result ?? Enumerable.Empty<Article>();
         }
 
         public async Task<ArticleDetailsDto> GetArticleWithUserStatusAsync(int articleId)
@@ -105,19 +106,16 @@ namespace NewsAggregation.Repository
             dto.IsSavedByUser = article.UserSavedArticles.Any(usa => usa.UserId == userId);
             dto.IsReportedByUser = article.UserArticleReports.Any(uar => uar.UserId == userId);
 
-            var userReaction = article.UserArticleReactions
-                .FirstOrDefault(r => r.UserId == userId);
+            var userReaction = article.UserArticleReactions.FirstOrDefault(r => r.UserId == userId);
             dto.UserReaction = userReaction?.Reaction;
 
             return dto;
         }
 
-
-
         public async Task<Article> GetArticleByIdAsync(int articleId)
         {
-            return await _context.Articles
-                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+            var article = await _context.Articles.FirstOrDefaultAsync(a => a.ArticleId == articleId);
+            return article; // null if not found is acceptable here
         }
 
         public async Task<IEnumerable<Article>> GetArticlesByIdsAsync(IEnumerable<int> articleIds)
@@ -132,25 +130,32 @@ namespace NewsAggregation.Repository
 
         public async Task AddRangeAsync(IEnumerable<Article> articles)
         {
+            if (articles == null)
+                throw new ArgumentNullException(nameof(articles));
+
             await _context.Articles.AddRangeAsync(articles);
         }
 
         public async Task<bool> ArticleExistsAsync(Article article)
         {
+            if (article == null)
+                throw new ArgumentNullException(nameof(article));
+
             return await _context.Articles.AnyAsync(a => a.Url == article.Url);
         }
 
         public async Task<bool> UpdateArticle(Article article)
         {
+            if (article == null)
+                throw new ArgumentNullException(nameof(article));
+
             _context.Update(article);
-            return await this.SaveChangesAsync();
+            return await SaveChangesAsync();
         }
 
         public async Task<bool> SaveChangesAsync()
         {
-            if (await _context.SaveChangesAsync() > 0)
-                return true;
-            else return false;
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

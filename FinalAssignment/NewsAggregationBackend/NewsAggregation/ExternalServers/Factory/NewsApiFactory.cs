@@ -13,7 +13,7 @@ namespace NewsAggregation.ExternalServers.Factory
             {
                 string s when s.Contains(AppConstants.NewsApiBase) => new NewsApiAdapter(),
                 string s when s.Contains(AppConstants.TheNewsApiBase) => new TheNewsApiAdapter(),
-                _ => throw new NotSupportedException(AppConstants.UnsupportedApi)
+                _ => throw new NotSupportedException(ErrorMessages.UnsupportedApi)
             };
         }
     }

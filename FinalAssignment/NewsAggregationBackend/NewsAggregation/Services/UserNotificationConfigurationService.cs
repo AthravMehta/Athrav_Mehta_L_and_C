@@ -1,8 +1,15 @@
 ﻿using AutoMapper;
+using NewsAggregation.Constants;
 using NewsAggregation.Entities;
+using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
+using NewsAggregation.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NewsAggregation.Services
 {
@@ -14,18 +21,25 @@ namespace NewsAggregation.Services
         private readonly ICrudBaseRepository<UserNotificationConfiguration> _crudBaseRepository;
         private readonly IUserNotificationConfigurationRepository _userNotificationConfigurationRepository;
 
-        public UserNotificationConfigurationService(IMapper mapper, IUserRepository userRepository, ICrudBaseRepository<Category> categoryRepository,
-            ICrudBaseRepository<UserNotificationConfiguration> crudBaseRepository, IUserNotificationConfigurationRepository userNotificationConfigurationRepository)
+        public UserNotificationConfigurationService(
+            IMapper mapper,
+            IUserRepository userRepository,
+            ICrudBaseRepository<Category> categoryRepository,
+            ICrudBaseRepository<UserNotificationConfiguration> crudBaseRepository,
+            IUserNotificationConfigurationRepository userNotificationConfigurationRepository)
         {
-            _mapper = mapper;
-            _userRepository = userRepository;
-            _categoryRepository = categoryRepository;
-            _crudBaseRepository = crudBaseRepository;
-            _userNotificationConfigurationRepository = userNotificationConfigurationRepository;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+            _crudBaseRepository = crudBaseRepository ?? throw new ArgumentNullException(nameof(crudBaseRepository));
+            _userNotificationConfigurationRepository = userNotificationConfigurationRepository ?? throw new ArgumentNullException(nameof(userNotificationConfigurationRepository));
         }
 
         public async Task<UserNotificationConfigurationDto> AddAsync(UserNotificationConfigurationDto dto)
         {
+            if (dto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             var entity = new UserNotificationConfiguration
             {
                 UserId = dto.UserId,
@@ -42,8 +56,12 @@ namespace NewsAggregation.Services
 
         public async Task<UserNotificationConfigurationDto> UpdateAsync(int id, UserNotificationConfigurationDto dto)
         {
+            if (dto == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NullObject, ErrorResponse.GetErrorMessage(ErrorResponse.ErrorEnum.NullObject));
+
             var entity = await _crudBaseRepository.GetByIdAsync(id);
-            if (entity == null) return null;
+            if (entity == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
             entity.UserId = dto.UserId;
             entity.IsEnabled = dto.IsEnabled;
@@ -58,16 +76,18 @@ namespace NewsAggregation.Services
         public async Task DeleteAsync(int id)
         {
             var entity = await _crudBaseRepository.GetByIdAsync(id);
-            if (entity != null)
-            {
-                await _crudBaseRepository.DeleteAsync(id);
-                await _crudBaseRepository.SaveChangesAsync();
-            }
+            if (entity == null)
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
+            await _crudBaseRepository.DeleteAsync(id);
+            await _crudBaseRepository.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllConfigurationAsync()
         {
             var entities = await _crudBaseRepository.GetAllAsync();
+            if (entities == null || !entities.Any())
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
             return _mapper.Map<IEnumerable<UserNotificationConfigurationDto>>(entities);
         }
@@ -75,6 +95,8 @@ namespace NewsAggregation.Services
         public async Task<IEnumerable<UserNotificationConfigurationDto>> GetAllUserConfigurationAsync()
         {
             var entities = await _userNotificationConfigurationRepository.GetAllUserConfigurationAsync();
+            if (entities == null || !entities.Any())
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
             return _mapper.Map<IEnumerable<UserNotificationConfigurationDto>>(entities);
         }
@@ -94,6 +116,9 @@ namespace NewsAggregation.Services
             if (newUser != null)
             {
                 var categories = await _categoryRepository.GetAllAsync();
+                if (categories == null || !categories.Any())
+                    throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
+
                 foreach (var category in categories)
                 {
                     bool exists = await _userNotificationConfigurationRepository.ExistsAsync(newUser.UserId, category.CategoryId);
@@ -112,6 +137,8 @@ namespace NewsAggregation.Services
             else if (categoryId != null)
             {
                 var users = await _userRepository.GetAllUsersAsync();
+                if (users == null || !users.Any())
+                    throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
                 foreach (var user in users)
                 {
@@ -131,16 +158,13 @@ namespace NewsAggregation.Services
             await this.SaveChangesAsync();
         }
 
-
-
-        /// <summary>
-        /// Initializes UserNotificationConfiguration for all existing users and categories,
-        /// creating missing configurations with IsEnabled = true.
-        /// </summary>
         public async Task InitializeNotificationConfigurationsAsync()
         {
             var users = await _userRepository.GetAllUsersAsync();
             var categories = await _categoryRepository.GetAllAsync();
+
+            if (users == null || !users.Any() || categories == null || !categories.Any())
+                throw new ApiException(ErrorResponse.ErrorEnum.NotFound, ErrorMessages.ResourceNotFound);
 
             foreach (var user in users)
             {

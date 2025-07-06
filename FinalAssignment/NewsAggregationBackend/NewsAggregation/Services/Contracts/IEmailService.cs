@@ -1,4 +1,4 @@
-﻿namespace NewsAggregation.Notifications.Contracts
+﻿namespace NewsAggregation.Services.Contracts
 {
     public interface IEmailService
     {

@@ -20,6 +20,7 @@ using Hangfire;
 using NewsAggregation.ExternalServers.Services;
 using NewsAggregation.Middlewares;
 using NewsAggregation.Constants;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -119,11 +120,12 @@ builder.Services.AddScoped<IUserArticleReadTrackingRepository, UserArticleReadTr
 
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<EmailNotificationSender>();
-builder.Services.AddSingleton<NotificationSenderFactory>();
+builder.Services.AddSingleton<INotificationSenderFactory, NotificationSenderFactory>();
 
 builder.Services.AddDataProtection();
-builder.Services.AddSingleton<EncryptionService>();
+builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(AppConstants.EmailSettingsSection));
 builder.Services.AddScoped<RequestContext>();
