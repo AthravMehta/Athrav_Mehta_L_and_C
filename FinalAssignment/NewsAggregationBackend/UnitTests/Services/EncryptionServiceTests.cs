@@ -68,6 +68,10 @@ namespace UnitTests.Services
             Assert.ThrowsException<ApiException>(() => _service.Decrypt(null));
         }
 
+        #endregion
+
+        #region Verify Tests
+
         [TestMethod]
         public void Verify_ShouldThrowApiException_WhenEncryptedValueIsNull()
         {

@@ -148,56 +148,20 @@ namespace NewsAggregation.ExternalServers.Services
                     continue;
 
                 var userArticles = articles
-                    .Where(a => ShouldSendArticleToUser(a, user, config))
+                    .Where(a => NewsFetcherHelper.ShouldSendArticleToUser(a, user, config))
                     .ToList();
 
                 if (!userArticles.Any())
                     continue;
 
                 var subject = AppConstants.UserArticleEmailSubject;
-                var body = BuildEmailBody(user, userArticles);
+                var body = NewsFetcherHelper.BuildEmailBody(user, userArticles);
 
                 var sender = _notificationSenderFactory.GetSender(NotificationType.Email);
                 BackgroundJob.Enqueue(() => sender.SendAsync(user.Email, subject, body));
 
-                await SaveNotifications(user.UserId, userArticles);
+                await NewsFetcherHelper.SaveNotifications(user.UserId, userArticles, _userNotificationService);
             }
-        }
-
-        private async Task SaveNotifications(int userId, List<Article>? articles)
-        {
-            var notifications = articles.Select(article => new UserNotification
-            {
-                UserId = userId,
-                ArticleId = article.ArticleId,
-                SentDateTime = DateTime.UtcNow,
-                IsRead = false
-            }).ToList();
-
-            await _userNotificationService.AddRangeAsync(notifications);
-        }
-
-        private bool ShouldSendArticleToUser(Article article, UserReadDto? user, ICollection<UserNotificationConfigurationDto>? userConfiguration)
-        {
-            if (userConfiguration == null || article == null)
-                return false;
-
-            return userConfiguration.Any(config => config.CategoryId == article.CategoryId && config.IsEnabled);
-        }
-
-        private string BuildEmailBody(UserReadDto user, List<Article> articles)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine($"<h2>Hello {user.Username},</h2>");
-            sb.AppendLine("<p>Here are your latest news articles:</p>");
-            sb.AppendLine("<ul>");
-            foreach (var article in articles)
-            {
-                sb.AppendLine($"<li><a href='{article.Url}'>{article.Title}</a></li>");
-            }
-            sb.AppendLine("</ul>");
-            sb.AppendLine("<p>Thank you for using News Aggregation App!</p>");
-            return sb.ToString();
         }
 
     }
