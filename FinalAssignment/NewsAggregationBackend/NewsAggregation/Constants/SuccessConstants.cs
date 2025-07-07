@@ -19,5 +19,7 @@
 
         public const string ArticleAlreadyReported = "You have already reported this article.";
         public const string ArticleReported = "Article reported successfully. Thank you for your feedback!";
+
+        public const string NoRecommendationFound = "No suitable category found for recommendations.";
     }
 }

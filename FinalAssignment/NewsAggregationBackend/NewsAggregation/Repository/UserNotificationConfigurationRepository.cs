@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NewsAggregation.Configurations;
 using NewsAggregation.Configurations.DatabaseConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
@@ -26,7 +27,7 @@ namespace NewsAggregation.Repository
             }
 
             var configs = await _context.UserNotificationConfigurations
-                .Where(config => config.UserId == userId.Value)
+                .Where(config => config.UserId == userId)
                 .Include(config => config.Category)
                 .ToListAsync();
 

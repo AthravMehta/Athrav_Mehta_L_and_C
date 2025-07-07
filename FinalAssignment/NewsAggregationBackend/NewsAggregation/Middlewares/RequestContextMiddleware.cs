@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using NewsAggregation.Configurations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 namespace NewsAggregation.Middlewares
 {

@@ -1,6 +1,9 @@
-﻿public class RequestContext
+﻿namespace NewsAggregation.Configurations
 {
-    public int? UserId { get; set; }
-    public List<string> Roles { get; set; } = new();
-    public string Email { get; set; }
+    public class RequestContext
+    {
+        public int? UserId { get; set; }
+        public List<string> Roles { get; set; } = new();
+        public string Email { get; set; }
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using NewsAggregation.Configurations;
 using NewsAggregation.Entities;
 
-namespace NewsAggregation.NewsAggregation.Entities
+namespace NewsAggregation.Entities
 {
     public class UserArticleReadTracking : BaseAuditEntity
     {

@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
+using NewsAggregation.Configurations;
 using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
 using NewsAggregation.Exceptions;
 using NewsAggregation.Models;
-using NewsAggregation.NewsAggregation.Entities;
 using NewsAggregation.Repository.Contracts;
 using NewsAggregation.Services.Contracts;
 using NewsAggregation.Utilities;
@@ -183,7 +183,7 @@ namespace NewsAggregation.Services
 
             if (topCategoryEntry.Equals(default(KeyValuePair<int, double>)))
             {
-                _logger.LogInformation("No suitable category found for recommendations.");
+                _logger.LogInformation(SuccessConstants.NoRecommendationFound);
                 return new List<ArticleDto>();
             }
 

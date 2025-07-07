@@ -21,6 +21,7 @@ using NewsAggregation.ExternalServers.Services;
 using NewsAggregation.Middlewares;
 using NewsAggregation.Constants;
 using Microsoft.Extensions.FileProviders;
+using NewsAggregation.Configurations;
 
 
 var builder = WebApplication.CreateBuilder(args);

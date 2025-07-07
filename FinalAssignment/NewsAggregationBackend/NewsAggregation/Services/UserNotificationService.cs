@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using NewsAggregation.Configurations;
 using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Exceptions;

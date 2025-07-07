@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.FileProviders;
+using NewsAggregation.Configurations;
 using NewsAggregation.Constants;
 using NewsAggregation.Entities;
 using NewsAggregation.Enums;
@@ -20,6 +21,7 @@ namespace NewsAggregation.Services
         private readonly IArticleRepository _articleRepository;
         private readonly IUserArticleActionRepository _userArticleActionRepository;
         private readonly INotificationSenderFactory _notificationSenderFactory;
+        private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly RequestContext _requestContext;
 
         public UserArticleActionService(
@@ -28,6 +30,7 @@ namespace NewsAggregation.Services
             IArticleRepository articleRepository,
             IUserArticleActionRepository userArticleActionRepository,
             INotificationSenderFactory notificationSenderFactory,
+            IBackgroundJobClient backgroundJobClient,
             RequestContext requestContext)
         {
             _fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
@@ -35,6 +38,7 @@ namespace NewsAggregation.Services
             _articleRepository = articleRepository ?? throw new ArgumentNullException(nameof(articleRepository));
             _userArticleActionRepository = userArticleActionRepository ?? throw new ArgumentNullException(nameof(userArticleActionRepository));
             _notificationSenderFactory = notificationSenderFactory ?? throw new ArgumentNullException(nameof(notificationSenderFactory));
+            _backgroundJobClient = backgroundJobClient ?? throw new ArgumentNullException(nameof(backgroundJobClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
@@ -110,7 +114,7 @@ namespace NewsAggregation.Services
                 }
             }
 
-            BackgroundJob.Enqueue(() => NotifyAdminArticleReportedWrapper(
+            _backgroundJobClient.Enqueue(() => NotifyAdminArticleReportedWrapper(
                 articleId,
                 article!.Title,
                 article!.Content,

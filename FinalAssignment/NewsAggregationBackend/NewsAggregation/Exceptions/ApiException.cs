@@ -21,7 +21,7 @@ namespace NewsAggregation.Exceptions
             {
                 logger.LogError(Message);
             }
-            ErrorCode = ErrorResponse.ErrorEnum.BadRequest;
+            ErrorCode = errCode;
         }
     }
 }

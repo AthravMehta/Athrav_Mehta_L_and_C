@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Entities;
-using NewsAggregation.NewsAggregation.Entities;
 
 namespace NewsAggregation.NewsAggregation.Configurations.FluentApiConfigurations
 {

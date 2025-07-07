@@ -2,7 +2,6 @@
 using NewsAggregation.Configurations.FluentApiConfigurations;
 using NewsAggregation.Entities;
 using NewsAggregation.NewsAggregation.Configurations.FluentApiConfigurations;
-using NewsAggregation.NewsAggregation.Entities;
 
 namespace NewsAggregation.Configurations.DatabaseConfigurations
 {
