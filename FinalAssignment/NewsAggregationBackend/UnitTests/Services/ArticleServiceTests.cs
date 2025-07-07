@@ -49,7 +49,6 @@ namespace UnitTests.Services
             _loggerMock = new Mock<ILogger<ArticleService>>();
             _mapperMock = new Mock<IMapper>();
 
-            // Create a real RequestContext instance instead of mocking it
             var requestContext = new RequestContext
             {
                 UserId = 1,

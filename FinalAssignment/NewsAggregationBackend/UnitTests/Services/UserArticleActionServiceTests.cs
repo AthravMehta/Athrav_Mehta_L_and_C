@@ -156,14 +156,11 @@ namespace UnitTests.Services
         [TestMethod]
         public async Task ReportArticleAsync_ShouldReturnAlreadyReported_WhenUserAlreadyReported()
         {
-            // Arrange
             var userArticleReportDto = new UserArticleReportDto { ArticleId = 1, ReportReason = "Spam" };
             _userArticleActionRepositoryMock.Setup(x => x.HasUserReportedArticleAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(true);
 
-            // Act
             var result = await _service.ReportArticleAsync(userArticleReportDto);
 
-            // Assert
             Assert.AreEqual("You have already reported this article.", result.Message);
         }
 

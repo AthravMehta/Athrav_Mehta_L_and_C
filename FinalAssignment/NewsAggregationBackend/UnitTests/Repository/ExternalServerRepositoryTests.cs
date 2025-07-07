@@ -65,9 +65,9 @@ namespace UnitTests.Repository
         {
             _dbContext.ExternalServers.AddRange(new List<ExternalServer>
             {
-                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server 1", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http://active1.com" },
+                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server 1", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http:ive1.com" },
                 new ExternalServer { ExternalServerId = 2, ServerName = "Inactive Server", IsActive = false, ApiKeyHash = "hash2", BaseUrl = "http://inactive.com" },
-                new ExternalServer { ExternalServerId = 3, ServerName = "Active Server 2", IsActive = true, ApiKeyHash = "hash3", BaseUrl = "http://active2.com" }
+                new ExternalServer { ExternalServerId = 3, ServerName = "Active Server 2", IsActive = true, ApiKeyHash = "hash3", BaseUrl = "http:ive2.com" }
             });
             await _dbContext.SaveChangesAsync();
             var result = await _repository.GetAllAsync(true);
@@ -82,7 +82,7 @@ namespace UnitTests.Repository
         {
             _dbContext.ExternalServers.AddRange(new List<ExternalServer>
             {
-                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http://active.com" },
+                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http:ive.com" },
                 new ExternalServer { ExternalServerId = 2, ServerName = "Inactive Server 1", IsActive = false, ApiKeyHash = "hash2", BaseUrl = "http://inactive1.com" },
                 new ExternalServer { ExternalServerId = 3, ServerName = "Inactive Server 2", IsActive = false, ApiKeyHash = "hash3", BaseUrl = "http://inactive2.com" }
             });
@@ -119,8 +119,8 @@ namespace UnitTests.Repository
         {
             _dbContext.ExternalServers.AddRange(new List<ExternalServer>
             {
-                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server 1", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http://active1.com" },
-                new ExternalServer { ExternalServerId = 2, ServerName = "Active Server 2", IsActive = true, ApiKeyHash = "hash2", BaseUrl = "http://active2.com" }
+                new ExternalServer { ExternalServerId = 1, ServerName = "Active Server 1", IsActive = true, ApiKeyHash = "hash1", BaseUrl = "http:ive1.com" },
+                new ExternalServer { ExternalServerId = 2, ServerName = "Active Server 2", IsActive = true, ApiKeyHash = "hash2", BaseUrl = "http:ive2.com" }
             });
             await _dbContext.SaveChangesAsync();
             var result = await _repository.GetAllAsync(false);

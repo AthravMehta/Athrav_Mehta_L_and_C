@@ -81,10 +81,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
     );
 
-
-//TODO: Add services to the container.
-//TODO: Apply Filter/Sorting in GET ALL API's
-//TODO: Check Authorize Roles above controller
 builder.Services.AddScoped(typeof(ICrudBaseService<>), typeof(CrudBaseService<>));
 builder.Services.AddScoped(typeof(ICrudBaseRepository<>), typeof(CrudBaseRepository<>));
 
@@ -151,7 +147,7 @@ builder.Services.AddHangfireServer();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

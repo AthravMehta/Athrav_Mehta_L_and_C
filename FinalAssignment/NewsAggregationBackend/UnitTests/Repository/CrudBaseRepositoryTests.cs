@@ -67,37 +67,21 @@ namespace UnitTests.Repository
 
         [TestMethod]
         public async Task GetAllAsync_ShouldReturnEntities_WhenEntitiesExist()
-        {
-            // Arrange
-            var categories = new List<Category>
+        {var categories = new List<Category>
             {
                 new Category { Name = "Technology" },
                 new Category { Name = "Sports" }
             };
             await _context.Categories.AddRangeAsync(categories);
-            await _context.SaveChangesAsync();
-
-            // Act
-            var result = await _repository.GetAllAsync();
-
-            // Assert
-            Assert.IsNotNull(result);
+            await _context.SaveChangesAsync();var result = await _repository.GetAllAsync();Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count());
         }
 
         [TestMethod]
         public async Task GetByIdAsync_ShouldReturnEntity_WhenEntityExists()
-        {
-            // Arrange
-            var category = new Category { Name = "Technology" };
+        {var category = new Category { Name = "Technology" };
             await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
-
-            // Act
-            var result = await _repository.GetByIdAsync(category.CategoryId);
-
-            // Assert
-            Assert.IsNotNull(result);
+            await _context.SaveChangesAsync();var result = await _repository.GetByIdAsync(category.CategoryId);Assert.IsNotNull(result);
             Assert.AreEqual("Technology", result.Name);
         }
 
@@ -119,16 +103,8 @@ namespace UnitTests.Repository
 
         [TestMethod]
         public async Task AddAsync_ShouldAddEntity_WhenEntityIsValid()
-        {
-            // Arrange
-            var category = new Category { Name = "Technology" };
-
-            // Act
-            await _repository.AddAsync(category);
-            await _repository.SaveChangesAsync();
-
-            // Assert
-            var savedCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name == "Technology");
+        {var category = new Category { Name = "Technology" };await _repository.AddAsync(category);
+            await _repository.SaveChangesAsync();var savedCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name == "Technology");
             Assert.IsNotNull(savedCategory);
             Assert.AreEqual("Technology", savedCategory.Name);
         }
@@ -151,20 +127,12 @@ namespace UnitTests.Repository
 
         [TestMethod]
         public async Task AddRangeAsync_ShouldAddEntities_WhenEntitiesAreValid()
-        {
-            // Arrange
-            var categories = new List<Category>
+        {var categories = new List<Category>
             {
                 new Category { Name = "Technology" },
                 new Category { Name = "Sports" }
-            };
-
-            // Act
-            await _repository.AddRangeAsync(categories);
-            await _repository.SaveChangesAsync();
-
-            // Assert
-            var savedCategories = await _context.Categories.ToListAsync();
+            };await _repository.AddRangeAsync(categories);
+            await _repository.SaveChangesAsync();var savedCategories = await _context.Categories.ToListAsync();
             Assert.AreEqual(2, savedCategories.Count);
         }
 
@@ -178,37 +146,21 @@ namespace UnitTests.Repository
 
         [TestMethod]
         public async Task UpdateAsync_ShouldUpdateEntity_WhenEntityIsValid()
-        {
-            // Arrange
-            var category = new Category { Name = "Technology" };
+        {var category = new Category { Name = "Technology" };
             await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
 
-            category.Name = "Updated Technology";
-
-            // Act
-            await _repository.UpdateAsync(category);
-            await _repository.SaveChangesAsync();
-
-            // Assert
-            var updatedCategory = await _context.Categories.FindAsync(category.CategoryId);
+            category.Name = "Updated Technology";await _repository.UpdateAsync(category);
+            await _repository.SaveChangesAsync();var updatedCategory = await _context.Categories.FindAsync(category.CategoryId);
             Assert.AreEqual("Updated Technology", updatedCategory.Name);
         }
 
         [TestMethod]
         public async Task DeleteAsync_ShouldDeleteEntity_WhenEntityExists()
-        {
-            // Arrange
-            var category = new Category { Name = "Technology" };
+        {var category = new Category { Name = "Technology" };
             await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
-
-            // Act
-            await _repository.DeleteAsync(category.CategoryId);
-            await _repository.SaveChangesAsync();
-
-            // Assert
-            var deletedCategory = await _context.Categories.FindAsync(category.CategoryId);
+            await _context.SaveChangesAsync();await _repository.DeleteAsync(category.CategoryId);
+            await _repository.SaveChangesAsync();var deletedCategory = await _context.Categories.FindAsync(category.CategoryId);
             Assert.IsNull(deletedCategory);
         }
 
@@ -222,16 +174,8 @@ namespace UnitTests.Repository
 
         [TestMethod]
         public async Task SaveChangesAsync_ShouldSaveChanges()
-        {
-            // Arrange
-            var category = new Category { Name = "Technology" };
-            await _context.Categories.AddAsync(category);
-
-            // Act
-            await _repository.SaveChangesAsync();
-
-            // Assert
-            var savedCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name == "Technology");
+        {var category = new Category { Name = "Technology" };
+            await _context.Categories.AddAsync(category);await _repository.SaveChangesAsync();var savedCategory = await _context.Categories.FirstOrDefaultAsync(c => c.Name == "Technology");
             Assert.IsNotNull(savedCategory);
         }
     }
