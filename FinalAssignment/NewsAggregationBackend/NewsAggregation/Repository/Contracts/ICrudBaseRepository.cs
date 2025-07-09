@@ -1,0 +1,14 @@
+﻿namespace NewsAggregation.Repository.Contracts
+{
+    public interface ICrudBaseRepository<TEntity> where TEntity : class
+    {
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<TEntity> GetByIdAsync(int id);
+        Task AddAsync(TEntity entity);
+        Task AddRangeAsync(List<TEntity> entities);
+
+        Task UpdateAsync(TEntity entity);
+        Task DeleteAsync(int id);
+        Task SaveChangesAsync();
+    }
+}
